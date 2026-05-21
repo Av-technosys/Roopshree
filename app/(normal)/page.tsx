@@ -1,11 +1,11 @@
-import React from 'react'
+import HeroSection from "@/components/home/HeroSection"
 
-const page = () => {
+const Page = () => {
   return (
-    <div>
-      home page 
-    </div>
+    <main className="flex-1">
+      <HeroSection />
+    </main>
   )
 }
 
-export default page
+export default Page

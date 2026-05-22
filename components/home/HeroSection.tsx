@@ -16,7 +16,7 @@ const HeroSection = () => {
   return (
     <section className="relative isolate min-h-svh overflow-hidden bg-[#C39150]/10">
       <Image
-        src="/hero-banner.png"
+        src="/home/hero-banner.png"
         alt="Bandhej saree collection"
         fill
         priority
@@ -25,7 +25,7 @@ const HeroSection = () => {
       />
       <div className="absolute inset-0 md:hidden">
         <Image
-          src="/sm-herobanner.png"
+          src="/home/sm-herobanner.png"
           alt="Bandhej saree collection"
           fill
           priority

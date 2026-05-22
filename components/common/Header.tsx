@@ -1,5 +1,6 @@
 "use client"
 
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
@@ -15,6 +16,8 @@ import {
 
 import { Button } from "@/components/ui/button"
 
+
+
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Shop", href: "/shop" },
@@ -24,6 +27,7 @@ const navLinks = [
 ]
 
 const Header = () => {
+  const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [hasScrolled, setHasScrolled] = useState(false)
 
@@ -37,6 +41,7 @@ const Header = () => {
   }, [])
 
   return (
+    
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
         hasScrolled
@@ -44,6 +49,7 @@ const Header = () => {
           : "border-b border-transparent bg-transparent"
       }`}
     >
+      
       <div className="mx-auto grid h-16 max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-4 sm:px-6 md:flex md:justify-between lg:px-8">
         <div className="flex items-center gap-2 justify-self-start md:hidden">
           <Button
@@ -71,15 +77,29 @@ const Header = () => {
         </Link>
 
         <nav className="hidden items-center gap-9 text-sm font-medium text-[#3F2617] md:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="transition-colors hover:text-[#C39150]"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href;
+
+            return (
+              <Link
+  key={link.href}
+  href={link.href}
+  className={`relative pt-2 transition-colors duration-300 ${
+    isActive
+      ? "text-[#3F2617]"
+      : "text-[#3F2617] hover:text-[#C39150]"
+  }`}
+>
+  <span
+    className={`absolute left-0 top-0 h-[2px] bg-[#C39150] transition-all duration-300 ${
+      isActive ? "w-full" : "w-0"
+    }`}
+  />
+
+  {link.label}
+</Link>
+            );
+          })}
         </nav>
 
         <div className="flex items-center justify-end gap-2 justify-self-end">
@@ -92,9 +112,13 @@ const Header = () => {
             <Search className="size-4" />
           </label>
 
-          <Button aria-label="Account" size="icon-sm" variant="ghost">
-            <User className="size-4" />
-          </Button>
+          
+          <Link href="/auth">
+            <Button aria-label="Account" size="icon-sm" variant="ghost">
+              <User className="size-4" />
+            </Button>
+          </Link>
+
           <Button aria-label="Cart" size="icon-sm" variant="ghost">
             <ShoppingBag className="size-4" />
           </Button>

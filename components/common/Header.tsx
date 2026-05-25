@@ -204,14 +204,11 @@ const Header = () => {
           <Button aria-label="Cart" size="icon-sm" variant="ghost">
             <ShoppingBag className="size-4" />
           </Button>
-          <Button
-            aria-label="Wishlist"
-            size="icon-sm"
-            variant="ghost"
-            className="hidden sm:inline-flex"
-          >
-            <Heart className="size-4" />
-          </Button>
+          <Link href="/wishlist" className="hidden sm:inline-flex">
+            <Button aria-label="Wishlist" size="icon-sm" variant="ghost">
+              <Heart className="size-4" />
+            </Button>
+          </Link>
         </div>
       </div>
     </header>

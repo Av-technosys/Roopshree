@@ -195,7 +195,7 @@ const Header = () => {
           </label>
 
           
-          <Link href="/auth">
+          <Link href="/dashboard">
             <Button aria-label="Account" size="icon-sm" variant="ghost">
               <User size={20} />
             </Button>

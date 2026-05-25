@@ -247,7 +247,7 @@ function ProductCard({ product }: { product: Product }) {
         </div>
       </div>
 
-      <Link href="/shop" className="block">
+      <Link href="/product/traditional-bandhej-saree" className="block">
         <h3 className="mt-3 font-heading text-[15px] leading-snug text-[#3F2617] md:text-sm">
           {product.name}
         </h3>

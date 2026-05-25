@@ -85,7 +85,7 @@ export default function Signup({
 
               <button
                 type="submit"
-                className="h-11 w-full bg-[#c9914d] text-xs font-semibold tracking-[1px] text-white transition hover:bg-[#b57f3f] lg:h-11 lg:text-sm lg:tracking-[1.5px] xl:h-12 xl:text-base"
+                className="h-11 w-full rounded-[4px] bg-[#c9914d] text-xs font-semibold tracking-[1px] text-white transition hover:bg-[#b57f3f] lg:h-11 lg:text-sm lg:tracking-[1.5px] xl:h-12 xl:text-base"
               >
                 Sign Up
               </button>
@@ -96,7 +96,7 @@ export default function Signup({
               <button
                 type="button"
                 onClick={onLogin}
-                className="font-semibold text-[#3b2418] underline"
+                className="rounded-[4px] font-semibold text-[#3b2418] underline"
               >
                 Login
               </button>
@@ -137,7 +137,7 @@ function InputBox({
   onChange?: React.ChangeEventHandler<HTMLInputElement>;
 }) {
   return (
-    <div className="flex h-11 items-center border border-[#d9b37f] bg-white px-3 lg:h-12 lg:border-[#c9914d] lg:bg-transparent lg:px-4 xl:h-14 xl:px-5">
+    <div className="flex h-11 items-center rounded-[4px] border border-[#d9b37f] bg-white px-3 lg:h-12 lg:border-[#c9914d] lg:bg-transparent lg:px-4 xl:h-14 xl:px-5">
       <span className="mr-3 text-[#3b2418] [&_svg]:h-3.5 [&_svg]:w-3.5 lg:mr-4 lg:[&_svg]:h-4 lg:[&_svg]:w-4 xl:mr-5 xl:[&_svg]:h-[18px] xl:[&_svg]:w-[18px]">
         {icon}
       </span>
@@ -155,7 +155,7 @@ function InputBox({
           type="button"
           aria-label={rightIconLabel}
           onClick={onRightIconClick}
-          className="ml-3 text-[#3b2418] [&_svg]:h-3.5 [&_svg]:w-3.5 lg:[&_svg]:h-4 lg:[&_svg]:w-4 xl:[&_svg]:h-[18px] xl:[&_svg]:w-[18px]"
+          className="ml-3 rounded-[4px] text-[#3b2418] [&_svg]:h-3.5 [&_svg]:w-3.5 lg:[&_svg]:h-4 lg:[&_svg]:w-4 xl:[&_svg]:h-[18px] xl:[&_svg]:w-[18px]"
         >
           {rightIcon}
         </button>

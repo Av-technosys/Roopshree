@@ -56,7 +56,7 @@ export default function Login({
                 <button
                   type="button"
                   onClick={onForgotPassword}
-                  className="text-[10px] font-semibold text-[#c9914d] hover:underline lg:text-base xl:text-lg"
+                  className="rounded-[4px] text-[10px] font-semibold text-[#c9914d] hover:underline lg:text-base xl:text-lg"
                 >
                   Forgot Password ?
                 </button>
@@ -64,7 +64,7 @@ export default function Login({
 
               <button
                 type="submit"
-                className="h-11 w-full bg-[#c9914d] text-xs font-semibold tracking-[1px] text-white transition hover:bg-[#b57f3f] lg:h-14 xl:h-[58px] lg:text-base lg:tracking-[2px]"
+                className="h-11 w-full rounded-[4px] bg-[#c9914d] text-xs font-semibold tracking-[1px] text-white transition hover:bg-[#b57f3f] lg:h-14 xl:h-[58px] lg:text-base lg:tracking-[2px]"
               >
                 Login
               </button>
@@ -75,7 +75,7 @@ export default function Login({
               <button
                 type="button"
                 onClick={onCreateAccount}
-                className="font-semibold text-[#c9914d] underline lg:text-[#3b2418]"
+                className="rounded-[4px] font-semibold text-[#c9914d] underline lg:text-[#3b2418]"
               >
                 Create Account
               </button>
@@ -103,7 +103,7 @@ function InputBox({
   type?: string;
 }) {
   return (
-    <div className="flex h-11 items-center border border-[#d9b37f] bg-white px-3 lg:h-14 lg:border-[#c9914d] lg:bg-transparent lg:px-5 xl:h-16">
+    <div className="flex h-11 items-center rounded-[4px] border border-[#d9b37f] bg-white px-3 lg:h-14 lg:border-[#c9914d] lg:bg-transparent lg:px-5 xl:h-16">
       <span className="mr-3 text-[#3b2418] [&_svg]:h-3.5 [&_svg]:w-3.5 lg:mr-5 lg:[&_svg]:h-[18px] lg:[&_svg]:w-[18px]">
         {icon}
       </span>
@@ -119,7 +119,7 @@ function InputBox({
           type="button"
           aria-label={rightIconLabel}
           onClick={onRightIconClick}
-          className="ml-3 text-[#3b2418] [&_svg]:h-3.5 [&_svg]:w-3.5 lg:ml-4 lg:[&_svg]:h-[18px] lg:[&_svg]:w-[18px]"
+          className="ml-3 rounded-[4px] text-[#3b2418] [&_svg]:h-3.5 [&_svg]:w-3.5 lg:ml-4 lg:[&_svg]:h-[18px] lg:[&_svg]:w-[18px]"
         >
           {rightIcon}
         </button>

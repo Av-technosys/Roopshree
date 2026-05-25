@@ -87,7 +87,7 @@ export function SetNewPasswordScreen({
 
         <button
           type="submit"
-          className="h-11 w-full bg-[#c9914d] text-xs font-semibold tracking-[2px] text-white transition hover:bg-[#b57f3f]"
+          className="h-11 w-full rounded-[4px] bg-[#c9914d] text-xs font-semibold tracking-[2px] text-white transition hover:bg-[#b57f3f]"
         >
           Update Password
         </button>
@@ -156,14 +156,14 @@ function OtpScreen({
                   inputRefs.current[index - 1]?.focus();
                 }
               }}
-              className="h-11 w-full border border-[#3b2418]/70 bg-white text-center text-base text-[#3b2418] outline-none focus:border-[#c9914d]"
+              className="h-11 w-full rounded-[4px] border border-[#3b2418]/70 bg-white text-center text-base text-[#3b2418] outline-none focus:border-[#c9914d]"
             />
           ))}
         </div>
 
         <button
           type="submit"
-          className="h-11 w-full bg-[#c9914d] text-xs font-semibold tracking-[2px] text-white transition hover:bg-[#b57f3f]"
+          className="h-11 w-full rounded-[4px] bg-[#c9914d] text-xs font-semibold tracking-[2px] text-white transition hover:bg-[#b57f3f]"
         >
           {buttonText}
         </button>
@@ -186,7 +186,7 @@ function PasswordInput({
   onToggle: () => void;
 }) {
   return (
-    <div className="flex h-11 items-center border border-[#c9914d] px-4">
+    <div className="flex h-11 items-center rounded-[4px] border border-[#c9914d] px-4">
       <span className="mr-5 text-[#3b2418]">
         <Lock size={15} />
       </span>
@@ -201,7 +201,7 @@ function PasswordInput({
         type="button"
         aria-label={label}
         onClick={onToggle}
-        className="ml-3 text-[#3b2418]/60"
+        className="ml-3 rounded-[4px] text-[#3b2418]/60"
       >
         {icon}
       </button>
@@ -222,7 +222,7 @@ function PlainAuthShell({
         <button
           type="button"
           onClick={onBackToLogin}
-          className="mb-7 flex w-fit items-center gap-2 text-sm font-medium text-[#3b2418] transition hover:text-[#c9914d]"
+          className="mb-7 flex w-fit items-center gap-2 rounded-[4px] text-sm font-medium text-[#3b2418] transition hover:text-[#c9914d]"
         >
           <ArrowLeft size={17} />
           Back to Login

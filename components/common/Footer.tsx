@@ -82,7 +82,7 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="relative border-t border-[#C39150]">
+      <div className="relative border-t border-[#C39150] bg-[#FAEBD8]">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-5 text-xs text-[#3F2617]/70 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <p>© 2026 Roopshree. All rights reserved.</p>
           <p>

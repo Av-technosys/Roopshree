@@ -136,3 +136,35 @@
     @apply font-sans;
   }
 }
+
+@layer components {
+  .scrollbar-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+
+  .range-thumb::-webkit-slider-thumb {
+    height: 0.75rem;
+    width: 0.75rem;
+    appearance: none;
+    border-radius: 9999px;
+    border: 1px solid #c39150;
+    background: #fff;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .range-thumb::-moz-range-thumb {
+    height: 0.75rem;
+    width: 0.75rem;
+    border-radius: 9999px;
+    border: 1px solid #c39150;
+    background: #fff;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+}

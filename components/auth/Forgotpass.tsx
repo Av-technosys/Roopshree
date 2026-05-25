@@ -17,7 +17,7 @@ export default function Forgotpass({
         <button
           type="button"
           onClick={onBackToLogin}
-          className="mb-9 flex w-fit items-center gap-2 text-sm font-medium text-[#3b2418] transition hover:text-[#c9914d] sm:text-base"
+          className="mb-9 flex w-fit items-center gap-2 rounded-[4px] text-sm font-medium text-[#3b2418] transition hover:text-[#c9914d] sm:text-base"
         >
           <ArrowLeft size={18} />
           Back to Login
@@ -27,19 +27,19 @@ export default function Forgotpass({
           <h1 className="font-playfairDisplay text-[34px] font-semibold leading-tight text-[#3b2418] sm:text-[42px]">
             Forgot Password
           </h1>
-          <p className="mt-2 text-sm text-[#c9914d] sm:text-base">
+          <p className="mt-2 text-sm text-[#c9914d] sm:text-base ">
             Enter your registered email to recieve reset link
           </p>
         </div>
 
         <form
-          className="space-y-8"
+          className="space-y-8 "
           onSubmit={(event) => {
             event.preventDefault();
             onSendOtp?.();
           }}
         >
-          <div className="flex h-14 items-center border border-[#c9914d] px-5 sm:h-16">
+          <div className="flex h-14 items-center rounded-[4px] border border-[#c9914d] px-5 sm:h-16">
             <span className="mr-5 text-[#3b2418]">
               <Mail size={18} />
             </span>
@@ -53,7 +53,7 @@ export default function Forgotpass({
 
           <button
             type="submit"
-            className="h-14 w-full bg-[#c9914d] text-sm font-semibold tracking-[2px] text-white transition hover:bg-[#b57f3f] sm:h-[58px] sm:text-base"
+            className="h-14 w-full rounded-[4px] bg-[#c9914d] text-sm font-semibold tracking-[2px] text-white transition hover:bg-[#b57f3f] sm:h-[58px] sm:text-base"
           >
             Send OTP
           </button>
@@ -64,7 +64,7 @@ export default function Forgotpass({
           <button
             type="button"
             onClick={onCreateAccount}
-            className="font-semibold text-[#3b2418] underline"
+            className="rounded-[4px] font-semibold text-[#3b2418] underline"
           >
             Create Account
           </button>

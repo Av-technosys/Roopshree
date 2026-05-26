@@ -54,7 +54,7 @@ const HeroSection = () => {
             transition={{ duration: 0.65, ease: "easeOut" }}
             className="text-[2.65rem] leading-[0.92] text-[#3F2617] sm:text-5xl md:text-6xl lg:text-7xl"
           >
-            Where Heritage Meets <span className="text-[#C18F50] italic md:text-7xl lg:text-8xl">Elegance</span>
+            Where Heritage Meets <span className="text-[#C18F50] italic ">Elegance</span>
           </motion.h1>
 
           <motion.div

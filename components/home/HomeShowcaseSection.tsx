@@ -56,7 +56,7 @@ const HomeShowcaseSection = () => {
                 Spotlight
             </h2>
             </div>
-        <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-4">
           {collections.map((title, index) => (
             <Card
               key={`${title}-${index}`}

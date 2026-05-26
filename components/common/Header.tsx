@@ -117,8 +117,13 @@ const Header = () => {
               ))}
             </nav>
 
-            <Button className="mt-auto h-12 rounded-[4px] bg-[#C39150] text-base text-white hover:bg-[#3F2617]">
-              Account
+            <Button
+              asChild
+              className="mt-auto h-12 rounded-[4px] bg-[#C39150] text-base text-white hover:bg-[#3F2617]"
+            >
+              <Link href="/dashboard" onClick={() => setIsMenuOpen(false)}>
+                Account
+              </Link>
             </Button>
           </motion.aside>
         </>
@@ -218,7 +223,7 @@ const Header = () => {
               {cartCount > 0 ? <NavBadge count={cartCount} /> : null}
             </Button>
           </Link>
-          <Link href="/wishlist" className="hidden sm:block">
+          <Link href="/wishlist">
             <Button
               aria-label={`Wishlist, ${wishlistCount} items`}
               size="icon-sm"

@@ -10,7 +10,7 @@ const fadeUp = {
 
 const HeroSection = () => {
   return (
-    <section className="relative isolate mt-16 h-[60svh] overflow-hidden bg-[#d6965f] md:mt-0 md:min-h-svh md:h-auto">
+    <section className="relative isolate mt-16 overflow-hidden bg-[#d6965f] md:mt-0 md:h-auto md:min-h-svh">
       <Image
         src="/shop/shop_bg.png"
         alt="Bandhej saree collection"
@@ -19,7 +19,7 @@ const HeroSection = () => {
         sizes="100vw"
         className="hidden object-cover object-center md:block"
       />
-      <div className="absolute inset-0 md:hidden">
+      <div className="relative aspect-[1023/1450] overflow-hidden md:hidden">
         <Image
           src="/shop/sm-shop_bg.png"
           alt="Bandhej saree collection"
@@ -29,8 +29,19 @@ const HeroSection = () => {
           className="object-cover object-top"
         />
       </div>
+      <div className="pointer-events-none absolute -bottom-10 -right-10 z-[2] w-[72vw] max-w-[25rem] md:hidden">
+        <Image
+          src="/shop/sm-shop_bgoverlay.png"
+          alt=""
+          width={1024}
+          height={1536}
+          priority
+          sizes="72vw"
+          className="h-auto w-full"
+        />
+      </div>
 
-      <div className="relative mx-auto flex min-h-[calc(100svh-64px)] max-w-7xl items-start px-3.5 pb-10 pt-10 sm:px-6 md:min-h-svh md:items-center md:px-8 md:py-20 lg:px-8">
+      <div className="absolute inset-x-0 top-0 z-[3] mx-auto flex max-w-7xl items-start px-3.5 pb-10 pt-10 sm:px-6 md:relative md:min-h-svh md:items-center md:px-8 md:py-20 lg:px-8">
         <motion.div
           initial="hidden"
           animate="visible"

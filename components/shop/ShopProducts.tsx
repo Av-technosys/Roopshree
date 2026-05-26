@@ -26,10 +26,8 @@ import { useWishlistStore } from "@/store/wishlistStore"
 const categories = [
   { name: "Shrug", image: "/home/shrug.png" },
   { name: "Gottapatti", image: "/home/gottapatti.png" },
-  { name: "Zardozi", image: "/home/zardozi.png" },
   { name: "Brouch", image: "/home/brouch.png" },
   { name: "Zardozi", image: "/home/zardozi.png" },
-  { name: "Gottapatti", image: "/home/gottapatti.png" },
   { name: "Zardozi", image: "/home/zardozi.png" },
 ]
 
@@ -232,17 +230,17 @@ function ProductCard({ product }: { product: Product }) {
           type="button"
           aria-label={`Add ${product.name} to wishlist`}
           onClick={() => handleToggleWishlist(storeItem)}
-          className={`absolute right-3 top-3 flex size-8 translate-y-2 items-center justify-center rounded-full bg-[#C39150] text-white opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 ${
-            isWishlisted ? "opacity-100" : ""
+          className={`absolute right-3 top-3 flex size-8 translate-y-0 items-center justify-center rounded-full bg-[#C39150] text-white opacity-100 transition duration-300 md:translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 ${
+            isWishlisted ? "md:opacity-100" : ""
           }`}
         >
           <Heart className="size-4" fill={isWishlisted ? "currentColor" : "none"} />
         </button>
         <div
-          className={`md:absolute md:inset-x-3 md:bottom-3 md:transition md:duration-300 ${
+          className={`absolute inset-x-2 bottom-2 transition duration-300 md:inset-x-3 md:bottom-3 ${
             isInCart
-              ? "md:translate-y-0 md:opacity-100"
-              : "md:translate-y-4 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100"
+              ? "translate-y-0 opacity-100"
+              : "translate-y-0 opacity-100 md:translate-y-4 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100"
           }`}
         >
           {isInCart ? (
@@ -273,17 +271,6 @@ function ProductCard({ product }: { product: Product }) {
           {formatPrice(product.price)}
         </p>
       </Link>
-      {isInCart ? (
-        <div className="mt-2 md:hidden">
-          <CartQuantityControls
-            quantity={cartQuantity}
-            productName={product.name}
-            onDecrease={() => decrease(storeItem.productId, storeItem.attributes)}
-            onIncrease={() => increase(storeItem.productId, storeItem.attributes)}
-            onRemove={() => removeItem(storeItem.productId, storeItem.attributes)}
-          />
-        </div>
-      ) : null}
     </article>
   )
 }

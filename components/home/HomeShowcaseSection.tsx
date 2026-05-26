@@ -69,14 +69,14 @@ const HomeShowcaseSection = () => {
                   alt=""
                   width={83}
                   height={67}
-                  className="mb-[6%] h-3.5 w-4 object-contain sm:h-7 sm:w-8 xl:h-6 xl:w-7"
+                  className="mb-[6%] h-3.5 w-4 object-contain sm:h-7 sm:w-8 md:h-4 md:w-5 lg:h-5 lg:w-6 xl:h-6 xl:w-7"
                 />
-                <h2 className="font-heading text-[clamp(0.5rem,3vw,1.35rem)] leading-[1.28] tex-[#3f2617] text-pretty sm:text-[clamp(1.1rem,2.7vw,1.45rem)] xl:text-[clamp(0.95rem,1.03vw,1.1rem)]">
+                <h2 className="font-heading text-[clamp(0.5rem,3vw,1.35rem)] leading-[1.28] text-[#3f2617] text-pretty sm:text-[clamp(1.1rem,2.7vw,1.45rem)] md:text-[clamp(0.68rem,1.32vw,0.9rem)] lg:text-[clamp(0.86rem,1.2vw,1.08rem)] xl:text-[clamp(0.95rem,1.03vw,1.1rem)]">
                   {title}
                 </h2>
-                <span className="mt-auto inline-flex items-center gap-1.5 text-[#3f2617] sm:gap-4 max-sm:text-[10px] xl:text-[0.95rem]">
+                <span className="mt-auto inline-flex items-center gap-1.5 text-xs text-[#3f2617] sm:gap-4 sm:text-sm md:gap-2 md:text-[0.68rem] lg:gap-3 lg:text-sm xl:gap-4 xl:text-[0.95rem]">
                   Explore Now
-                  <ArrowRight className="size-2 text-[#c39150] transition-transform duration-300 group-hover:translate-x-1 sm:size-4" />
+                  <ArrowRight className="size-2 text-[#c39150] transition-transform duration-300 group-hover:translate-x-1 sm:size-4 md:size-3 lg:size-4" />
                 </span>
               </div>
 

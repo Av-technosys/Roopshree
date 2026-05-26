@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import {
   ArrowRight,
   BadgeCheck,
-  Flower2,
   Leaf,
   LockKeyhole,
   Truck,
@@ -52,6 +51,11 @@ const HomeShowcaseSection = () => {
   return (
     <section className="bg-white py-14 md:py-20">
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+        <div className="text-center text-[#17110d]">
+            <h2 className="font-heading text-2xl leading-tight sm:text-4xl pb-10">
+                Spotlight
+            </h2>
+            </div>
         <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-4">
           {collections.map((title, index) => (
             <Card
@@ -60,7 +64,13 @@ const HomeShowcaseSection = () => {
               className="group relative aspect-square overflow-hidden rounded-[4px] border border-[#ead8c5]  transition duration-300 hover:border-[#c39150]/70 cursor-pointer"
             >
               <div className="absolute bottom-[22%] left-[6.4%] top-[27%] z-10 flex w-[58%] flex-col">
-                <Flower2 className="mb-[6%] size-3.5 text-[#c39150] sm:size-7 xl:size-6" />
+                <Image
+                  src="/about/timelesselegance.png"
+                  alt=""
+                  width={83}
+                  height={67}
+                  className="mb-[6%] h-3.5 w-4 object-contain sm:h-7 sm:w-8 xl:h-6 xl:w-7"
+                />
                 <h2 className="font-heading text-[clamp(0.5rem,3vw,1.35rem)] leading-[1.28] text-[#3f2617] text-pretty sm:text-[clamp(1.1rem,2.7vw,1.45rem)] xl:text-[clamp(0.95rem,1.03vw,1.1rem)]">
                   {title}
                 </h2>

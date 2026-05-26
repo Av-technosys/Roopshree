@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, Flower2 } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { formatPrice, products } from "@/components/global/const"
@@ -31,7 +31,13 @@ const Newarrival = () => {
             <div className="flex items-center justify-center gap-4 text-[#9d6b32] md:gap-8">
               <span className="h-px w-20 bg-[#9d6b32]/50 md:w-[8.6vw] md:bg-linear-to-r md:from-transparent md:to-[#3f2617]" />
               <div className="flex shrink-0 flex-col items-center gap-1 md:gap-2">
-                <Flower2 className="size-6 md:size-10" strokeWidth={1.4} />
+                <Image
+                  src="/about/timelesselegance.png"
+                  alt=""
+                  width={83}
+                  height={67}
+                  className="h-6 w-7 object-contain md:h-10 md:w-12"
+                />
                 <span className="text-[0.7rem] font-semibold uppercase tracking-[0.25em] md:text-[1.35vw] md:tracking-[0.34em]">
                   New Arrival
                 </span>

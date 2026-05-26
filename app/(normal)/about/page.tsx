@@ -1,9 +1,23 @@
-import React from 'react'
+import AboutCta from "@/components/about/AboutCta"
+import AboutHero from "@/components/about/AboutHero"
+import GallerySection from "@/components/about/GallerySection"
+import HeritageSection from "@/components/about/HeritageSection"
+import MissionSection from "@/components/about/MissionSection"
+import QualityHighlights from "@/components/about/QualityHighlights"
+import StorySection from "@/components/about/StorySection"
 
-function about() {
+const AboutPage = () => {
   return (
-    <div>about</div>
+    <main className="flex-1">
+      <AboutHero />
+      <HeritageSection />
+      <StorySection />
+      <MissionSection />
+      <QualityHighlights />
+      <GallerySection />
+      <AboutCta />
+    </main>
   )
 }
 
-export default about
+export default AboutPage

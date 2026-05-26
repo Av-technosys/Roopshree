@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Image from "next/image"
-import { ChevronLeft, ChevronRight, Flower2, Star } from "lucide-react"
+import { ChevronLeft, ChevronRight, Star } from "lucide-react"
 
 import {
   Carousel,
@@ -142,9 +142,12 @@ const Reviews = () => {
 
       <div className="relative mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
         <div className="text-center">
-          <Flower2
-            className="mx-auto size-6 text-[#c39150] sm:size-9"
-            strokeWidth={1.35}
+          <Image
+            src="/about/timelesselegance.png"
+            alt=""
+            width={83}
+            height={67}
+            className="mx-auto h-6 w-7 object-contain sm:h-9 sm:w-11"
           />
           <p className="mt-2 text-[0.5rem] font-semibold uppercase tracking-[0.34em] text-black sm:mt-3 sm:text-xs sm:tracking-[0.36em]">
             In Their Words

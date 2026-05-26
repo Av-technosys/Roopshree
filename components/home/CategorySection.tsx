@@ -43,21 +43,20 @@ const CategorySection = () => {
           </p>
         </div>
 
-        <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 md:mt-16 lg:grid-cols-5 lg:gap-5">
+        <div className="scrollbar-hidden mt-12 flex snap-x gap-4 overflow-x-auto md:mt-16 lg:grid lg:grid-cols-5 lg:overflow-visible lg:gap-5">
           {categories.map((category) => (
             <Link
               key={category.name}
               href={category.href}
-              className="group block overflow-hidden"
+              className="group relative block aspect-[334/473] w-[42vw] min-w-[10rem] shrink-0 snap-start overflow-hidden sm:w-[18rem] md:w-[20rem] lg:w-auto lg:min-w-0 lg:shrink"
               aria-label={`Explore ${category.name}`}
             >
               <Image
                 src={category.image}
                 alt={category.name}
-                width={299}
-                height={448}
-                sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
-                className="h-auto w-full transition duration-300 group-hover:scale-[1.02]"
+                fill
+                sizes="(width: 1024px) 20vw, (width: 640px) 33vw, 50vw"
+                className="object-fill transition duration-300 group-hover:scale-[1.02]"
               />
             </Link>
           ))}

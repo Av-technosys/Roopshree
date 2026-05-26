@@ -1,6 +1,5 @@
 import Image from "next/image"
 import Link from "next/link"
-import { Flower2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 
@@ -71,9 +70,12 @@ const StayConnected = () => {
       />
 
       <div className="relative mx-auto max-w-7xl px-5 text-center sm:px-6 lg:px-8">
-        <Flower2
-          className="mx-auto size-8 text-[#c39150] sm:size-11"
-          strokeWidth={1.35}
+        <Image
+          src="/about/timelesselegance.png"
+          alt=""
+          width={83}
+          height={67}
+          className="mx-auto h-8 w-10 object-contain sm:h-11 sm:w-14"
         />
         <p className="mt-3 text-[0.72rem] font-semibold uppercase tracking-[0.34em] text-[#3f2617] sm:text-sm">
           Stay Connected

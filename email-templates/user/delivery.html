@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Delivery Confirmation</title>
+    <style>
+      body { margin: 0; padding: 0; background: #f1dfc9; color: #6f6b68; font-family: Poppins, Arial, sans-serif; }
+      table { border-collapse: collapse; }
+      img { border: 0; display: block; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+      .page { width: 100%; background: #f1dfc9; }
+      .wrap { width: 100%; max-width: 394px; margin: 0 auto; }
+      .shell { padding: 54px 19px 46px; }
+      .card { background: #fffaf3; border-radius: 12px; }
+      .content { padding: 40px 19px 35px; }
+      .logo { width: 120px; margin: 0 auto 30px; }
+      h1 { margin: 0 0 29px; color: #c88a3e; font-family: Georgia, "Times New Roman", serif; font-size: 21px; line-height: 1.25; text-align: center; }
+      p { margin: 0 0 18px; font-size: 13px; line-height: 1.38; }
+      .section-title { margin: 31px 0 27px; color: #c88a3e; font-family: Georgia, "Times New Roman", serif; font-size: 16px; line-height: 1.3; font-weight: 700; }
+      .details p { margin-bottom: 8px; }
+      .compact p { margin-bottom: 2px; }
+      .quote { margin: 28px 0 16px; color: #6a6764; font-family: Georgia, "Times New Roman", serif; font-size: 14px; font-style: italic; line-height: 1.35; text-align: center; }
+      .team { margin: 0 0 28px; text-align: center; font-size: 12px; }
+      .help { margin: 0; text-align: center; font-size: 12px; line-height: 1.25; }
+      .help a { color: #ff9d00; text-decoration: none; }
+      .footer { padding: 33px 28px 0; color: #a99f95; text-align: center; }
+      .footer p { margin: 0 0 9px; font-size: 12px; line-height: 1.2; }
+      @media screen and (min-width: 520px) {
+        .wrap { max-width: 430px; }
+        .content { padding-left: 32px; padding-right: 32px; }
+      }
+    </style>
+  </head>
+  <body>
+    <table role="presentation" class="page" width="100%">
+      <tr>
+        <td align="center">
+          <table role="presentation" class="wrap" width="100%">
+            <tr>
+              <td class="shell">
+                <table role="presentation" class="card" width="100%">
+                  <tr>
+                    <td class="content">
+                      <img class="logo" src="../../public/header-logo.png" alt="Roop Shree">
+                      <h1>Delivery Confirmation</h1>
+                      <p>Hi {{Customer First Name}},</p>
+                      <p>Your Roopshree Bandhej order has been successfully delivered.</p>
+                      <p>We hope your handcrafted pieces reached you safely and add elegance and tradition to your wardrobe beautifully.</p>
+                      <p class="section-title">Delivery Details</p>
+                      <div class="details">
+                        <p>Order ID: {{Order ID}}</p>
+                        <p>Delivered On: {{Delivery Date}}</p>
+                      </div>
+                      <p class="section-title">Thank You for Choosing Roopshree Bandhej</p>
+                      <p>Every piece you receive is inspired by the timeless beauty of Rajasthan&rsquo;s traditional Bandhej artistry and crafted with care for modern elegance.</p>
+                      <p>With Roopshree Bandhej, you can expect:</p>
+                      <div class="compact">
+                        <p>&bull; Authentic handcrafted-inspired designs</p>
+                        <p>&bull; Premium fabrics with elegant detailing</p>
+                        <p>&bull; Timeless ethnic styles for every occasion</p>
+                        <p>&bull; Comfort, grace, and tradition woven together</p>
+                      </div>
+                      <p class="section-title">We&rsquo;d Love Your Feedback</p>
+                      <p>Your experience means everything to us. Share your feedback and help others discover the beauty of Roopshree Bandhej.</p>
+                      <p>Leave a Review: {{Review Link}}</p>
+                      <p class="quote">&ldquo;Tradition woven beautifully into every thread.&rdquo;</p>
+                      <p class="team">~ Team Roopshree Bandhej</p>
+                      <p class="help">Need Help ?<br>If you have any questions about your order, feel free to reach out: <a href="mailto:support@Morze.com">support@Morze.com</a></p>
+                    </td>
+                  </tr>
+                </table>
+                <div class="footer">
+                  <p>Note: Every product is carefully quality-checked and packed to ensure it reaches you in perfect condition.</p>
+                  <p>&copy; 2026&nbsp; Morzze. All rights reserved.</p>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

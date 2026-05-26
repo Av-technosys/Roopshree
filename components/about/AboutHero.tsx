@@ -42,7 +42,7 @@ const AboutHero = () => {
 
           <h1 className="font-heading text-[2.65rem] leading-[0.94] text-[#3f2617] sm:text-5xl md:text-6xl lg:text-7xl">
             A STORY OF
-            <span className="block font-semibold italic text-[#c18f50] sm:text-6xl md:text-7xl lg:text-8xl">
+            <span className="block italic text-[#c18f50] sm:text-6xl md:text-7xl lg:text-8xl">
               Roopshree
             </span>
           </h1>

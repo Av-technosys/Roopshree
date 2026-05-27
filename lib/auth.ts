@@ -1,12 +1,32 @@
-type SessionUser = {
-  id: string
-  email: string
-  role: 'user' | 'admin'
+import { cookies } from 'next/headers'
+import { authCookieNames, getEmailFromIdToken } from '@/lib/auth-token'
+
+export async function getCurrentSession() {
+  const cookieStore = await cookies()
+  const accessToken = cookieStore.get(authCookieNames.accessToken)?.value
+  const idToken = cookieStore.get(authCookieNames.idToken)?.value
+  const refreshToken = cookieStore.get(authCookieNames.refreshToken)?.value
+  const role = cookieStore.get(authCookieNames.role)?.value
+
+  if (!refreshToken) {
+    return null
+  }
+
+  return {
+    accessToken,
+    idToken,
+    refreshToken,
+    user: {
+      email: idToken ? getEmailFromIdToken(idToken) : undefined,
+      role,
+    },
+  }
 }
 
-export async function getCurrentUser(): Promise<SessionUser | null> {
-  // Wire this to your auth provider/session store.
-  return null
+export async function getCurrentUser() {
+  const session = await getCurrentSession()
+
+  return session?.user ?? null
 }
 
 export async function requireUser() {
@@ -20,9 +40,11 @@ export async function requireUser() {
 }
 
 export async function requireAdmin() {
+  const session = await getCurrentSession()
   const user = await requireUser()
+  const role = session?.user?.role
 
-  if (user.role !== 'admin') {
+  if (role !== 'admin') {
     throw new Error('Forbidden')
   }
 

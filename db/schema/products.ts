@@ -3,7 +3,6 @@ import {
   boolean,
   index,
   integer,
-  jsonb,
   pgTable,
   primaryKey,
   text,
@@ -32,9 +31,7 @@ export const categories = pgTable(
     name: varchar('name', { length: 160 }).notNull(),
     slug: varchar('slug', { length: 180 }).notNull(),
     description: text('description'),
-    imageKey: text('image_key'),
-    sortOrder: integer('sort_order').default(0).notNull(),
-    isActive: boolean('is_active').default(true).notNull(),
+    bannerImage: text('banner_image'),
     ...timestamps,
   },
   (table) => [
@@ -52,8 +49,8 @@ export const products = pgTable(
     name: varchar('name', { length: 220 }).notNull(),
     shortDescription: text('short_description'),
     description: text('description'),
-    basePriceInPaise: integer('base_price_in_paise').notNull(),
-    compareAtPriceInPaise: integer('compare_at_price_in_paise'),
+    basePrice: integer('base_price').notNull(),
+    strikeThroughPrice: integer('strike_through_price'),
     status: productStatusEnum('status').default('draft').notNull(),
     isFeatured: boolean('is_featured').default(false).notNull(),
     ...timestamps,
@@ -91,10 +88,15 @@ export const productVariants = pgTable(
       .references(() => products.id, { onDelete: 'cascade' }),
     sku: varchar('sku', { length: 80 }).notNull(),
     title: varchar('title', { length: 180 }).notNull(),
-    priceInPaise: integer('price_in_paise').notNull(),
-    compareAtPriceInPaise: integer('compare_at_price_in_paise'),
+    price: integer('price').notNull(),
+    strikeThroughPrice: integer('strike_through_price'),
     stockQuantity: integer('stock_quantity').default(0).notNull(),
-    lowStockThreshold: integer('low_stock_threshold').default(5).notNull(),
+    hasVariantBox: boolean('has_variant_box').default(false).notNull(),
+    rating: integer('rating').default(0).notNull(),
+    reviewCount: integer('review_count').default(0).notNull(),
+    size: varchar('size', { length: 80 }),
+    color: varchar('color', { length: 80 }),
+    fabric: varchar('fabric', { length: 120 }),
     isDefault: boolean('is_default').default(false).notNull(),
     isActive: boolean('is_active').default(true).notNull(),
     ...timestamps,
@@ -119,20 +121,6 @@ export const productAttributes = pgTable(
   (table) => [index('product_attributes_product_id_idx').on(table.productId)],
 )
 
-export const productFaqs = pgTable(
-  'product_faqs',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    productId: uuid('product_id')
-      .notNull()
-      .references(() => products.id, { onDelete: 'cascade' }),
-    question: varchar('question', { length: 500 }).notNull(),
-    answer: text('answer').notNull(),
-    sortOrder: integer('sort_order').default(0).notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [index('product_faqs_product_id_idx').on(table.productId)],
-)
 
 export const mediaAssets = pgTable(
   'media_assets',

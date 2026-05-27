@@ -15,7 +15,6 @@ import {
   orderStatusEnum,
   paymentProviderEnum,
   paymentStatusEnum,
-  subscriptionStatusEnum,
 } from './enums'
 import { productVariants, products } from './products'
 import { addresses, users } from './users'
@@ -101,19 +100,23 @@ export const orders = pgTable(
       onDelete: 'set null',
     }),
     status: orderStatusEnum('status').default('pending').notNull(),
-    subtotalInPaise: integer('subtotal_in_paise').notNull(),
-    discountInPaise: integer('discount_in_paise').default(0).notNull(),
-    shippingInPaise: integer('shipping_in_paise').default(0).notNull(),
-    taxInPaise: integer('tax_in_paise').default(0).notNull(),
-    totalInPaise: integer('total_in_paise').notNull(),
-    shippingFullName: varchar('shipping_full_name', { length: 160 }).notNull(),
+    shipmentProvider: varchar('shipment_provider').default('envia'),
+    trackingNumber: varchar('tracking_number'),
+    trackingUrl: text('tracking_url'),
+    shipmentStatus: varchar('shipment_status', { length: 80 }).default('processing').notNull(),
+    shipmentId: varchar('shipment_id', { length: 180 }),
+    courierName: varchar('courier_name', { length: 160 }),
+    estimatedDeliveryDate: timestamp('estimated_delivery_date', { withTimezone: true }),
+    shipedAt: timestamp('shipped_at', { withTimezone: true }),
+    deliveredAt: timestamp('delivered_at', { withTimezone: true }),
     shippingPhone: varchar('shipping_phone', { length: 20 }).notNull(),
-    shippingLine1: text('shipping_line_1').notNull(),
-    shippingLine2: text('shipping_line_2'),
-    shippingCity: varchar('shipping_city', { length: 120 }).notNull(),
-    shippingState: varchar('shipping_state', { length: 120 }).notNull(),
-    shippingPostalCode: varchar('shipping_postal_code', { length: 20 }).notNull(),
-    shippingCountry: varchar('shipping_country', { length: 80 }).default('India').notNull(),
+    addressLine1: text('address_line_1').notNull(),
+    addressLine2: text('address_line_2'),
+    city: varchar('city', { length: 120 }).notNull(),
+    state: varchar('state', { length: 120 }).notNull(),
+    postalCode: varchar('postal_code', { length: 20 }).notNull(),
+    country: varchar('country', { length: 80 }).default('India').notNull(),
+    totalAmount: integer('total_amount').notNull(),
     ...timestamps,
   },
   (table) => [
@@ -130,24 +133,19 @@ export const orderItems = pgTable(
     orderId: uuid('order_id')
       .notNull()
       .references(() => orders.id, { onDelete: 'cascade' }),
-    productId: uuid('product_id').references(() => products.id, {
-      onDelete: 'set null',
-    }),
     variantId: uuid('variant_id').references(() => productVariants.id, {
       onDelete: 'set null',
     }),
     quantity: integer('quantity').notNull(),
-    unitPriceInPaise: integer('unit_price_in_paise').notNull(),
-    totalInPaise: integer('total_in_paise').notNull(),
+    productPrice: integer('product_price').notNull(),
     productName: varchar('product_name', { length: 220 }).notNull(),
     productSlug: varchar('product_slug', { length: 180 }).notNull(),
     productSku: varchar('product_sku', { length: 80 }).notNull(),
+    productImage: varchar('product_image', { length: 220 }),
     variantTitle: varchar('variant_title', { length: 180 }),
-    imageKey: text('image_key'),
   },
   (table) => [
     index('order_items_order_id_idx').on(table.orderId),
-    index('order_items_product_id_idx').on(table.productId),
   ],
 )
 
@@ -196,32 +194,5 @@ export const shipments = pgTable(
   (table) => [
     index('shipments_order_id_idx').on(table.orderId),
     index('shipments_tracking_number_idx').on(table.trackingNumber),
-  ],
-)
-
-export const subscriptions = pgTable(
-  'subscriptions',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    userId: uuid('user_id')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
-    productId: uuid('product_id')
-      .notNull()
-      .references(() => products.id, { onDelete: 'cascade' }),
-    variantId: uuid('variant_id').references(() => productVariants.id, {
-      onDelete: 'set null',
-    }),
-    status: subscriptionStatusEnum('status').default('active').notNull(),
-    frequencyInMonths: integer('frequency_in_months').notNull(),
-    quantity: integer('quantity').default(1).notNull(),
-    nextOrderDate: timestamp('next_order_date', { withTimezone: true }),
-    startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
-    endedAt: timestamp('ended_at', { withTimezone: true }),
-    ...timestamps,
-  },
-  (table) => [
-    index('subscriptions_user_id_idx').on(table.userId),
-    index('subscriptions_status_idx').on(table.status),
   ],
 )

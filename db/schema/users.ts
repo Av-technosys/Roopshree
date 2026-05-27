@@ -1,7 +1,6 @@
 import {
   boolean,
   index,
-  integer,
   pgTable,
   text,
   timestamp,
@@ -59,4 +58,3 @@ export const addresses = pgTable(
     index('addresses_default_idx').on(table.userId, table.isDefault),
   ],
 )
-

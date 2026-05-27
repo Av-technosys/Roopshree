@@ -8,20 +8,32 @@ type ProductRecord = ProductPayload & {
 
 export async function createProductRecord(
   payload: ProductPayload & { priceInPaise: number },
-) {
+): Promise<ProductRecord> {
+  void db
+  void payload
+
   // Replace with a Drizzle insert once product schema is available.
-  return db.query<ProductRecord>('products.create', payload)
+  throw new Error('Product create query not implemented')
 }
 
-export async function findProductById(productId: string) {
+export async function findProductById(
+  productId: string,
+): Promise<ProductRecord | null> {
+  void db
+  void productId
+
   // Replace with a Drizzle select by id.
-  return db.query<ProductRecord | null>('products.findById', { productId })
+  return null satisfies ProductRecord | null
 }
 
 export async function updateProductRecord(
   productId: string,
   payload: ProductPayload & { priceInPaise: number },
-) {
+): Promise<ProductRecord> {
+  void db
+  void productId
+  void payload
+
   // Replace with a Drizzle update by id.
-  return db.query<ProductRecord>('products.update', { productId, ...payload })
+  throw new Error('Product update query not implemented')
 }

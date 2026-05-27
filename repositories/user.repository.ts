@@ -6,12 +6,17 @@ type UserRecord = {
   role: 'user' | 'admin'
 }
 
-export async function listUsers() {
+export async function listUsers(): Promise<UserRecord[]> {
+  void db
+
   // Replace with a Drizzle select from users.
-  return db.query<UserRecord[]>('users.list')
+  return [] satisfies UserRecord[]
 }
 
-export async function getUserById(userId: string) {
+export async function getUserById(userId: string): Promise<UserRecord | null> {
+  void db
+  void userId
+
   // Replace with a Drizzle select by id.
-  return db.query<UserRecord | null>('users.findById', { userId })
+  return null satisfies UserRecord | null
 }

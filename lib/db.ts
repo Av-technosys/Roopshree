@@ -1,10 +1,23 @@
-type QueryParams = Record<string, unknown>
+import { drizzle } from 'drizzle-orm/postgres-js'
+import postgres, { type Sql } from 'postgres'
+import { DATABASE_URL } from '@/config/env'
+import * as schema from '@/db'
 
-export const db = {
-  async query<T>(operation: string, params?: QueryParams): Promise<T> {
-    void params
-
-    // Replace this adapter with Drizzle queries after schemas are defined.
-    throw new Error(`Database operation not implemented: ${operation}`)
-  },
+type GlobalWithPostgres = typeof globalThis & {
+  postgresClient?: Sql
 }
+
+const globalForDb = globalThis as GlobalWithPostgres
+
+export const sql =
+  globalForDb.postgresClient ??
+  postgres(DATABASE_URL, {
+    max: 10,
+    prepare: false,
+  })
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForDb.postgresClient = sql
+}
+
+export const db = drizzle(sql, { schema })

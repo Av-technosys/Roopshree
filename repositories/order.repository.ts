@@ -6,12 +6,22 @@ type OrderRecord = {
   totalInPaise: number
 }
 
-export async function findOrderById(orderId: string) {
+export async function findOrderById(orderId: string): Promise<OrderRecord | null> {
+  void db
+  void orderId
+
   // Replace with a Drizzle select by id.
-  return db.query<OrderRecord | null>('orders.findById', { orderId })
+  return null satisfies OrderRecord | null
 }
 
-export async function updateOrderStatusRecord(orderId: string, status: string) {
+export async function updateOrderStatusRecord(
+  orderId: string,
+  status: string,
+): Promise<OrderRecord> {
+  void db
+  void orderId
+  void status
+
   // Replace with a Drizzle update by id.
-  return db.query<OrderRecord>('orders.updateStatus', { orderId, status })
+  throw new Error('Order status update query not implemented')
 }

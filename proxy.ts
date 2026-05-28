@@ -16,19 +16,19 @@ function startsWithRoute(pathname: string, routes: string[]) {
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const isLoggedIn = hasSessionCookie(request)
+  // const isLoggedIn = hasSessionCookie(request)
 
-  if (startsWithRoute(pathname, protectedRoutes) && !isLoggedIn) {
-    const signInUrl = request.nextUrl.clone()
-    signInUrl.pathname = '/auth'
-    signInUrl.searchParams.set('callbackUrl', request.nextUrl.href)
+  // if (startsWithRoute(pathname, protectedRoutes) && !isLoggedIn) {
+  //   const signInUrl = request.nextUrl.clone()
+  //   signInUrl.pathname = '/auth'
+  //   signInUrl.searchParams.set('callbackUrl', request.nextUrl.href)
 
-    return NextResponse.redirect(signInUrl)
-  }
+  //   return NextResponse.redirect(signInUrl)
+  // }
 
-  if (startsWithRoute(pathname, authRoutes) && isLoggedIn) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
-  }
+  // if (startsWithRoute(pathname, authRoutes) && isLoggedIn) {
+  //   return NextResponse.redirect(new URL('/dashboard', request.url))
+  // }
 
   return NextResponse.next()
 }

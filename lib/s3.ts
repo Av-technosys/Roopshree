@@ -8,10 +8,10 @@ function getS3Region() {
 }
 
 function getS3BucketName() {
-  const bucketName = process.env.S3_BUCKET_NAME
+  const bucketName = process.env.AWS_BUCKET
 
   if (!bucketName) {
-    throw new Error('Missing S3_BUCKET_NAME')
+    throw new Error('Missing AWS_BUCKET')
   }
 
   return bucketName
@@ -19,9 +19,13 @@ function getS3BucketName() {
 
 function getS3ClientConfig(): S3ClientConfig {
   const accessKeyId =
-    process.env.S3_AWS_ACCESS_KEY_ID ?? process.env.AWS_ACCESS_KEY_ID
+    process.env.S3_AWS_ACCESS_KEY_ID ??
+    process.env.AWS_ACCESS_KEY_ID ??
+    process.env.AWS_ACCESS_KEY
   const secretAccessKey =
-    process.env.S3_AWS_SECRET_ACCESS_KEY ?? process.env.AWS_SECRET_ACCESS_KEY
+    process.env.S3_AWS_SECRET_ACCESS_KEY ??
+    process.env.AWS_SECRET_ACCESS_KEY ??
+    process.env.AWS_SECRET_KEY
 
   if (!accessKeyId || !secretAccessKey) {
     return {
@@ -41,7 +45,8 @@ function getS3ClientConfig(): S3ClientConfig {
 export const s3Client = new S3Client(getS3ClientConfig())
 
 export function getS3ObjectPreviewUrl(key: string) {
-  const publicBaseUrl = process.env.S3_PUBLIC_BASE_URL
+  const publicBaseUrl =
+    process.env.S3_PUBLIC_BASE_URL ?? process.env.NEXT_PUBLIC_S3_BASE_URL
 
   if (publicBaseUrl) {
     return `${publicBaseUrl.replace(/\/$/, '')}/${key}`

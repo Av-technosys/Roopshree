@@ -1,37 +1,38 @@
 import { pageSize } from "@/const/globalconst";
-import { getProducts } from "@/helper/product/action";
-import ProductClient from "./productClient";
+import { getCategoriesPagination } from "@/helper/category/action";
+import CategoryClient from "./categoryClient";
 
 interface PageProps {
   searchParams: {
     page?: string;
     page_size?: string;
     search?: string;
-    category?: string;
-    status?: string;
+    category?:string;
   };
 }
 
+const PAGE_SIZE = pageSize
+
 const Page = async ({ searchParams }: PageProps) => {
   const params = await searchParams;
-  const PAGE_SIZE = pageSize
-  const result = await getProducts({
+
+
+  const result = await getCategoriesPagination({
     page: Number(params.page ?? "1"),
-    pageSize: Number(PAGE_SIZE),
+    pageSize: PAGE_SIZE,
     search: params.search ?? "",
-    category: params.category,
-    status: params.status,
+    category: params.category ?? undefined,
+
+
   });
 
-
   return (
-    <ProductClient
-      products={result.items}
+    <CategoryClient
+      categories={result.items}
       total={result.totalPages}
       currentPage={result.page}
     />
   );
 };
-
 
 export default Page;

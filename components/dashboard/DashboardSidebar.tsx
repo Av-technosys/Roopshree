@@ -6,14 +6,20 @@ import { ChevronRight, UserRound } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import {
-  customer,
   dashboardNavItems,
   signOutItem,
 } from "@/components/dashboard/dashboard-data"
 import { logout } from "@/lib/logout"
 import { useToast } from "@/components/common/ToastProvider"
+import type { ProfileView } from "@/services/user.service"
 
-export function DashboardSidebar({ onNavigate }: { onNavigate?: () => void }) {
+export function DashboardSidebar({
+  onNavigate,
+  profile,
+}: {
+  onNavigate?: () => void
+  profile: ProfileView | null
+}) {
   const pathname = usePathname()
   const router = useRouter()
   const { showToast } = useToast()
@@ -27,9 +33,9 @@ export function DashboardSidebar({ onNavigate }: { onNavigate?: () => void }) {
             <UserRound className="size-5" />
           </span>
           <h2 className="mt-3 text-sm font-semibold text-[#2d180f]">
-            {customer.name}
+            {profile?.fullName ?? "Account"}
           </h2>
-          <p className="mt-1 text-xs text-[#6f625b]">{customer.email}</p>
+          <p className="mt-1 text-xs text-[#6f625b]">{profile?.email ?? ""}</p>
         </div>
       </div>
 

@@ -9,6 +9,7 @@ import { ChevronRight, Menu, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar"
+import type { ProfileView } from "@/services/user.service"
 
 const sectionLabels: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -20,7 +21,13 @@ const sectionLabels: Record<string, string> = {
   "/dashboard/notifications": "Notification",
 }
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export function DashboardShell({
+  children,
+  profile,
+}: {
+  children: React.ReactNode
+  profile: ProfileView | null
+}) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const pathname = usePathname()
   const activeSection =
@@ -72,7 +79,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <X className="size-5" />
               </Button>
             </div>
-            <DashboardSidebar onNavigate={() => setIsSidebarOpen(false)} />
+            <DashboardSidebar
+              profile={profile}
+              onNavigate={() => setIsSidebarOpen(false)}
+            />
           </motion.aside>
         </>
       ) : null}
@@ -113,7 +123,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
         <div className="mt-5 grid gap-6 lg:grid-cols-[270px_minmax(0,1fr)]">
           <div className="hidden lg:block">
-            <DashboardSidebar />
+            <DashboardSidebar profile={profile} />
           </div>
           <div className="min-w-0">{children}</div>
         </div>

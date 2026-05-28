@@ -10,6 +10,8 @@ export type AuthRole = 'user' | 'admin'
 
 type CognitoClaims = {
   email?: string
+  name?: string
+  phone_number?: string
   sub?: string
   'custom:role'?: string
   'cognito:groups'?: string[]
@@ -44,4 +46,15 @@ export function getRoleFromIdToken(idToken: string): AuthRole {
 
 export function getEmailFromIdToken(idToken: string) {
   return decodeJwtPayload<CognitoClaims>(idToken)?.email
+}
+
+export function getUserClaimsFromIdToken(idToken: string) {
+  const claims = decodeJwtPayload<CognitoClaims>(idToken)
+
+  return {
+    email: claims?.email,
+    name: claims?.name,
+    phone: claims?.phone_number,
+    sub: claims?.sub,
+  }
 }

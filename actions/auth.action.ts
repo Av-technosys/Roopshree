@@ -13,6 +13,8 @@ import {
   getAuthCookiePayload,
   getClearAuthCookiePayload,
 } from '@/lib/auth-cookies'
+import { getUserClaimsFromIdToken } from '@/lib/auth-token'
+import { syncProfileFromAuthClaimsService } from '@/services/user.service'
 
 type AuthActionResult = {
   ok: boolean
@@ -26,6 +28,12 @@ async function setAuthCookies(email: string, password: string) {
   getAuthCookiePayload({ email, tokens }).forEach((cookie) => {
     cookieStore.set(cookie.name, cookie.value, cookie.options)
   })
+
+  try {
+    await syncProfileFromAuthClaimsService(getUserClaimsFromIdToken(tokens.idToken))
+  } catch (error) {
+    console.error('Unable to sync signed-in user profile:', error)
+  }
 }
 
 export async function signInAction({

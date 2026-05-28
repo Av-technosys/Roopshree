@@ -7,10 +7,14 @@ function getString(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
 }
 
+function normalizeMobileNumber(value: string) {
+  return value.replace(/[^\d]/g, '')
+}
+
 export function validateProfilePayload(payload: unknown): ProfilePayload {
   const data = payload as Partial<Record<keyof ProfilePayload, unknown>>
   const fullName = getString(data.fullName)
-  const phone = getString(data.phone)
+  const phone = normalizeMobileNumber(getString(data.phone))
 
   if (!fullName) {
     throw new Error('Full name is required')
@@ -18,6 +22,10 @@ export function validateProfilePayload(payload: unknown): ProfilePayload {
 
   if (!phone) {
     throw new Error('Mobile number is required')
+  }
+
+  if (phone.length !== 10) {
+    throw new Error('Mobile number must be exactly 10 digits')
   }
 
   return {

@@ -1,4 +1,4 @@
-import { and, asc, countDistinct, desc, eq, ne } from 'drizzle-orm'
+import { and, asc, countDistinct, desc, eq, inArray, ne, sql, type SQL } from 'drizzle-orm'
 import {
   categories,
   mediaAssets,
@@ -6,6 +6,7 @@ import {
   productAttributes,
   productMedia,
   products,
+  productFilters,
   productVariants,
   reviews,
 } from '@/db'
@@ -53,6 +54,14 @@ export type ProductListQuery = {
   limit?: number
   offset?: number
   categorySlug?: string
+  categorySlugs?: string[]
+  colors?: string[]
+  fabrics?: string[]
+  sizes?: string[]
+  availability?: ('in-stock' | 'out-of-stock')[]
+  minPriceInPaise?: number
+  maxPriceInPaise?: number
+  filters?: Record<string, string[]>
   featured?: boolean
   sortBy?: 'featured' | 'newest' | 'price-low' | 'price-high'
 }
@@ -79,6 +88,22 @@ export type CategoryListRow = {
   name: string
   slug: string
   imageKey: string | null
+}
+
+export type ProductFilterOptionRow = {
+  name: string
+  value: string
+}
+
+export type VariantFilterOptionRow = {
+  color: string | null
+  fabric: string | null
+  size: string | null
+}
+
+export type ProductPriceRangeRow = {
+  minPrice: number | null
+  maxPrice: number | null
 }
 
 export type ProductDetailRow = {
@@ -134,22 +159,83 @@ export type ProductReviewRow = {
 }
 
 function getProductWhere(query: ProductListQuery) {
-  return and(
+  const categorySlugs = [
+    ...(query.categorySlug ? [query.categorySlug] : []),
+    ...(query.categorySlugs ?? []),
+  ].filter(Boolean)
+  const customFilterEntries = Object.entries(query.filters ?? {}).filter(
+    ([, values]) => values.length > 0,
+  )
+  const hasPriceFilter =
+    query.minPriceInPaise !== undefined || query.maxPriceInPaise !== undefined
+  const activeVariantWhere = and(
+    eq(productVariants.productId, products.id),
+    eq(productVariants.isActive, true),
+  )
+  const displayPriceFilters: (SQL | undefined)[] = [
+    query.minPriceInPaise === undefined
+      ? undefined
+      : sql`coalesce(${productVariants.price}, ${products.basePrice}) >= ${query.minPriceInPaise}`,
+    query.maxPriceInPaise === undefined
+      ? undefined
+      : sql`coalesce(${productVariants.price}, ${products.basePrice}) <= ${query.maxPriceInPaise}`,
+  ]
+  const variantFilters: (SQL | undefined)[] = [
+    activeVariantWhere,
+    query.colors?.length ? inArray(productVariants.color, query.colors) : undefined,
+    query.fabrics?.length ? inArray(productVariants.fabric, query.fabrics) : undefined,
+    query.sizes?.length ? inArray(productVariants.size, query.sizes) : undefined,
+    query.availability?.length === 1 && query.availability[0] === 'in-stock'
+      ? sql`${productVariants.stockQuantity} > 0`
+      : undefined,
+    query.availability?.length === 1 && query.availability[0] === 'out-of-stock'
+      ? eq(productVariants.stockQuantity, 0)
+      : undefined,
+  ]
+  const hasVariantAttributeFilters = Boolean(
+    query.colors?.length ||
+      query.fabrics?.length ||
+      query.sizes?.length ||
+      query.availability?.length === 1,
+  )
+  const conditions: (SQL | undefined)[] = [
     ne(products.status, 'archived'),
     query.featured === undefined
       ? undefined
       : eq(products.isFeatured, query.featured),
-    query.categorySlug ? eq(categories.slug, query.categorySlug) : undefined,
-  )
+    categorySlugs.length
+      ? sql`exists (
+          select 1 from ${productCategories}
+          inner join ${categories} on ${categories.id} = ${productCategories.categoryId}
+          where ${productCategories.productId} = ${products.id}
+          and ${inArray(categories.slug, categorySlugs)}
+        )`
+      : undefined,
+    hasVariantAttributeFilters
+      ? sql`exists (
+          select 1 from ${productVariants}
+          where ${and(...variantFilters)}
+        )`
+      : undefined,
+    hasPriceFilter ? and(...displayPriceFilters) : undefined,
+    ...customFilterEntries.map(([name, values]) => sql`exists (
+      select 1 from ${productFilters}
+      where ${productFilters.productId} = ${products.id}
+      and lower(${productFilters.name}) = lower(${name})
+      and ${inArray(productFilters.value, values)}
+    )`),
+  ]
+
+  return and(...conditions)
 }
 
 function getProductOrder(query: ProductListQuery) {
   if (query.sortBy === 'price-low') {
-    return asc(productVariants.price)
+    return asc(sql`coalesce(${productVariants.price}, ${products.basePrice})`)
   }
 
   if (query.sortBy === 'price-high') {
-    return desc(productVariants.price)
+    return desc(sql`coalesce(${productVariants.price}, ${products.basePrice})`)
   }
 
   if (query.sortBy === 'newest') {
@@ -163,7 +249,7 @@ export async function listProductRows(
   query: ProductListQuery = {},
 ): Promise<ProductListRow[]> {
   return db
-    .selectDistinctOn([products.id], {
+    .select({
       id: products.id,
       slug: products.slug,
       name: products.name,
@@ -188,8 +274,6 @@ export async function listProductRows(
         eq(productVariants.isActive, true),
       ),
     )
-    .leftJoin(productCategories, eq(productCategories.productId, products.id))
-    .leftJoin(categories, eq(categories.id, productCategories.categoryId))
     .leftJoin(
       productMedia,
       and(
@@ -200,7 +284,7 @@ export async function listProductRows(
     )
     .leftJoin(mediaAssets, eq(mediaAssets.id, productMedia.mediaAssetId))
     .where(getProductWhere(query))
-    .orderBy(products.id, getProductOrder(query), asc(products.name))
+    .orderBy(getProductOrder(query), asc(products.name), asc(products.id))
     .limit(query.limit ?? 12)
     .offset(query.offset ?? 0)
 }
@@ -209,8 +293,14 @@ export async function countProductRows(query: ProductListQuery = {}) {
   const [row] = await db
     .select({ count: countDistinct(products.id) })
     .from(products)
-    .leftJoin(productCategories, eq(productCategories.productId, products.id))
-    .leftJoin(categories, eq(categories.id, productCategories.categoryId))
+    .leftJoin(
+      productVariants,
+      and(
+        eq(productVariants.productId, products.id),
+        eq(productVariants.isDefault, true),
+        eq(productVariants.isActive, true),
+      ),
+    )
     .where(getProductWhere(query))
 
   return row?.count ?? 0
@@ -227,6 +317,51 @@ export async function listCategoryRows(limit = 12): Promise<CategoryListRow[]> {
     .from(categories)
     .orderBy(asc(categories.name))
     .limit(limit)
+}
+
+export async function listVariantFilterOptionRows(): Promise<VariantFilterOptionRow[]> {
+  return db
+    .select({
+      color: productVariants.color,
+      fabric: productVariants.fabric,
+      size: productVariants.size,
+    })
+    .from(productVariants)
+    .innerJoin(products, eq(products.id, productVariants.productId))
+    .where(and(eq(productVariants.isActive, true), ne(products.status, 'archived')))
+    .groupBy(productVariants.color, productVariants.fabric, productVariants.size)
+}
+
+export async function listCatalogProductFilterOptionRows(): Promise<ProductFilterOptionRow[]> {
+  return db
+    .select({
+      name: productFilters.name,
+      value: productFilters.value,
+    })
+    .from(productFilters)
+    .innerJoin(products, eq(products.id, productFilters.productId))
+    .where(ne(products.status, 'archived'))
+    .groupBy(productFilters.name, productFilters.value)
+    .orderBy(productFilters.name, productFilters.value)
+}
+
+export async function getCatalogProductPriceRange(): Promise<ProductPriceRangeRow> {
+  const [range] = await db
+    .select({
+      minPrice: sql<number>`min(coalesce(${productVariants.price}, ${products.basePrice}))`,
+      maxPrice: sql<number>`max(coalesce(${productVariants.price}, ${products.basePrice}))`,
+    })
+    .from(products)
+    .leftJoin(
+      productVariants,
+      and(
+        eq(productVariants.productId, products.id),
+        eq(productVariants.isActive, true),
+      ),
+    )
+    .where(ne(products.status, 'archived'))
+
+  return range ?? { minPrice: null, maxPrice: null }
 }
 
 export async function findProductDetailBySlug(slug: string) {

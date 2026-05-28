@@ -13,6 +13,7 @@ import {
   Trash2,
 } from "lucide-react"
 import { ShopMobileFilters } from "./ShopFilters"
+import type { getCatalogFilterOptions } from "@/services/product.service"
 import {
   formatPrice,
   productToCartItem,
@@ -36,11 +37,13 @@ export type ShopCategory = {
 export default function ShopProducts({
   products,
   categories,
+  filterOptions,
   total,
   currentPage,
 }: {
   products: Product[]
   categories: ShopCategory[]
+  filterOptions: Awaited<ReturnType<typeof getCatalogFilterOptions>>
   total: number
   currentPage: number
 }) {
@@ -97,7 +100,7 @@ export default function ShopProducts({
       ) : null}
 
       <div className="mt-8 flex items-center justify-between lg:hidden">
-        <ShopMobileFilters />
+        <ShopMobileFilters options={filterOptions} />
         <SortControl sortBy={sortBy} onSortChange={setSortBy} compact />
       </div>
 

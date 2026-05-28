@@ -14,7 +14,7 @@ export const dashboardNavItems = [
   { label: "Profile Settings", href: "/dashboard/profile", icon: User },
   { label: "My Orders", href: "/dashboard/orders", icon: Package },
   { label: "Address Book", href: "/dashboard/address-book", icon: MapPin },
-  { label: "Wishlist", href: "/dashboard/wishlist", icon: Heart },
+  { label: "Wishlist", href: "/wishlist", icon: Heart },
   { label: "Reviews & Ratings", href: "/dashboard/reviews", icon: Star },
   { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
 ]

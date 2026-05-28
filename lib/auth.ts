@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers'
-import { authCookieNames, getEmailFromIdToken } from '@/lib/auth-token'
+import { authCookieNames, getUserClaimsFromIdToken } from '@/lib/auth-token'
 
 export async function getCurrentSession() {
   const cookieStore = await cookies()
@@ -7,6 +7,7 @@ export async function getCurrentSession() {
   const idToken = cookieStore.get(authCookieNames.idToken)?.value
   const refreshToken = cookieStore.get(authCookieNames.refreshToken)?.value
   const role = cookieStore.get(authCookieNames.role)?.value
+  const claims = idToken ? getUserClaimsFromIdToken(idToken) : null
 
   if (!refreshToken) {
     return null
@@ -17,7 +18,10 @@ export async function getCurrentSession() {
     idToken,
     refreshToken,
     user: {
-      email: idToken ? getEmailFromIdToken(idToken) : undefined,
+      email: claims?.email ?? cookieStore.get(authCookieNames.email)?.value,
+      name: claims?.name,
+      phone: claims?.phone,
+      sub: claims?.sub,
       role,
     },
   }

@@ -26,21 +26,30 @@ export function DashboardCard({
 
 export function Field({
   label,
+  name,
   type = "text",
   defaultValue,
   className,
+  required = false,
+  readOnly = false,
 }: {
   label: string
+  name?: string
   type?: string
   defaultValue?: string
   className?: string
+  required?: boolean
+  readOnly?: boolean
 }) {
   return (
     <label className={cn("block min-w-0 text-xs text-[#777]", className)}>
       {label}
       <input
+        name={name}
         type={type}
         defaultValue={defaultValue}
+        required={required}
+        readOnly={readOnly}
         className="mt-1 h-10 w-full border border-[#e1c5a5] bg-white px-4 text-sm font-medium text-black outline-none transition focus:border-[#C39150]"
       />
     </label>
@@ -51,17 +60,22 @@ export function PrimaryAction({
   children,
   className,
   onClick,
+  type = "button",
+  disabled = false,
 }: {
   children: React.ReactNode
   className?: string
   onClick?: () => void
+  type?: "button" | "submit" | "reset"
+  disabled?: boolean
 }) {
   return (
     <button
-      type="button"
+      type={type}
       onClick={onClick}
+      disabled={disabled}
       className={cn(
-        "h-10 bg-[#C39150] px-7 text-xs font-semibold tracking-[0.08em] text-white transition hover:bg-[#3F2617]",
+        "h-10 bg-[#C39150] px-7 text-xs font-semibold tracking-[0.08em] text-white transition hover:bg-[#3F2617] disabled:opacity-60",
         className
       )}
     >

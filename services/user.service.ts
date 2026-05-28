@@ -27,6 +27,14 @@ type AuthClaims = {
   sub?: string
 }
 
+function getCognitoPhoneNumber(phone: string) {
+  const digits = phone.replace(/[^\d]/g, '')
+  const withoutCountryCode =
+    digits.length === 12 && digits.startsWith('91') ? digits.slice(2) : digits
+
+  return `+91${withoutCountryCode}`
+}
+
 export async function getProfileService(sessionUser: SessionUser) {
   if (!sessionUser?.email) {
     return null
@@ -65,7 +73,7 @@ export async function updateProfileService(
     email: sessionUser.email,
     userAttribute: [
       { Name: 'name', Value: payload.fullName },
-      { Name: 'phone_number', Value: payload.phone },
+      { Name: 'phone_number', Value: getCognitoPhoneNumber(payload.phone) },
     ],
   })
 

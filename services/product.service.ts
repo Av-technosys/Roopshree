@@ -9,7 +9,10 @@ import {
   listProductDetailVariants,
   listProductRows,
   countProductRows,
+  getCatalogProductPriceRange,
+  listCatalogProductFilterOptionRows,
   updateProductRecord,
+  listVariantFilterOptionRows,
   type ProductListQuery,
   type ProductListRow,
 } from '@/repositories/product.repository'
@@ -97,6 +100,75 @@ export async function getCatalogCategories(limit = 8) {
     href: `/shop?category=${category.slug}`,
     image: category.imageKey ? getS3ObjectPreviewUrl(category.imageKey) : '',
   }))
+}
+
+function uniqueOptions(values: (string | null | undefined)[]) {
+  return Array.from(
+    new Set(
+      values
+        .map((value) => value?.trim())
+        .filter((value): value is string => Boolean(value)),
+    ),
+  )
+    .sort((a, b) => a.localeCompare(b))
+    .map((value) => ({ label: value, value }))
+}
+
+function getFilterParamKey(name: string) {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+export async function getCatalogFilterOptions() {
+  const [categories, variants, customFilters, priceRange] = await Promise.all([
+    listCategoryRows(100),
+    listVariantFilterOptionRows(),
+    listCatalogProductFilterOptionRows(),
+    getCatalogProductPriceRange(),
+  ])
+  const customGroups = customFilters.reduce<
+    Record<string, { title: string; paramKey: string; values: string[] }>
+  >((groups, filter) => {
+    const title = filter.name.trim()
+    const paramKey = getFilterParamKey(title)
+
+    if (!title || !paramKey) return groups
+
+    groups[paramKey] ??= {
+      title,
+      paramKey,
+      values: [],
+    }
+
+    groups[paramKey].values.push(filter.value)
+    return groups
+  }, {})
+
+  return {
+    categories: categories.map((category) => ({
+      label: category.name,
+      value: category.slug,
+    })),
+    colors: uniqueOptions(variants.map((variant) => variant.color)),
+    fabrics: uniqueOptions(variants.map((variant) => variant.fabric)),
+    sizes: uniqueOptions(variants.map((variant) => variant.size)),
+    availability: [
+      { label: 'In Stock', value: 'in-stock' },
+      { label: 'Out of Stock', value: 'out-of-stock' },
+    ],
+    customGroups: Object.values(customGroups).map((group) => ({
+      title: group.title,
+      paramKey: group.paramKey,
+      items: uniqueOptions(group.values),
+    })),
+    priceRange: {
+      min: Math.floor((priceRange.minPrice ?? 0) / 100),
+      max: Math.ceil((priceRange.maxPrice ?? 0) / 100),
+    },
+  }
 }
 
 export async function getProductDetailsBySlug(slug: string) {

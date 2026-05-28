@@ -1,70 +1,35 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { Check, ChevronDown, SlidersHorizontal, X } from "lucide-react"
+import type { getCatalogFilterOptions } from "@/services/product.service"
 
-const filterGroups = [
-  {
-    title: "Category",
-    items: [
-      "Bandhej Dupattas",
-      "Gotta Patti Dupattas",
-      "Zardozi Work Dupattas",
-      "Jaal Pattern Dupattas",
-      "Brooch/Odana Style Dupattas",
-      "Shrugs",
-      "Plain Fabric Sarees",
-      "Pure Gajji Silk Sarees",
-    ],
-    defaultSelected: ["Shrugs"],
-  },
-  {
-    title: "Fabric",
-    items: ["Silk", "Cotton", "Gaji Silk", "Chiffon", "Georgette"],
-  },
-  {
-    title: "Size",
-    items: ["Free Size", "5.5 Mtr", "6.0 Mtr", "6.5 Mtr", "Custom Stitch"],
-  },
-  {
-    title: "Availability",
-    items: ["In Stock", "Out Stock"],
-  },
-]
+type FilterOptions = Awaited<ReturnType<typeof getCatalogFilterOptions>>
+type FilterOption = { label: string; value: string }
+type PriceRange = { min: number; max: number }
 
-const colors = [
-  "#ff1f17",
-  "#f1a719",
-  "#11a84a",
-  "#132f7a",
-  "#111111",
-  "#5d26b7",
-  "#f45c9c",
-]
+const defaultPriceBounds = { min: 0, max: 20000 }
 
-const pricePresets = [
-  { label: "₹1,000 - ₹5,000", min: 1000, max: 5000 },
-  { label: "₹7,000 - ₹10,000", min: 7000, max: 10000 },
-  { label: "₹10,000 - ₹25,000", min: 10000, max: 25000 },
-]
-
-const minPrice = 1000
-const maxPrice = 25000
-const defaultPriceRange = { min: 2500, max: 5500 }
-
-export default function ShopFilters() {
-  const filterState = useShopFilterState()
+export default function ShopFilters({ options }: { options: FilterOptions }) {
+  const searchParams = useSearchParams()
 
   return (
     <aside className="hidden lg:block">
-      <FilterPanel {...filterState} />
+      <ShopFiltersPanel key={searchParams.toString()} options={options} />
     </aside>
   )
 }
 
-export function ShopMobileFilters() {
-  const filterState = useShopFilterState()
+function ShopFiltersPanel({ options }: { options: FilterOptions }) {
+  const filterState = useShopFilterState(options)
+
+  return <FilterPanel {...filterState} options={options} />
+}
+
+export function ShopMobileFilters({ options }: { options: FilterOptions }) {
   const [isOpen, setIsOpen] = useState(false)
+  const searchParams = useSearchParams()
 
   return (
     <div className="lg:hidden">
@@ -87,7 +52,11 @@ export function ShopMobileFilters() {
             className="absolute inset-0 h-full w-full cursor-default"
           />
           <div className="relative h-full w-[min(320px,calc(100vw-56px))] bg-[#fff8ee] shadow-2xl shadow-black/25">
-            <FilterPanel {...filterState} onClose={() => setIsOpen(false)} />
+            <ShopMobileFiltersPanel
+              key={searchParams.toString()}
+              options={options}
+              onClose={() => setIsOpen(false)}
+            />
           </div>
         </div>
       ) : null}
@@ -95,120 +64,253 @@ export function ShopMobileFilters() {
   )
 }
 
-function useShopFilterState() {
-  const defaultSelected = useMemo(() => {
-    return new Set(
-      filterGroups.flatMap((group) => group.defaultSelected ?? [])
+function ShopMobileFiltersPanel({
+  options,
+  onClose,
+}: {
+  options: FilterOptions
+  onClose: () => void
+}) {
+  const filterState = useShopFilterState(options)
+
+  return <FilterPanel {...filterState} options={options} onClose={onClose} />
+}
+
+function getParamList(searchParams: URLSearchParams, key: string) {
+  return (searchParams.get(key) ?? "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function getPriceRange(_options: FilterOptions): PriceRange {
+  return defaultPriceBounds
+}
+
+function getInitialPriceRange(
+  searchParams: URLSearchParams,
+  bounds: PriceRange,
+): PriceRange {
+  const minParam = searchParams.get("minPrice")
+  const maxParam = searchParams.get("maxPrice")
+  const min = minParam === null ? Number.NaN : Number(minParam)
+  const max = maxParam === null ? Number.NaN : Number(maxParam)
+
+  return {
+    min: Number.isFinite(min) ? Math.max(bounds.min, min) : bounds.min,
+    max: Number.isFinite(max) ? Math.min(bounds.max, max) : bounds.max,
+  }
+}
+
+function useShopFilterState(options: FilterOptions) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const dbPriceRange = useMemo(() => getPriceRange(options), [options])
+  const [selected, setSelected] = useState(() =>
+    getSelectedFromSearchParams(searchParams, options),
+  )
+  const [priceRange, setPriceRange] = useState<PriceRange>(() =>
+    getInitialPriceRange(searchParams, dbPriceRange),
+  )
+
+  function toggleSet(
+    group: keyof Omit<typeof selected, "custom">,
+    value: string,
+  ) {
+    setSelected((current) => {
+      const nextGroup = new Set(current[group])
+      if (nextGroup.has(value)) {
+        nextGroup.delete(value)
+      } else {
+        nextGroup.add(value)
+      }
+
+      return { ...current, [group]: nextGroup }
+    })
+  }
+
+  function toggleCustom(groupKey: string, value: string) {
+    setSelected((current) => {
+      const nextGroup = new Set(current.custom[groupKey] ?? [])
+      if (nextGroup.has(value)) {
+        nextGroup.delete(value)
+      } else {
+        nextGroup.add(value)
+      }
+
+      return {
+        ...current,
+        custom: { ...current.custom, [groupKey]: nextGroup },
+      }
+    })
+  }
+
+  function updatePriceRange(nextRange: PriceRange) {
+    const requestedMin = Number.isFinite(nextRange.min)
+      ? nextRange.min
+      : dbPriceRange.min
+    const requestedMax = Number.isFinite(nextRange.max)
+      ? nextRange.max
+      : dbPriceRange.max
+    const nextMin = Math.max(
+      dbPriceRange.min,
+      Math.min(requestedMin, requestedMax),
     )
-  }, [])
+    const nextMax = Math.min(
+      dbPriceRange.max,
+      Math.max(requestedMax, requestedMin),
+    )
 
-  const [selectedFilters, setSelectedFilters] = useState(defaultSelected)
-  const [selectedColors, setSelectedColors] = useState<Set<string>>(new Set())
-  const [priceRange, setPriceRange] = useState(defaultPriceRange)
-  const [selectedPreset, setSelectedPreset] = useState<string | null>(null)
-  const [applied, setApplied] = useState(false)
-
-  function toggleFilter(item: string) {
-    setSelectedFilters((current) => {
-      const next = new Set(current)
-      if (next.has(item)) {
-        next.delete(item)
-      } else {
-        next.add(item)
-      }
-      return next
+    setPriceRange({
+      min: nextMin,
+      max: nextMax,
     })
-    setApplied(false)
   }
 
-  function toggleColor(color: string) {
-    setSelectedColors((current) => {
-      const next = new Set(current)
-      if (next.has(color)) {
-        next.delete(color)
-      } else {
-        next.add(color)
-      }
-      return next
+  function applyFilters(onApplied?: () => void) {
+    const params = new URLSearchParams(searchParams.toString())
+
+    setListParam(params, "category", selected.category)
+    setListParam(params, "color", selected.color)
+    setListParam(params, "fabric", selected.fabric)
+    setListParam(params, "size", selected.size)
+    setListParam(params, "availability", selected.availability)
+
+    options.customGroups.forEach((group) => {
+      setListParam(params, `filter_${group.paramKey}`, selected.custom[group.paramKey])
     })
-    setApplied(false)
+
+    setPriceParam(params, "minPrice", priceRange.min, dbPriceRange.min)
+    setPriceParam(params, "maxPrice", priceRange.max, dbPriceRange.max)
+    params.delete("page")
+
+    const query = params.toString()
+    router.push(query ? `${pathname}?${query}` : pathname)
+    onApplied?.()
   }
 
-  function updateMin(value: number) {
-    setSelectedPreset(null)
-    setApplied(false)
-    setPriceRange((current) => ({
-      min: Math.min(value, current.max - 500),
-      max: current.max,
-    }))
-  }
+  function clearAll(onCleared?: () => void) {
+    const params = new URLSearchParams(searchParams.toString())
 
-  function updateMax(value: number) {
-    setSelectedPreset(null)
-    setApplied(false)
-    setPriceRange((current) => ({
-      min: current.min,
-      max: Math.max(value, current.min + 500),
-    }))
-  }
+    ;[
+      "category",
+      "color",
+      "fabric",
+      "size",
+      "availability",
+      "minPrice",
+      "maxPrice",
+      "page",
+    ].forEach((key) => params.delete(key))
+    options.customGroups.forEach((group) => params.delete(`filter_${group.paramKey}`))
 
-  function choosePreset(preset: (typeof pricePresets)[number]) {
-    setPriceRange({ min: preset.min, max: preset.max })
-    setSelectedPreset(preset.label)
-    setApplied(false)
-  }
+    setSelected({
+      category: new Set(),
+      color: new Set(),
+      fabric: new Set(),
+      size: new Set(),
+      availability: new Set(),
+      custom: Object.fromEntries(
+        options.customGroups.map((group) => [group.paramKey, new Set<string>()]),
+      ) as Record<string, Set<string>>,
+    })
+    setPriceRange(dbPriceRange)
 
-  function clearAll() {
-    setSelectedFilters(new Set())
-    setSelectedColors(new Set())
-    setPriceRange(defaultPriceRange)
-    setSelectedPreset(null)
-    setApplied(false)
+    const query = params.toString()
+    router.push(query ? `${pathname}?${query}` : pathname)
+    onCleared?.()
   }
 
   return {
-    selectedFilters,
-    selectedColors,
+    selected,
     priceRange,
-    selectedPreset,
-    onToggleFilter: toggleFilter,
-    onToggleColor: toggleColor,
-    onUpdateMin: updateMin,
-    onUpdateMax: updateMax,
-    onChoosePreset: choosePreset,
+    dbPriceRange,
+    onToggle: toggleSet,
+    onToggleCustom: toggleCustom,
+    onUpdatePriceRange: updatePriceRange,
+    onApply: applyFilters,
     onClearAll: clearAll,
-    applied,
-    onApply: () => setApplied(true),
+  }
+}
+
+function getSelectedFromSearchParams(
+  searchParams: URLSearchParams,
+  options: FilterOptions,
+) {
+  return {
+    category: new Set(getParamList(searchParams, "category")),
+    color: new Set(getParamList(searchParams, "color")),
+    fabric: new Set(getParamList(searchParams, "fabric")),
+    size: new Set(getParamList(searchParams, "size")),
+    availability: new Set(getParamList(searchParams, "availability")),
+    custom: Object.fromEntries(
+      options.customGroups.map((group) => [
+        group.paramKey,
+        new Set(getParamList(searchParams, `filter_${group.paramKey}`)),
+      ]),
+    ) as Record<string, Set<string>>,
+  }
+}
+
+function setListParam(
+  params: URLSearchParams,
+  key: string,
+  values: Set<string> | undefined,
+) {
+  const list = Array.from(values ?? [])
+
+  if (list.length > 0) {
+    params.set(key, list.join(","))
+  } else {
+    params.delete(key)
+  }
+}
+
+function setPriceParam(
+  params: URLSearchParams,
+  key: string,
+  value: number,
+  defaultValue: number,
+) {
+  if (value !== defaultValue) {
+    params.set(key, String(value))
+  } else {
+    params.delete(key)
   }
 }
 
 function FilterPanel({
-  selectedFilters,
-  selectedColors,
+  options,
+  selected,
   priceRange,
-  selectedPreset,
-  onToggleFilter,
-  onToggleColor,
-  onUpdateMin,
-  onUpdateMax,
-  onChoosePreset,
-  onClearAll,
-  applied,
+  dbPriceRange,
+  onToggle,
+  onToggleCustom,
+  onUpdatePriceRange,
   onApply,
+  onClearAll,
   onClose,
 }: {
-  selectedFilters: Set<string>
-  selectedColors: Set<string>
-  priceRange: { min: number; max: number }
-  selectedPreset: string | null
-  onToggleFilter: (item: string) => void
-  onToggleColor: (color: string) => void
-  onUpdateMin: (value: number) => void
-  onUpdateMax: (value: number) => void
-  onChoosePreset: (preset: (typeof pricePresets)[number]) => void
-  onClearAll: () => void
-  applied: boolean
-  onApply: () => void
+  options: FilterOptions
+  selected: {
+    category: Set<string>
+    color: Set<string>
+    fabric: Set<string>
+    size: Set<string>
+    availability: Set<string>
+    custom: Record<string, Set<string>>
+  }
+  priceRange: PriceRange
+  dbPriceRange: PriceRange
+  onToggle: (
+    group: "category" | "color" | "fabric" | "size" | "availability",
+    value: string,
+  ) => void
+  onToggleCustom: (groupKey: string, value: string) => void
+  onUpdatePriceRange: (range: PriceRange) => void
+  onApply: (onApplied?: () => void) => void
+  onClearAll: (onCleared?: () => void) => void
   onClose?: () => void
 }) {
   return (
@@ -227,7 +329,7 @@ function FilterPanel({
         ) : (
           <button
             type="button"
-            onClick={onClearAll}
+            onClick={() => onClearAll()}
             className="text-[10px] text-[#c39150] underline"
           >
             Clear All
@@ -236,95 +338,61 @@ function FilterPanel({
       </div>
 
       <div className="space-y-4">
-        {filterGroups.slice(0, 1).map((group) => (
+        <FilterGroup
+          title="Category"
+          items={options.categories}
+          selectedValues={selected.category}
+          onToggle={(value) => onToggle("category", value)}
+        />
+        <ColorFilter
+          items={options.colors}
+          selectedValues={selected.color}
+          onToggle={(value) => onToggle("color", value)}
+        />
+        <FilterGroup
+          title="Fabric"
+          items={options.fabrics}
+          selectedValues={selected.fabric}
+          onToggle={(value) => onToggle("fabric", value)}
+        />
+        <FilterGroup
+          title="Size"
+          items={options.sizes}
+          selectedValues={selected.size}
+          onToggle={(value) => onToggle("size", value)}
+        />
+        <FilterGroup
+          title="Availability"
+          items={options.availability}
+          selectedValues={selected.availability}
+          onToggle={(value) => onToggle("availability", value)}
+        />
+        {options.customGroups.map((group) => (
           <FilterGroup
-            key={group.title}
-            {...group}
-            selectedFilters={selectedFilters}
-            onToggleFilter={onToggleFilter}
+            key={group.paramKey}
+            title={group.title}
+            items={group.items}
+            selectedValues={selected.custom[group.paramKey] ?? new Set()}
+            onToggle={(value) => onToggleCustom(group.paramKey, value)}
           />
         ))}
 
-        <div>
-          <FilterHeading title="Colour" />
-          <div className="mt-2 flex flex-wrap gap-2">
-            {colors.map((color) => {
-              const selected = selectedColors.has(color)
-              return (
-                <button
-                  key={color}
-                  type="button"
-                  aria-label={`Filter by ${color}`}
-                  onClick={() => onToggleColor(color)}
-                  className={`flex size-5 items-center justify-center rounded-full border transition ${
-                    selected
-                      ? "border-[#3F2617] ring-2 ring-[#c39150]/40"
-                      : "border-black/10"
-                  }`}
-                  style={{ backgroundColor: color }}
-                >
-                  {selected ? <Check className="size-3 text-white" /> : null}
-                </button>
-              )
-            })}
-          </div>
-          <button type="button" className="mt-2 text-[11px] text-[#c39150]">
-            + More
-          </button>
-        </div>
-
-        {filterGroups.slice(1).map((group) => (
-          <FilterGroup
-            key={group.title}
-            {...group}
-            selectedFilters={selectedFilters}
-            onToggleFilter={onToggleFilter}
-          />
-        ))}
-
-        <div>
-          <FilterHeading title="Price Range" />
-          <div className="mt-3">
-            <RangeSlider
-              min={minPrice}
-              max={maxPrice}
-              value={priceRange}
-              onUpdateMin={onUpdateMin}
-              onUpdateMax={onUpdateMax}
-            />
-            <div className="mt-3 flex justify-between text-[11px] text-[#3F2617]">
-              <span>₹{priceRange.min.toLocaleString("en-IN")}</span>
-              <span>₹{priceRange.max.toLocaleString("en-IN")}</span>
-            </div>
-          </div>
-          <div className="mt-3 space-y-2">
-            {pricePresets.map((preset) => (
-              <button
-                key={preset.label}
-                type="button"
-                onClick={() => onChoosePreset(preset)}
-                className={`h-7 w-full border text-[11px] transition ${
-                  selectedPreset === preset.label
-                    ? "border-[#c39150] bg-[#C39150] text-white"
-                    : "border-[#d8a15a] bg-white text-[#3F2617]"
-                }`}
-              >
-                {preset.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <PriceFilter
+          range={priceRange}
+          bounds={dbPriceRange}
+          onUpdate={onUpdatePriceRange}
+        />
 
         <button
           type="button"
-          onClick={onApply}
+          onClick={() => onApply(onClose)}
           className="h-8 w-full rounded-[2px] bg-[#C39150] text-xs font-medium text-white transition hover:bg-[#3F2617]"
         >
-          {applied ? "Filters Applied" : "Apply Filters"}
+          Apply Filters
         </button>
         <button
           type="button"
-          onClick={onClearAll}
+          onClick={() => onClearAll(onClose)}
           className="h-8 w-full rounded-[2px] border border-[#d8a15a] bg-white text-xs text-[#c39150]"
         >
           Clear All
@@ -337,30 +405,32 @@ function FilterPanel({
 function FilterGroup({
   title,
   items,
-  selectedFilters,
-  onToggleFilter,
+  selectedValues,
+  onToggle,
 }: {
   title: string
-  items: string[]
-  defaultSelected?: string[]
-  selectedFilters: Set<string>
-  onToggleFilter: (item: string) => void
+  items: FilterOption[]
+  selectedValues: Set<string>
+  onToggle: (value: string) => void
 }) {
+  if (items.length === 0) return null
+
   return (
     <div>
       <FilterHeading title={title} />
       <div className="mt-2 space-y-1.5">
         {items.map((item) => {
-          const checked = selectedFilters.has(item)
+          const checked = selectedValues.has(item.value)
+
           return (
             <label
-              key={item}
+              key={item.value}
               className="flex cursor-pointer items-center gap-2 text-[11px] leading-4 text-[#3F2617]/75"
             >
               <input
                 type="checkbox"
                 checked={checked}
-                onChange={() => onToggleFilter(item)}
+                onChange={() => onToggle(item.value)}
                 className="sr-only"
               />
               <span
@@ -370,16 +440,81 @@ function FilterGroup({
               >
                 {checked ? <Check className="size-2.5 text-white" /> : null}
               </span>
-              {item}
+              {item.label}
             </label>
           )
         })}
       </div>
-      {items.length > 4 ? (
-        <button type="button" className="mt-2 text-[11px] text-[#c39150]">
-          + More
-        </button>
-      ) : null}
+    </div>
+  )
+}
+
+function ColorFilter({
+  items,
+  selectedValues,
+  onToggle,
+}: {
+  items: FilterOption[]
+  selectedValues: Set<string>
+  onToggle: (value: string) => void
+}) {
+  if (items.length === 0) return null
+
+  return (
+    <div>
+      <FilterHeading title="Colour" />
+      <div className="mt-2 flex flex-wrap gap-2">
+        {items.map((item) => {
+          const selected = selectedValues.has(item.value)
+
+          return (
+            <button
+              key={item.value}
+              type="button"
+              aria-label={`Filter by ${item.label}`}
+              title={item.label}
+              onClick={() => onToggle(item.value)}
+              className={`flex size-5 items-center justify-center rounded-full border transition ${
+                selected
+                  ? "border-[#3F2617] ring-2 ring-[#c39150]/40"
+                  : "border-black/10"
+              }`}
+              style={{ backgroundColor: item.value }}
+            >
+              {selected ? <Check className="size-3 text-white" /> : null}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function PriceFilter({
+  range,
+  bounds,
+  onUpdate,
+}: {
+  range: PriceRange
+  bounds: PriceRange
+  onUpdate: (range: PriceRange) => void
+}) {
+  return (
+    <div>
+      <FilterHeading title="Price Range" />
+      <div className="mt-3">
+        <RangeSlider
+          min={bounds.min}
+          max={bounds.max}
+          value={range}
+          onUpdateMin={(min) => onUpdate({ ...range, min })}
+          onUpdateMax={(max) => onUpdate({ ...range, max })}
+        />
+        <div className="mt-3 flex justify-between text-[11px] text-[#3F2617]">
+          <span>₹{range.min.toLocaleString("en-IN")}</span>
+          <span>₹{range.max.toLocaleString("en-IN")}</span>
+        </div>
+      </div>
     </div>
   )
 }
@@ -393,12 +528,13 @@ function RangeSlider({
 }: {
   min: number
   max: number
-  value: { min: number; max: number }
+  value: PriceRange
   onUpdateMin: (value: number) => void
   onUpdateMax: (value: number) => void
 }) {
-  const minPercent = ((value.min - min) / (max - min)) * 100
-  const maxPercent = ((value.max - min) / (max - min)) * 100
+  const safeMax = Math.max(max, min + 100)
+  const minPercent = ((value.min - min) / (safeMax - min)) * 100
+  const maxPercent = ((value.max - min) / (safeMax - min)) * 100
 
   return (
     <div className="relative h-5">
@@ -410,20 +546,20 @@ function RangeSlider({
       <input
         type="range"
         min={min}
-        max={max}
+        max={safeMax}
         step={100}
         value={value.min}
         onChange={(event) => onUpdateMin(Number(event.target.value))}
-        className="range-thumb pointer-events-none absolute inset-0 h-5 w-full appearance-none bg-transparent"
+        className="range-thumb absolute inset-0 h-5 w-full appearance-none bg-transparent"
       />
       <input
         type="range"
         min={min}
-        max={max}
+        max={safeMax}
         step={100}
         value={value.max}
         onChange={(event) => onUpdateMax(Number(event.target.value))}
-        className="range-thumb pointer-events-none absolute inset-0 h-5 w-full appearance-none bg-transparent"
+        className="range-thumb absolute inset-0 h-5 w-full appearance-none bg-transparent"
       />
     </div>
   )

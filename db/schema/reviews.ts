@@ -11,6 +11,7 @@ import {
 } from 'drizzle-orm/pg-core'
 import { mediaAssets, products } from './products'
 import { users } from './users'
+import { reviewStatusEnum } from './enums'
 
 export const reviews = pgTable(
   'reviews',
@@ -25,14 +26,14 @@ export const reviews = pgTable(
     message: text('message').notNull(),
     reviewerName: varchar('reviewer_name', { length: 160 }),
     reviewerEmail: varchar('reviewer_email', { length: 255 }),
-    isApproved: boolean('is_approved').default(false).notNull(),
+    status: reviewStatusEnum('status').default('pending').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
     index('reviews_product_id_idx').on(table.productId),
     index('reviews_user_id_idx').on(table.userId),
-    index('reviews_approved_idx').on(table.isApproved),
+    index('reviews_status_idx').on(table.status),
   ],
 )
 

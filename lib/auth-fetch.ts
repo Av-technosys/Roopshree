@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { refreshCognitoTokens } from '@/helper/cognito'
-import { assertCompleteTokenSet, getAuthCookiePayload } from '@/lib/auth-cookies'
+import { getAuthCookiePayload } from '@/lib/auth-cookies'
 import { authCookieNames, decodeJwtPayload } from '@/lib/auth-token'
 
 type JwtExpiryClaims = {
@@ -36,9 +36,18 @@ export async function getValidAccessToken() {
     throw new Error('Unauthorized')
   }
 
-  const tokens = assertCompleteTokenSet(
-    await refreshCognitoTokens({ email, refreshToken }),
-  )
+  const refreshedTokens = await refreshCognitoTokens({ email, refreshToken })
+
+  if (!refreshedTokens.accessToken || !refreshedTokens.idToken) {
+    throw new Error('Unable to refresh session')
+  }
+
+  const tokens = {
+    accessToken: refreshedTokens.accessToken,
+    idToken: refreshedTokens.idToken,
+    refreshToken: refreshedTokens.refreshToken ?? refreshToken,
+    expiresIn: refreshedTokens.expiresIn ?? 3600,
+  }
 
   getAuthCookiePayload({ email, tokens }).forEach((cookie) => {
     cookieStore.set(cookie.name, cookie.value, cookie.options)

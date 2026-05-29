@@ -53,6 +53,8 @@ export const products = pgTable(
     strikeThroughPrice: integer('strike_through_price'),
     status: productStatusEnum('status').default('draft').notNull(),
     isFeatured: boolean('is_featured').default(false).notNull(),
+    rating: integer('rating').default(0).notNull(),
+    reviewCount: integer('review_count').default(0).notNull(),
     ...timestamps,
   },
   (table) => [
@@ -92,8 +94,6 @@ export const productVariants = pgTable(
     strikeThroughPrice: integer('strike_through_price'),
     stockQuantity: integer('stock_quantity').default(0).notNull(),
     hasVariantBox: boolean('has_variant_box').default(false).notNull(),
-    rating: integer('rating').default(0).notNull(),
-    reviewCount: integer('review_count').default(0).notNull(),
     size: varchar('size', { length: 80 }),
     color: varchar('color', { length: 80 }),
     fabric: varchar('fabric', { length: 120 }),

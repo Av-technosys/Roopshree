@@ -60,3 +60,15 @@ export const coinLedgerTypeEnum = pgEnum('coin_ledger_type', [
   'redemption',
   'manual_adjustment',
 ])
+
+export const customerContactTypeEnum = pgEnum(
+  "customer_contact_type",
+  ["newsletter", "enquiry"]
+);
+
+
+export const reviewStatusEnum = pgEnum('review_status', [
+  'pending',
+  'approved',
+  'rejected',
+])

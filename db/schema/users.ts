@@ -8,7 +8,7 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core'
-import { userRoleEnum } from './enums'
+import { customerContactTypeEnum, userRoleEnum } from './enums'
 
 const timestamps = {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -56,5 +56,26 @@ export const addresses = pgTable(
   (table) => [
     index('addresses_user_id_idx').on(table.userId),
     index('addresses_default_idx').on(table.userId, table.isDefault),
+  ],
+)
+
+export const customerContacts = pgTable(
+  'customer_contacts',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    email: varchar('email', { length: 255 }).notNull(),
+    type: customerContactTypeEnum('type').notNull(),
+
+    fullName: varchar('full_name', { length: 160 }),
+    phone: varchar('phone', { length: 20 }),
+    category: varchar('category', { length: 120 }),
+    subject: varchar('subject', { length: 180 }),
+    message: text('message'),
+
+    ...timestamps,
+  },
+  (table) => [
+    index('customer_contacts_type_idx').on(table.type),
+    index('customer_contacts_email_idx').on(table.email),
   ],
 )

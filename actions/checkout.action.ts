@@ -17,11 +17,13 @@ import {
   products,
   productVariants,
 } from "@/db/schema/products"
+import { addresses } from "@/db/schema/users"
 import { db } from "@/lib/db"
 import { getCurrentDbUserId } from "@/lib/current-db-user"
 import { getS3ObjectPreviewUrl } from "@/lib/s3"
 
 type ShippingDetails = {
+  addressId?: string
   fullName: string
   phone: string
   addressLine1: string
@@ -83,6 +85,7 @@ function getCheckoutSigningSecret() {
 
 function normalizeShippingDetails(input: ShippingDetails): ShippingDetails {
   return {
+    addressId: input.addressId?.trim() || undefined,
     fullName: input.fullName?.trim() ?? "",
     phone: input.phone?.trim() ?? "",
     addressLine1: input.addressLine1?.trim() ?? "",
@@ -94,7 +97,49 @@ function normalizeShippingDetails(input: ShippingDetails): ShippingDetails {
   }
 }
 
-function validateShippingDetails(input: ShippingDetails) {
+function mapAddressToShipping(
+  address: typeof addresses.$inferSelect,
+): ShippingDetails {
+  return {
+    addressId: address.id,
+    fullName: address.fullName,
+    phone: address.phone,
+    addressLine1: address.line1,
+    addressLine2: [address.line2, address.locality].filter(Boolean).join(", ") || undefined,
+    city: address.city,
+    state: address.state,
+    postalCode: address.postalCode,
+    country: address.country,
+  }
+}
+
+async function findUserAddress(userId: string, addressId: string) {
+  const [address] = await db
+    .select()
+    .from(addresses)
+    .where(and(eq(addresses.id, addressId), eq(addresses.userId, userId)))
+    .limit(1)
+
+  return address ?? null
+}
+
+async function resolveShippingDetails(userId: string, input: ShippingDetails) {
+  const shipping = normalizeShippingDetails(input)
+
+  if (shipping.addressId) {
+    const address = await findUserAddress(userId, shipping.addressId)
+
+    if (!address) {
+      return { ok: false as const, message: "Selected address was not found" }
+    }
+
+    return { ok: true as const, shipping: mapAddressToShipping(address) }
+  }
+
+  return validateManualShippingDetails(shipping)
+}
+
+function validateManualShippingDetails(input: ShippingDetails) {
   const shipping = normalizeShippingDetails(input)
 
   if (
@@ -108,7 +153,7 @@ function validateShippingDetails(input: ShippingDetails) {
     return { ok: false as const, message: "Shipping details are required" }
   }
 
-  return { ok: true as const, shipping }
+  return { ok: true as const, shipping: { ...shipping, addressId: undefined } }
 }
 
 function getOrderNumber() {
@@ -364,7 +409,7 @@ export async function createCartPaymentOrder(input: {
     return { success: false, userIsNotLoggedIn: true, message: "Login required" }
   }
 
-  const shippingResult = validateShippingDetails(input.shipping)
+  const shippingResult = await resolveShippingDetails(userId, input.shipping)
 
   if (!shippingResult.ok) {
     return { success: false, message: shippingResult.message }
@@ -423,7 +468,7 @@ export async function createBuyNowPaymentOrder(input: {
     return { success: false, message: "Product id is required" }
   }
 
-  const shippingResult = validateShippingDetails(input.shipping)
+  const shippingResult = await resolveShippingDetails(userId, input.shipping)
 
   if (!shippingResult.ok) {
     return { success: false, message: shippingResult.message }
@@ -515,19 +560,41 @@ export async function completeRazorpayPayment(input: {
         return { orderId: existingPayment.orderId }
       }
 
+      let orderShipping = checkout.shipping
+
+      if (checkout.shipping.addressId) {
+        const [address] = await tx
+          .select()
+          .from(addresses)
+          .where(
+            and(
+              eq(addresses.id, checkout.shipping.addressId),
+              eq(addresses.userId, userId),
+            ),
+          )
+          .limit(1)
+
+        if (!address) {
+          throw new Error("Selected address was not found")
+        }
+
+        orderShipping = mapAddressToShipping(address)
+      }
+
       const [order] = await tx
         .insert(orders)
         .values({
           orderNumber: getOrderNumber(),
           userId,
+          addressId: orderShipping.addressId ?? null,
           status: "paid",
-          shippingPhone: checkout.shipping.phone,
-          addressLine1: checkout.shipping.addressLine1,
-          addressLine2: checkout.shipping.addressLine2 ?? null,
-          city: checkout.shipping.city,
-          state: checkout.shipping.state,
-          postalCode: checkout.shipping.postalCode,
-          country: checkout.shipping.country ?? "India",
+          shippingPhone: orderShipping.phone,
+          addressLine1: orderShipping.addressLine1,
+          addressLine2: orderShipping.addressLine2 ?? null,
+          city: orderShipping.city,
+          state: orderShipping.state,
+          postalCode: orderShipping.postalCode,
+          country: orderShipping.country ?? "India",
           totalAmount: checkout.amountInPaise,
         })
         .returning({ id: orders.id })

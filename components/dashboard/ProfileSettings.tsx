@@ -61,7 +61,7 @@ export function ProfileSettings({
                 required
               />
               <Field
-                label="Mobile Number"
+                label="Mobile Number (e.g. 9876543210)"
                 name="phone"
                 defaultValue={profile?.phone}
                 required

@@ -35,6 +35,16 @@ function getCognitoPhoneNumber(phone: string) {
   return `+91${withoutCountryCode}`
 }
 
+function getDisplayPhoneNumber(phone?: string | null) {
+  const digits = phone?.replace(/[^\d]/g, '') ?? ''
+
+  if (digits.length === 12 && digits.startsWith('91')) {
+    return digits.slice(2)
+  }
+
+  return digits
+}
+
 export async function getProfileService(sessionUser: SessionUser) {
   if (!sessionUser?.email) {
     return null
@@ -49,7 +59,7 @@ export async function getProfileService(sessionUser: SessionUser) {
       email: sessionUser.email,
       fullName: fallbackName,
       name: fallbackName,
-      phone: sessionUser.phone ?? '',
+      phone: getDisplayPhoneNumber(sessionUser.phone),
     } satisfies ProfileView
   }
 
@@ -57,7 +67,7 @@ export async function getProfileService(sessionUser: SessionUser) {
     email: profile.email,
     fullName: profile.name,
     name: profile.name,
-    phone: profile.phone ?? sessionUser.phone ?? '',
+    phone: getDisplayPhoneNumber(profile.phone ?? sessionUser.phone),
   } satisfies ProfileView
 }
 

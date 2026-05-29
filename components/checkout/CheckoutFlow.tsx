@@ -12,6 +12,7 @@ import { useCartStore } from "@/store/cartStore"
 import type { CartItem } from "@/store/cartTypes"
 
 export type CheckoutShippingDetails = {
+  addressId?: string
   fullName: string
   phone: string
   addressLine1: string
@@ -26,6 +27,7 @@ const manualAddressId = "manual"
 
 function getAddressShipping(address: AddressView): CheckoutShippingDetails {
   return {
+    addressId: address.id,
     fullName: address.fullName,
     phone: address.phone,
     addressLine1: address.line1,
@@ -363,7 +365,9 @@ function CheckoutInput({
 }) {
   return (
     <label className="block">
-      <span className="sr-only">{label}</span>
+      <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#C39150]">
+        {label}
+      </span>
       <input
         type="text"
         placeholder={label}

@@ -14,6 +14,7 @@ import {
 import { validateAddressPayload } from "@/validators/address.validator";
 
 const addressBookPath = "/dashboard/address-book";
+const dashboardPath = "/dashboard";
 
 async function getCurrentAddressUserId() {
   return getAddressUserId(await requireUser());
@@ -34,10 +35,15 @@ export async function getAddressById(id: string) {
 export async function createAddress(payload: unknown) {
   try {
     const userId = await getCurrentAddressUserId();
-    await createAddressService(userId, validateAddressPayload(payload));
+    const address = await createAddressService(userId, validateAddressPayload(payload));
 
     revalidatePath(addressBookPath);
-    return { success: true, message: "Address created successfully" };
+    revalidatePath(dashboardPath);
+    return {
+      success: true,
+      message: "Address created successfully",
+      addressId: address.id,
+    };
   } catch (error) {
     console.error("Create address failed:", error);
     return {
@@ -51,11 +57,16 @@ export async function createAddress(payload: unknown) {
 export async function updateAddress(id: string, payload: unknown) {
   try {
     const userId = await getCurrentAddressUserId();
-    await updateAddressService(userId, id, validateAddressPayload(payload));
+    const address = await updateAddressService(userId, id, validateAddressPayload(payload));
 
     revalidatePath(addressBookPath);
     revalidatePath(`${addressBookPath}/edit`);
-    return { success: true, message: "Address updated successfully" };
+    revalidatePath(dashboardPath);
+    return {
+      success: true,
+      message: "Address updated successfully",
+      addressId: address.id,
+    };
   } catch (error) {
     console.error("Update address failed:", error);
     return {
@@ -72,6 +83,7 @@ export async function setDefaultAddress(id: string) {
     await setDefaultAddressService(userId, id);
 
     revalidatePath(addressBookPath);
+    revalidatePath(dashboardPath);
     return { success: true, message: "Default address updated successfully" };
   } catch (error) {
     console.error("Set default address failed:", error);
@@ -91,6 +103,7 @@ export async function deleteAddress(id: string) {
     await deleteAddressService(userId, id);
 
     revalidatePath(addressBookPath);
+    revalidatePath(dashboardPath);
     return { success: true, message: "Address deleted successfully" };
   } catch (error) {
     console.error("Delete address failed:", error);

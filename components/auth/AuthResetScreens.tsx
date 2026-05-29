@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   confirmForgotPasswordAction,
   confirmSignUpAction,
+  resendSignUpOtpAction,
 } from "@/actions/auth.action";
 import { useToast } from "@/components/common/ToastProvider";
 
@@ -174,6 +175,7 @@ function OtpScreen({
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const router = useRouter();
   const { showToast } = useToast();
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
@@ -224,6 +226,25 @@ function OtpScreen({
     onVerifyOtp?.(code);
   }
 
+  async function handleResendOtp() {
+    setError("");
+    setIsResending(true);
+
+    const response = await resendSignUpOtpAction({ email });
+
+    setIsResending(false);
+
+    if (!response.ok) {
+      setError(response.error ?? "Unable to resend OTP");
+      showToast({ title: response.error ?? "Unable to resend OTP", tone: "error" });
+      return;
+    }
+
+    setOtp(["", "", "", "", "", ""]);
+    inputRefs.current[0]?.focus();
+    showToast({ title: response.message ?? "OTP resent. Please check your inbox.", tone: "success" });
+  }
+
   return (
     <PlainAuthShell onBackToLogin={onBackToLogin}>
       <div className="mb-6">
@@ -268,6 +289,17 @@ function OtpScreen({
         >
           {isSubmitting ? "Verifying..." : buttonText}
         </button>
+
+        {password && (
+          <button
+            type="button"
+            disabled={isResending}
+            onClick={handleResendOtp}
+            className="w-full rounded-[4px] text-center text-xs font-semibold text-[#3b2418] underline transition hover:text-[#c9914d] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isResending ? "Resending OTP..." : "Resend OTP"}
+          </button>
+        )}
       </form>
     </PlainAuthShell>
   );

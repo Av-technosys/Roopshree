@@ -43,7 +43,13 @@ export default function Signup({
 
     setIsSubmitting(true);
 
-    const response = await signUpAction({ name, email, phone, password });
+    const normalizedEmail = email.trim().toLowerCase();
+    const response = await signUpAction({
+      name,
+      email: normalizedEmail,
+      phone,
+      password,
+    });
 
     setIsSubmitting(false);
 
@@ -53,8 +59,8 @@ export default function Signup({
       return;
     }
 
-    showToast({ title: "OTP sent to your email", tone: "success" });
-    onVerifyOtp?.({ email, password });
+    showToast({ title: response.message ?? "OTP sent. Please check your inbox.", tone: "success" });
+    onVerifyOtp?.({ email: normalizedEmail, password });
   }
 
   return (

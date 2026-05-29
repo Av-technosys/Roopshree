@@ -6,6 +6,7 @@ import {
   cognitoConfirmForgotPassword,
   cognitoConfirmSignUp,
   cognitoForgotPassword,
+  cognitoResendConfirmationCode,
   cognitoSignUp,
 } from '@/helper/cognito'
 import {
@@ -19,6 +20,58 @@ import { syncProfileFromAuthClaimsService } from '@/services/user.service'
 type AuthActionResult = {
   ok: boolean
   error?: string
+  message?: string
+}
+
+function getNormalizedEmail(email: string) {
+  return email.trim().toLowerCase()
+}
+
+function getSignupPhoneNumber(phone: string) {
+  const digits = phone.replace(/[^\d]/g, '')
+  const withoutCountryCode =
+    digits.length === 12 && digits.startsWith('91') ? digits.slice(2) : digits
+
+  if (withoutCountryCode.length !== 10) {
+    throw new Error('Mobile number must be exactly 10 digits')
+  }
+
+  return `+91${withoutCountryCode}`
+}
+
+function getAuthErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message) {
+    return error.message
+  }
+
+  return fallback
+}
+
+function hasAuthErrorName(error: unknown, name: string) {
+  return error instanceof Error && error.name === name
+}
+
+function getDeliveryMessage(
+  details?: {
+    DeliveryMedium?: string
+    Destination?: string
+  },
+  fallback = 'OTP sent. Please check your inbox.',
+) {
+  if (!details?.Destination) return fallback
+
+  const medium = details.DeliveryMedium?.toLowerCase()
+  const destination = details.Destination
+
+  if (medium === 'email') {
+    return `OTP sent to ${destination}`
+  }
+
+  if (medium === 'sms') {
+    return `OTP sent on ${destination}`
+  }
+
+  return `OTP sent to ${destination}`
 }
 
 async function setAuthCookies(email: string, password: string) {
@@ -43,15 +96,21 @@ export async function signInAction({
   email: string
   password: string
 }): Promise<AuthActionResult> {
-  if (!email || !password) {
+  const normalizedEmail = getNormalizedEmail(email)
+
+  if (!normalizedEmail || !password) {
     return { ok: false, error: 'Email and password are required' }
   }
 
   try {
-    await setAuthCookies(email, password)
+    await setAuthCookies(normalizedEmail, password)
 
     return { ok: true }
-  } catch {
+  } catch (error) {
+    if (hasAuthErrorName(error, 'UserNotConfirmedException')) {
+      return { ok: false, error: 'Please verify your account OTP before login' }
+    }
+
     return { ok: false, error: 'Invalid email or password' }
   }
 }
@@ -67,24 +126,76 @@ export async function signUpAction({
   phone: string
   password: string
 }): Promise<AuthActionResult> {
-  if (!name || !email || !phone || !password) {
+  const fullName = name.trim()
+  const normalizedEmail = getNormalizedEmail(email)
+
+  if (!fullName || !normalizedEmail || !phone || !password) {
     return { ok: false, error: 'Name, email, phone and password are required' }
   }
 
+  let cognitoPhoneNumber: string
+
   try {
-    await cognitoSignUp({
-      email,
+    cognitoPhoneNumber = getSignupPhoneNumber(phone)
+  } catch (error) {
+    return {
+      ok: false,
+      error: getAuthErrorMessage(error, 'Invalid mobile number'),
+    }
+  }
+
+  try {
+    const response = await cognitoSignUp({
+      email: normalizedEmail,
       password,
       userAttribute: [
-        { Name: 'name', Value: name },
-        { Name: 'email', Value: email },
-        { Name: 'phone_number', Value: phone },
+        { Name: 'name', Value: fullName },
+        { Name: 'email', Value: normalizedEmail },
+        { Name: 'phone_number', Value: cognitoPhoneNumber },
       ],
     })
 
-    return { ok: true }
-  } catch {
-    return { ok: false, error: 'Unable to create account' }
+    return {
+      ok: true,
+      message: getDeliveryMessage(response.CodeDeliveryDetails),
+    }
+  } catch (error) {
+    console.error('Unable to create account:', error)
+
+    return {
+      ok: false,
+      error: getAuthErrorMessage(error, 'Unable to create account'),
+    }
+  }
+}
+
+export async function resendSignUpOtpAction({
+  email,
+}: {
+  email: string
+}): Promise<AuthActionResult> {
+  const normalizedEmail = getNormalizedEmail(email)
+
+  if (!normalizedEmail) {
+    return { ok: false, error: 'Email is required' }
+  }
+
+  try {
+    const response = await cognitoResendConfirmationCode({
+      email: normalizedEmail,
+    })
+
+    return {
+      ok: true,
+      message: getDeliveryMessage(response.CodeDeliveryDetails, 'OTP resent. Please check your inbox.'),
+    }
+  } catch (error) {
+    console.error('Unable to resend signup OTP:', error)
+
+    return {
+      ok: false,
+      error: getAuthErrorMessage(error, 'Unable to resend OTP'),
+    }
   }
 }
 
@@ -97,17 +208,22 @@ export async function confirmSignUpAction({
   code: string
   password: string
 }): Promise<AuthActionResult> {
-  if (!email || !code || !password) {
+  const normalizedEmail = getNormalizedEmail(email)
+
+  if (!normalizedEmail || !code || !password) {
     return { ok: false, error: 'Email, OTP and password are required' }
   }
 
   try {
-    await cognitoConfirmSignUp({ email, code })
-    await setAuthCookies(email, password)
+    await cognitoConfirmSignUp({ email: normalizedEmail, code })
+    await setAuthCookies(normalizedEmail, password)
 
     return { ok: true }
-  } catch {
-    return { ok: false, error: 'Unable to verify account' }
+  } catch (error) {
+    return {
+      ok: false,
+      error: getAuthErrorMessage(error, 'Unable to verify account'),
+    }
   }
 }
 

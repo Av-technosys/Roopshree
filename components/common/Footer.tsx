@@ -1,9 +1,9 @@
 import Image from "next/image"
 import Link from "next/link"
-import { Camera, Mail } from "lucide-react"
 
 import { FooterNewsletterForm } from "@/components/common/FooterNewsletterForm"
 import { Button } from "@/components/ui/button"
+import { IconBrandInstagram, IconMail } from "@tabler/icons-react"
 
 const quickLinks = ["Home", "About", "Shop", "Contact Us", "Enquiry", "Blogs"]
 const categories = [
@@ -50,10 +50,10 @@ const Footer = () => {
           </p>
           <div className="mt-5 flex gap-3">
             <Button aria-label="Instagram" size="icon-sm" variant="ghost">
-              <Camera className="size-4 text-[#C39150]" />
+              <IconBrandInstagram className="size-6 text-[#C39150]" />
             </Button>
             <Button aria-label="Email" size="icon-sm" variant="ghost">
-              <Mail className="size-4 text-[#C39150]" />
+              <IconMail className="size-6 text-[#C39150]" />
             </Button>
           </div>
         </div>

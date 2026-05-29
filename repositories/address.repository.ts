@@ -121,6 +121,10 @@ export async function insertAddressRecord(
       })
       .returning()
 
+    if (!created) {
+      throw new Error('Address could not be created')
+    }
+
     await normalizeDefaultAddress(
       tx,
       userId,
@@ -130,8 +134,12 @@ export async function insertAddressRecord(
     const [normalized] = await tx
       .select()
       .from(addresses)
-      .where(eq(addresses.id, created.id))
+      .where(and(eq(addresses.userId, userId), eq(addresses.id, created.id)))
       .limit(1)
+
+    if (!normalized) {
+      throw new Error('Address was not saved. Please try again.')
+    }
 
     return normalized
   })
@@ -167,6 +175,10 @@ export async function updateAddressRecord(
       .where(and(eq(addresses.userId, userId), eq(addresses.id, id)))
       .returning()
 
+    if (!updated) {
+      throw new Error('Address could not be updated')
+    }
+
     await normalizeDefaultAddress(
       tx,
       userId,
@@ -176,8 +188,12 @@ export async function updateAddressRecord(
     const [normalized] = await tx
       .select()
       .from(addresses)
-      .where(eq(addresses.id, updated.id))
+      .where(and(eq(addresses.userId, userId), eq(addresses.id, updated.id)))
       .limit(1)
+
+    if (!normalized) {
+      throw new Error('Address was not updated. Please try again.')
+    }
 
     return normalized
   })

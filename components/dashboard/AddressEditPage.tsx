@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { type FormEvent, useTransition } from "react"
+import { type FormEvent, useRef, useState, useTransition } from "react"
 import {
   DashboardCard,
   Field,
@@ -23,10 +23,17 @@ export function AddressEditPage({
   const isEditing = Boolean(address)
   const router = useRouter()
   const { showToast } = useToast()
+  const formRef = useRef<HTMLFormElement>(null)
+  const [isSaving, setIsSaving] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const isSubmitting = isSaving || isPending
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    if (isSubmitting) return
+
+    setIsSaving(true)
 
     const formData = new FormData(event.currentTarget)
     const payload = {
@@ -43,18 +50,32 @@ export function AddressEditPage({
     }
 
     startTransition(async () => {
-      const result =
-        address?.id
-          ? await updateAddress(address.id, payload)
-          : await createAddress(payload)
+      try {
+        const result =
+          address?.id
+            ? await updateAddress(address.id, payload)
+            : await createAddress(payload)
 
-      showToast({
-        title: result.message,
-        tone: result.success ? "success" : "error",
-      })
+        showToast({
+          title: result.message,
+          tone: result.success ? "success" : "error",
+        })
 
-      if (result.success) {
-        router.push("/dashboard/address-book")
+        if (result.success) {
+          formRef.current?.reset()
+          router.push("/dashboard/address-book")
+          router.refresh()
+        }
+      } catch (error) {
+        showToast({
+          title:
+            error instanceof Error
+              ? error.message
+              : "Failed to save address",
+          tone: "error",
+        })
+      } finally {
+        setIsSaving(false)
       }
     })
   }
@@ -65,7 +86,7 @@ export function AddressEditPage({
         {isEditing ? "Edit Address" : "Add Address"}
       </h1>
 
-      <form onSubmit={handleSubmit}>
+      <form ref={formRef} onSubmit={handleSubmit}>
         <div className="mt-7 grid gap-5 md:grid-cols-2">
           <Field
             label="Full Name"
@@ -136,8 +157,8 @@ export function AddressEditPage({
         </label>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <PrimaryAction type="submit" disabled={isPending}>
-            {isPending ? "Saving..." : isEditing ? "Update" : "Save"}
+          <PrimaryAction type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : isEditing ? "Update" : "Save"}
           </PrimaryAction>
           <Link
             href="/dashboard/address-book"

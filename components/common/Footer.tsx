@@ -27,10 +27,16 @@ const customerServices: FooterLink[] = [
 ]
 
 const Footer = async () => {
-  const categories = (await getCatalogCategories(7)).map((category) => ({
-    label: category.name,
-    href: category.href,
-  }))
+  let categories: FooterLink[] = []
+
+  try {
+    categories = (await getCatalogCategories(7)).map((category) => ({
+      label: category.name,
+      href: category.href,
+    }))
+  } catch (error) {
+    console.error("Footer categories failed:", error)
+  }
 
   return (
     <footer className="relative overflow-hidden border-t border-[#C39150] bg-[#F1E1CD] text-[#3F2617] md:bg-[#C39150]/15">

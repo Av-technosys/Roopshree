@@ -1,9 +1,9 @@
 import Details from "./DetailsClient";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 const Page = async ({ params }: PageProps) => {

@@ -3,7 +3,7 @@ import EditProduct from "./editClient";
 
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 const Page = async ({ params }: PageProps) => {

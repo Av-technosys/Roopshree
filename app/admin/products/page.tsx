@@ -3,13 +3,13 @@ import { getProducts } from "@/helper/product/action";
 import ProductClient from "./productClient";
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     page?: string;
     page_size?: string;
     search?: string;
     category?: string;
     status?: string;
-  };
+  }>;
 }
 
 const Page = async ({ searchParams }: PageProps) => {

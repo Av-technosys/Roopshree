@@ -4,6 +4,25 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+function injectSetOpen(
+  children: React.ReactNode,
+  setOpen?: (open: boolean) => void,
+): React.ReactNode {
+  return React.Children.map(children, (child) => {
+    if (!React.isValidElement(child)) return child;
+
+    const element = child as React.ReactElement<{
+      children?: React.ReactNode;
+      setOpen?: (open: boolean) => void;
+    }>;
+
+    return React.cloneElement(element, {
+      setOpen,
+      children: injectSetOpen(element.props.children, setOpen),
+    });
+  });
+}
+
 function AlertDialog({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
 
@@ -64,14 +83,7 @@ function AlertDialogContent({
         role="dialog"
         aria-modal="true"
       >
-        {React.Children.map(children, (child) =>
-          React.isValidElement(child)
-            ? React.cloneElement(
-                child as React.ReactElement<{ setOpen?: (open: boolean) => void }>,
-                { setOpen },
-              )
-            : child,
-        )}
+        {injectSetOpen(children, setOpen)}
       </div>
     </div>
   );

@@ -14,7 +14,7 @@ type UploadErrorResponse = {
   error: string;
 };
 
-type UploadFolder = "products" | "categories" | "banners" | "users";
+type UploadFolder = "products" | "categories" | "banners" | "users" | "reviews";
 
 const folderAliases: Record<string, UploadFolder> = {
   product: "products",
@@ -27,6 +27,8 @@ const folderAliases: Record<string, UploadFolder> = {
   banners: "banners",
   user: "users",
   users: "users",
+  review: "reviews",
+  reviews: "reviews",
 };
 
 function normalizeFolder(folder: string): UploadFolder {

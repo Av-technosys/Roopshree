@@ -69,6 +69,6 @@ export const customerContactTypeEnum = pgEnum(
 
 export const reviewStatusEnum = pgEnum('review_status', [
   'pending',
-  'approved',
+  'accepted',
   'rejected',
 ])

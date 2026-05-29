@@ -190,12 +190,10 @@ export async function getProductDetailsBySlug(slug: string) {
   const price = (defaultVariant?.price ?? product.basePrice) / 100
   const strikeThroughPrice =
     (defaultVariant?.strikeThroughPrice ?? product.strikeThroughPrice ?? 0) / 100
-  const reviewCount =
-    defaultVariant?.reviewCount ??
-    reviews.length
+  const reviewCount = reviews.length
   const averageRating = reviews.length
     ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
-    : (defaultVariant?.rating ?? 0)
+    : 0
   const ratingRows = [5, 4, 3, 2, 1].map((rating) => {
     const count = reviews.filter((review) => review.rating === rating).length
 
@@ -226,8 +224,8 @@ export async function getProductDetailsBySlug(slug: string) {
       fabric: variant.fabric,
       size: variant.size,
       isDefault: variant.isDefault,
-      rating: variant.rating,
-      reviewCount: variant.reviewCount,
+      rating: averageRating,
+      reviewCount,
       image: (() => {
         const imageKey =
           variant.bannerImage ??

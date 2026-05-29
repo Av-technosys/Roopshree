@@ -173,84 +173,82 @@ export function CheckoutReviewModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-start justify-center overflow-x-hidden bg-black/50 px-3 py-4 sm:items-center sm:px-4 sm:py-8">
-      <section className="box-border max-h-[92svh] w-full max-w-full overflow-y-auto overflow-x-hidden bg-white px-4 py-5 shadow-2xl sm:max-w-[980px] sm:px-7 lg:px-8 lg:py-7">
-        <div className="grid min-w-0 grid-cols-[24px_minmax(0,1fr)_24px] items-center">
-          <BackButton onClick={onClose} />
-          <div className="col-start-2">
-            <CheckoutSteps activeStep={2} />
-          </div>
+    <>
+      <div className="grid min-w-0 grid-cols-[24px_minmax(0,1fr)_24px] items-center">
+        <BackButton onClick={onClose} />
+        <div className="col-start-2">
+          <CheckoutSteps activeStep={2} />
         </div>
+      </div>
 
-        <div className="mx-auto mt-8 grid min-w-0 max-w-[710px] gap-5 md:mt-12 md:grid-cols-[480px_210px] md:items-start md:justify-center">
-          <section className="min-w-0">
-            <h2 className="font-heading text-lg font-semibold text-black">
-              Order Review
-            </h2>
+      <div className="mt-8 grid min-w-0 gap-5 md:mt-12 md:grid-cols-[480px_210px] md:items-start md:justify-center">
+        <section className="min-w-0">
+          <h2 className="font-heading text-lg font-semibold text-black">
+            Order Review
+          </h2>
 
-            <div className="mt-5 space-y-3">
-              <ReviewBlock label="Contact">
-                {shipping.fullName || "-"} · {shipping.phone || "-"}
-              </ReviewBlock>
-              <ReviewBlock label="Ship To">
-                {[
-                  shipping.addressLine1,
-                  shipping.addressLine2,
-                  shipping.city,
-                  shipping.state,
-                  shipping.postalCode,
-                ]
-                  .filter(Boolean)
-                  .join(", ") || "-"}
-              </ReviewBlock>
+          <div className="mt-5 space-y-3">
+            <ReviewBlock label="Contact">
+              {shipping.fullName || "-"} · {shipping.phone || "-"}
+            </ReviewBlock>
+            <ReviewBlock label="Ship To">
+              {[
+                shipping.addressLine1,
+                shipping.addressLine2,
+                shipping.city,
+                shipping.state,
+                shipping.postalCode,
+              ]
+                .filter(Boolean)
+                .join(", ") || "-"}
+            </ReviewBlock>
 
-              <div className="space-y-4">
-                {items.map((item) => (
-                  <div
-                    key={`${item.productId}-${item.addedAt}`}
-                    className="grid min-w-0 gap-3 border-b border-[#C39150]/45 pb-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
-                  >
-                    <div className="flex min-w-0 gap-4">
-                      <div className="relative h-12 w-10 shrink-0 overflow-hidden bg-[#f7eadb]">
-                        <Image
-                          src={item.image}
-                          alt={item.title}
-                          fill
-                          sizes="40px"
-                          className="object-cover object-top"
-                        />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="font-heading text-xs font-semibold text-[#3F2617]">
-                          {item.title}
-                        </h3>
-                        <p className="mt-1 text-[10px] text-[#3F2617]/70">
-                          {item.colour} Colour · {item.quantity}
-                        </p>
-                      </div>
+            <div className="space-y-4">
+              {items.map((item) => (
+                <div
+                  key={`${item.productId}-${item.addedAt}`}
+                  className="grid min-w-0 gap-3 border-b border-[#C39150]/45 pb-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+                >
+                  <div className="flex min-w-0 gap-4">
+                    <div className="relative h-12 w-10 shrink-0 overflow-hidden bg-[#f7eadb]">
+                      <Image
+                        src={item.image}
+                        alt={item.title}
+                        fill
+                        sizes="40px"
+                        className="object-cover object-top"
+                      />
                     </div>
-                    <p className="min-w-0 text-xs font-semibold text-[#3F2617] sm:text-right">
-                      {formatPrice(item.price * item.quantity)}
-                    </p>
+                    <div className="min-w-0">
+                      <h3 className="font-heading text-xs font-semibold text-[#3F2617]">
+                        {item.title}
+                      </h3>
+                      <p className="mt-1 text-[10px] text-[#3F2617]/70">
+                        {item.colour} Colour · {item.quantity}
+                      </p>
+                    </div>
                   </div>
-                ))}
-              </div>
-
-              <button
-                type="button"
-                onClick={handlePayment}
-                disabled={isPaying}
-                className="h-11 w-full bg-[#C39150] px-6 text-sm font-semibold tracking-[0.05em] text-white transition hover:bg-[#3F2617]"
-              >
-                {isPaying ? "Starting payment..." : "Continue to Payment"}
-              </button>
+                  <p className="min-w-0 text-xs font-semibold text-[#3F2617] sm:text-right">
+                    {formatPrice(item.price * item.quantity)}
+                  </p>
+                </div>
+              ))}
             </div>
-          </section>
 
-          <CheckoutSummary items={items} summary={summary} />
-        </div>
-      </section>
-    </div>
+            <button
+              type="button"
+              onClick={handlePayment}
+              disabled={isPaying}
+              className="h-11 w-full bg-[#C39150] px-6 text-sm font-semibold tracking-[0.05em] text-white transition hover:bg-[#3F2617] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isPaying ? "Starting payment..." : "Continue to Payment"}
+            </button>
+          </div>
+        </section>
+
+        <CheckoutSummary items={items} summary={summary} />
+      </div>
+    </>
   )
 }
 

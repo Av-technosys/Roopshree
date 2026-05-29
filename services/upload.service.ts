@@ -9,6 +9,9 @@ const extensionByContentType: Record<string, string> = {
   'image/jpeg': 'jpg',
   'image/png': 'png',
   'image/webp': 'webp',
+  'video/mp4': 'mp4',
+  'video/webm': 'webm',
+  'video/quicktime': 'mov',
 }
 
 function createImageKey(payload: ImageUploadPayload) {

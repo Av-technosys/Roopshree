@@ -129,8 +129,6 @@ export type ProductDetailVariantRow = {
   size: string | null
   bannerImage: string | null
   isDefault: boolean
-  rating: number
-  reviewCount: number
 }
 
 export type ProductDetailMediaRow = {
@@ -399,8 +397,6 @@ export async function listProductDetailVariants(
       size: productVariants.size,
       bannerImage: productVariants.bannerImage,
       isDefault: productVariants.isDefault,
-      rating: productVariants.rating,
-      reviewCount: productVariants.reviewCount,
     })
     .from(productVariants)
     .where(
@@ -456,6 +452,11 @@ export async function listProductReviews(productId: string): Promise<ProductRevi
       createdAt: reviews.createdAt,
     })
     .from(reviews)
-    .where(and(eq(reviews.productId, productId), eq(reviews.isApproved, true)))
+    .where(
+      and(
+        eq(reviews.productId, productId),
+        sql`${reviews.status}::text in ('accepted', 'approved')`,
+      ),
+    )
     .orderBy(desc(reviews.createdAt))
 }

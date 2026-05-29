@@ -1,11 +1,14 @@
 const allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp']
+const allowedVideoTypes = ['video/mp4', 'video/webm', 'video/quicktime']
+const allowedUploadTypes = [...allowedImageTypes, ...allowedVideoTypes]
 const maxImageSize = 5 * 1024 * 1024
+const maxVideoSize = 25 * 1024 * 1024
 
 export type ImageUploadPayload = {
   fileName: string
   contentType: string
   size: number
-  folder?: 'products' | 'categories' | 'banners' | 'users'
+  folder?: 'products' | 'categories' | 'banners' | 'users' | 'reviews'
 }
 
 export function validateImageUploadPayload(payload: unknown): ImageUploadPayload {
@@ -15,12 +18,20 @@ export function validateImageUploadPayload(payload: unknown): ImageUploadPayload
     throw new Error('Invalid upload payload')
   }
 
-  if (!allowedImageTypes.includes(data.contentType)) {
-    throw new Error('Unsupported image type')
+  if (!allowedUploadTypes.includes(data.contentType)) {
+    throw new Error('Unsupported media type')
   }
 
-  if (data.size > maxImageSize) {
-    throw new Error('Image size must be 5MB or less')
+  const maxSize = allowedVideoTypes.includes(data.contentType)
+    ? maxVideoSize
+    : maxImageSize
+
+  if (data.size > maxSize) {
+    throw new Error(
+      allowedVideoTypes.includes(data.contentType)
+        ? 'Video size must be 25MB or less'
+        : 'Image size must be 5MB or less',
+    )
   }
 
   return {

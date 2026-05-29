@@ -3,12 +3,12 @@ import { getCategoriesPagination } from "@/helper/category/action";
 import CategoryClient from "./categoryClient";
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     page?: string;
     page_size?: string;
     search?: string;
     category?:string;
-  };
+  }>;
 }
 
 const PAGE_SIZE = pageSize

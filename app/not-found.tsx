@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Home, Search, Frown } from "lucide-react"
@@ -11,7 +12,9 @@ const NotFound = () => {
   return (
     
     <main className="relative isolate min-h-svh overflow-hidden bg-[#fff7ef] px-5 py-12 text-center py-20">
-      <Header />
+      <Suspense>
+        <Header />
+      </Suspense>
       <Image
         src="/404.png"
         alt=""

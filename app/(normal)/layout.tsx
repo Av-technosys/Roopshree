@@ -1,3 +1,5 @@
+import { Suspense } from "react"
+
 import Footer from "@/components/common/Footer"
 import Header from "@/components/common/Header"
 import { StoreHydrator } from "@/components/global/StoreHydrator"
@@ -12,7 +14,9 @@ export default async function Layout({ children }: {
 
     return <>
       <StoreHydrator isAuthenticated={Boolean(session)} />
-      <Header isAuthenticated={Boolean(session)} />
+      <Suspense>
+        <Header isAuthenticated={Boolean(session)} />
+      </Suspense>
         {children}
        <Footer />
     </>

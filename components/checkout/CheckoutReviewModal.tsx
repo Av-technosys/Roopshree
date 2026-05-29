@@ -1,8 +1,18 @@
 import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 
+import {
+  completeRazorpayPayment,
+  createBuyNowPaymentOrder,
+  createCartPaymentOrder,
+} from "@/actions/checkout.action"
 import { CheckoutSummary } from "@/components/checkout/CheckoutSummary"
 import { BackButton, CheckoutSteps } from "@/components/checkout/CheckoutSteps"
+import type { CheckoutShippingDetails } from "@/components/checkout/CheckoutFlow"
 import { formatPrice } from "@/components/global/const"
+import { useToast } from "@/components/common/ToastProvider"
+import { useCartStore } from "@/store/cartStore"
 import type { CartItem } from "@/store/cartTypes"
 
 type CartSummary = {
@@ -12,84 +22,233 @@ type CartSummary = {
   total: number
 }
 
+type RazorpayCheckoutSuccess = {
+  razorpay_order_id: string
+  razorpay_payment_id: string
+  razorpay_signature: string
+}
+
+type RazorpayCheckoutOptions = {
+  key: string
+  amount: number
+  currency: string
+  name: string
+  description: string
+  order_id: string
+  handler: (response: RazorpayCheckoutSuccess) => void
+  prefill?: {
+    name?: string
+    contact?: string
+  }
+  theme?: {
+    color?: string
+  }
+}
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: RazorpayCheckoutOptions) => {
+      open: () => void
+      on: (event: string, callback: () => void) => void
+    }
+  }
+}
+
 export function CheckoutReviewModal({
   items,
   summary,
+  source,
+  shipping,
   onClose,
 }: {
   items: CartItem[]
   summary: CartSummary
+  source: "cart" | "buy-now"
+  shipping: CheckoutShippingDetails
   onClose: () => void
 }) {
+  const router = useRouter()
+  const { showToast } = useToast()
+  const clearCart = useCartStore((state) => state.clearCart)
+  const [isPaying, setIsPaying] = useState(false)
+
+  async function loadRazorpayScript() {
+    if (window.Razorpay) return true
+
+    return new Promise<boolean>((resolve) => {
+      const script = document.createElement("script")
+      script.src = "https://checkout.razorpay.com/v1/checkout.js"
+      script.onload = () => resolve(true)
+      script.onerror = () => resolve(false)
+      document.body.appendChild(script)
+    })
+  }
+
+  async function handlePayment() {
+    setIsPaying(true)
+
+    try {
+      const scriptLoaded = await loadRazorpayScript()
+
+      if (!scriptLoaded || !window.Razorpay) {
+        showToast({ title: "Unable to load payment gateway", tone: "error" })
+        return
+      }
+
+      const buyNowItem = source === "buy-now" ? items[0] : null
+      const orderResult =
+        source === "buy-now"
+          ? await createBuyNowPaymentOrder({
+              shipping,
+              productId: buyNowItem?.dbProductId,
+              variantId: buyNowItem?.variantId,
+              quantity: buyNowItem?.quantity ?? 1,
+            })
+          : await createCartPaymentOrder({ shipping })
+
+      if (orderResult.userIsNotLoggedIn) {
+        router.push("/auth?callbackUrl=/checkout")
+        return
+      }
+
+      if (!orderResult.success || !orderResult.keyId) {
+        showToast({
+          title: orderResult.message ?? "Unable to start payment",
+          tone: "error",
+        })
+        return
+      }
+
+      const razorpay = new window.Razorpay({
+        key: orderResult.keyId,
+        amount: orderResult.amountInPaise,
+        currency: orderResult.currency,
+        name: "Roop Shree",
+        description: "Order payment",
+        order_id: orderResult.providerOrderId,
+        prefill: {
+          name: shipping.fullName,
+          contact: shipping.phone,
+        },
+        theme: {
+          color: "#C39150",
+        },
+        handler: async (response) => {
+          const completeResult = await completeRazorpayPayment({
+            checkoutToken: orderResult.checkoutToken,
+            razorpay: response,
+          })
+
+          if (!completeResult.success) {
+            showToast({
+              title: completeResult.message ?? "Payment verification failed",
+              tone: "error",
+            })
+            return
+          }
+
+          if (completeResult.source === "cart") {
+            clearCart()
+          } else {
+            window.sessionStorage.removeItem("roopshree-buy-now")
+          }
+          showToast({ title: "Payment successful", tone: "success" })
+          onClose()
+          router.push("/dashboard/")
+          router.refresh()
+        },
+      })
+
+      razorpay.on("payment.failed", () => {
+        showToast({ title: "Payment failed", tone: "error" })
+      })
+
+      razorpay.open()
+    } catch (error) {
+      console.error(error)
+      showToast({ title: "Unable to complete payment", tone: "error" })
+    } finally {
+      setIsPaying(false)
+    }
+  }
+
   return (
-    <div className="fixed inset-0 z-[9999] flex items-start justify-center overflow-x-hidden bg-black/50 px-3 py-4 sm:items-center sm:px-4 sm:py-8">
-      <section className="box-border max-h-[92svh] w-full max-w-full overflow-y-auto overflow-x-hidden bg-white px-4 py-5 shadow-2xl sm:max-w-[980px] sm:px-7 lg:px-8 lg:py-7">
-        <div className="grid min-w-0 grid-cols-[24px_minmax(0,1fr)_24px] items-center">
-          <BackButton onClick={onClose} />
-          <div className="col-start-2">
-            <CheckoutSteps activeStep={2} />
-          </div>
+    <>
+      <div className="grid min-w-0 grid-cols-[24px_minmax(0,1fr)_24px] items-center">
+        <BackButton onClick={onClose} />
+        <div className="col-start-2">
+          <CheckoutSteps activeStep={2} />
         </div>
+      </div>
 
-        <div className="mx-auto mt-8 grid min-w-0 max-w-[710px] gap-5 md:mt-12 md:grid-cols-[480px_210px] md:items-start md:justify-center">
-          <section className="min-w-0">
-            <h2 className="font-heading text-lg font-semibold text-black">
-              Order Review
-            </h2>
+      <div className="mt-8 grid min-w-0 gap-5 md:mt-12 md:grid-cols-[480px_210px] md:items-start md:justify-center">
+        <section className="min-w-0">
+          <h2 className="font-heading text-lg font-semibold text-black">
+            Order Review
+          </h2>
 
-            <div className="mt-5 space-y-3">
-              <ReviewBlock label="Contact">
-                John Doe · 8585858585 · you@gmail.com
-              </ReviewBlock>
-              <ReviewBlock label="Ship To">
-                999 Pt, Mansarovar, Jaipur, Rajasthan - 302022
-              </ReviewBlock>
+          <div className="mt-5 space-y-3">
+            <ReviewBlock label="Contact">
+              {shipping.fullName || "-"} · {shipping.phone || "-"}
+            </ReviewBlock>
+            <ReviewBlock label="Ship To">
+              {[
+                shipping.addressLine1,
+                shipping.addressLine2,
+                shipping.city,
+                shipping.state,
+                shipping.postalCode,
+              ]
+                .filter(Boolean)
+                .join(", ") || "-"}
+            </ReviewBlock>
 
-              <div className="space-y-4">
-                {items.map((item) => (
-                  <div
-                    key={`${item.productId}-${item.addedAt}`}
-                    className="grid min-w-0 gap-3 border-b border-[#C39150]/45 pb-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
-                  >
-                    <div className="flex min-w-0 gap-4">
-                      <div className="relative h-12 w-10 shrink-0 overflow-hidden bg-[#f7eadb]">
-                        <Image
-                          src={item.image}
-                          alt={item.title}
-                          fill
-                          sizes="40px"
-                          className="object-cover object-top"
-                        />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="font-heading text-xs font-semibold text-[#3F2617]">
-                          {item.title}
-                        </h3>
-                        <p className="mt-1 text-[10px] text-[#3F2617]/70">
-                          {item.colour} Colour · {item.quantity}
-                        </p>
-                      </div>
+            <div className="space-y-4">
+              {items.map((item) => (
+                <div
+                  key={`${item.productId}-${item.addedAt}`}
+                  className="grid min-w-0 gap-3 border-b border-[#C39150]/45 pb-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+                >
+                  <div className="flex min-w-0 gap-4">
+                    <div className="relative h-12 w-10 shrink-0 overflow-hidden bg-[#f7eadb]">
+                      <Image
+                        src={item.image}
+                        alt={item.title}
+                        fill
+                        sizes="40px"
+                        className="object-cover object-top"
+                      />
                     </div>
-                    <p className="min-w-0 text-xs font-semibold text-[#3F2617] sm:text-right">
-                      {formatPrice(item.price * item.quantity)}
-                    </p>
+                    <div className="min-w-0">
+                      <h3 className="font-heading text-xs font-semibold text-[#3F2617]">
+                        {item.title}
+                      </h3>
+                      <p className="mt-1 text-[10px] text-[#3F2617]/70">
+                        {item.colour} Colour · {item.quantity}
+                      </p>
+                    </div>
                   </div>
-                ))}
-              </div>
-
-              <button
-                type="button"
-                className="h-11 w-full bg-[#C39150] px-6 text-sm font-semibold tracking-[0.05em] text-white transition hover:bg-[#3F2617]"
-              >
-                Continue to Payment
-              </button>
+                  <p className="min-w-0 text-xs font-semibold text-[#3F2617] sm:text-right">
+                    {formatPrice(item.price * item.quantity)}
+                  </p>
+                </div>
+              ))}
             </div>
-          </section>
 
-          <CheckoutSummary items={items} summary={summary} />
-        </div>
-      </section>
-    </div>
+            <button
+              type="button"
+              onClick={handlePayment}
+              disabled={isPaying}
+              className="h-11 w-full bg-[#C39150] px-6 text-sm font-semibold tracking-[0.05em] text-white transition hover:bg-[#3F2617] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isPaying ? "Starting payment..." : "Continue to Payment"}
+            </button>
+          </div>
+        </section>
+
+        <CheckoutSummary items={items} summary={summary} />
+      </div>
+    </>
   )
 }
 

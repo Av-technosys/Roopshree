@@ -1,5 +1,6 @@
 export type Product = {
-  id: number
+  id: number | string
+  variantId?: string | null
   slug: string
   name: string
   colour: string
@@ -9,8 +10,14 @@ export type Product = {
 }
 
 export function productToCartItem(product: Product) {
+  const productId = product.variantId
+    ? `${product.slug}:${product.variantId}`
+    : product.slug
+
   return {
-    productId: product.slug,
+    productId,
+    dbProductId: typeof product.id === "string" ? product.id : undefined,
+    variantId: product.variantId ?? undefined,
     title: product.name,
     price: product.price,
     image: product.image,

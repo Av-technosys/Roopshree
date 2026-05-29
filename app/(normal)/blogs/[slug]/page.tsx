@@ -1,11 +1,6 @@
 import { BlogDetailPage } from "@/components/blog/BlogDetailPage"
-import { blogPosts, getBlogPost } from "@/components/global/const"
-
-export function generateStaticParams() {
-  return blogPosts.map((post) => ({
-    slug: post.slug,
-  }))
-}
+import { getBlogBySlug, getBlogDetailPageData } from "@/services/blog.service"
+import { notFound } from "next/navigation"
 
 export async function generateMetadata({
   params,
@@ -13,7 +8,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const post = getBlogPost(slug)
+  const post = await getBlogBySlug(slug)
 
   return {
     title: post ? `${post.title} | Roop Shree` : "Blog | Roop Shree",
@@ -27,6 +22,11 @@ export default async function Page({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
+  const pageData = await getBlogDetailPageData(slug)
 
-  return <BlogDetailPage slug={slug} />
+  if (!pageData) {
+    notFound()
+  }
+
+  return <BlogDetailPage {...pageData} />
 }

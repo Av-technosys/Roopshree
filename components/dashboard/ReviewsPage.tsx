@@ -1,153 +1,283 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useTransition } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { createPortal } from "react-dom"
 import { X, Star, ThumbsUp } from "lucide-react"
 
+import { submitReviewAction } from "@/actions/review.action"
 import {
   DashboardCard,
   DashboardPageTitle,
-  FilterPill,
   PrimaryAction,
 } from "@/components/dashboard/DashboardPrimitives"
-import { recentOrders, submittedReview } from "@/components/dashboard/dashboard-data"
+import { useFileUpload } from "@/helper/upload/client"
+import type { getDashboardReviewData } from "@/services/review.service"
 
-export function ReviewsPage() {
-  const [activeTab, setActiveTab] = useState<"pending" | "submitted">("pending")
-  const [isModalOpen, setIsModalOpen] = useState(false)
+type ReviewData = Awaited<ReturnType<typeof getDashboardReviewData>>
+type PendingReviewItem = ReviewData["pending"][number]
+type UploadedReviewMedia = {
+  key: string
+  url: string
+  contentType: string
+}
+
+export function ReviewsPage({ reviewData }: { reviewData: ReviewData }) {
+  const router = useRouter()
+  const [activeTab, setActiveTab] = useState<"all" | "pending" | "submitted">("all")
+  const [selectedItem, setSelectedItem] = useState<PendingReviewItem | null>(null)
 
   useEffect(() => {
-    document.body.style.overflow = isModalOpen ? "hidden" : ""
+    document.body.style.overflow = selectedItem ? "hidden" : ""
 
     return () => {
       document.body.style.overflow = ""
     }
-  }, [isModalOpen])
+  }, [selectedItem])
+
+  const showPending = activeTab === "all" || activeTab === "pending"
+  const showSubmitted = activeTab === "all" || activeTab === "submitted"
 
   return (
     <div>
       <DashboardPageTitle>Reviews & Ratings</DashboardPageTitle>
 
       <div className="mt-5 flex flex-wrap gap-3">
-        <FilterPill active>All</FilterPill>
-        <button
-          type="button"
-          onClick={() => setActiveTab("submitted")}
-          className={`h-8 rounded-full border border-[#C39150] px-5 text-xs font-medium ${
-            activeTab === "submitted"
-              ? "bg-[#C39150] text-white"
-              : "text-[#C39150]"
-          }`}
-        >
-          Submitted
-        </button>
-        <button
-          type="button"
+        <ReviewTab
+          active={activeTab === "all"}
+          onClick={() => setActiveTab("all")}
+          label="All"
+          count={reviewData.pending.length + reviewData.submitted.length}
+        />
+        <ReviewTab
+          active={activeTab === "pending"}
           onClick={() => setActiveTab("pending")}
-          className={`h-8 rounded-full border border-[#C39150] px-5 text-xs font-medium ${
-            activeTab === "pending" ? "bg-[#C39150] text-white" : "text-[#C39150]"
-          }`}
-        >
-          Pending
-        </button>
+          label="Pending"
+          count={reviewData.pending.length}
+        />
+        <ReviewTab
+          active={activeTab === "submitted"}
+          onClick={() => setActiveTab("submitted")}
+          label="Submitted"
+          count={reviewData.submitted.length}
+        />
       </div>
 
-      {activeTab === "submitted" ? (
-        <SubmittedReview />
-      ) : (
-        <div className="mt-5 space-y-5">
-          {recentOrders.map((order, index) => (
-            <DashboardCard key={`${order.slug}-${index}`}>
-              <div className="grid gap-3 bg-[#f1dfc7] px-4 py-3 text-xs text-[#C39150] sm:grid-cols-3">
-                <Meta label="Order ID" value={order.id} />
-                <Meta label="Date" value={order.date} />
-                <Meta label="Total" value={order.total} />
-              </div>
-              <div className="grid gap-4 p-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
-                <div className="flex gap-4">
-                  <div className="relative h-16 w-14 shrink-0 overflow-hidden bg-[#f8f0e6]">
-                    <Image
-                      src={order.image}
-                      alt={order.product}
-                      fill
-                      sizes="56px"
-                      className="object-cover object-top"
-                    />
-                  </div>
-                  <div>
-                    <h2 className="text-sm font-semibold text-black">
-                      Bandhej Saree
-                    </h2>
-                    <p className="mt-1 text-xs text-[#777]">Colour: Red</p>
-                    <p className="text-xs text-[#777]">Qty: 2</p>
-                  </div>
+      {showPending ? (
+        <section className="mt-5 space-y-5">
+          {reviewData.pending.length ? (
+            reviewData.pending.map((item) => (
+              <DashboardCard key={item.orderItemId}>
+                <div className="grid gap-3 bg-[#f1dfc7] px-4 py-3 text-xs text-[#C39150] sm:grid-cols-3">
+                  <Meta label="Order ID" value={item.orderNumber} />
+                  <Meta label="Date" value={item.date} />
+                  <Meta label="Total" value={item.total} />
                 </div>
-                <PrimaryAction onClick={() => setIsModalOpen(true)}>
-                  Write a Review
-                </PrimaryAction>
-              </div>
-            </DashboardCard>
-          ))}
-        </div>
-      )}
+                <div className="grid gap-4 p-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+                  <ProductSummary item={item} />
+                  <PrimaryAction onClick={() => setSelectedItem(item)}>
+                    Write a Review
+                  </PrimaryAction>
+                </div>
+              </DashboardCard>
+            ))
+          ) : activeTab === "pending" ? (
+            <EmptyState>No delivered orders are waiting for review.</EmptyState>
+          ) : null}
+        </section>
+      ) : null}
 
-      {typeof document !== "undefined" && isModalOpen
+      {showSubmitted ? (
+        <section className="mt-5 space-y-5">
+          {reviewData.submitted.length ? (
+            reviewData.submitted.map((review) => (
+              <SubmittedReview key={review.id} review={review} />
+            ))
+          ) : activeTab === "submitted" ? (
+            <EmptyState>No reviews submitted yet.</EmptyState>
+          ) : null}
+        </section>
+      ) : null}
+
+      {!reviewData.pending.length && !reviewData.submitted.length ? (
+        <EmptyState>
+          Reviews become available here once one of your orders is delivered.
+        </EmptyState>
+      ) : null}
+
+      {typeof document !== "undefined" && selectedItem
         ? createPortal(
-            <ReviewModal onClose={() => setIsModalOpen(false)} />,
-            document.body
+            <ReviewModal
+              item={selectedItem}
+              onSubmitted={() => {
+                setSelectedItem(null)
+                router.refresh()
+              }}
+              onClose={() => setSelectedItem(null)}
+            />,
+            document.body,
           )
         : null}
     </div>
   )
 }
 
-function SubmittedReview() {
+function ReviewTab({
+  active,
+  onClick,
+  label,
+  count,
+}: {
+  active: boolean
+  onClick: () => void
+  label: string
+  count: number
+}) {
   return (
-    <DashboardCard className="mt-5 grid gap-4 p-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
-      <div className="flex gap-4">
-        <div className="relative h-20 w-20 shrink-0 overflow-hidden bg-[#f8f0e6]">
-          <Image
-            src={submittedReview.image}
-            alt={submittedReview.product}
-            fill
-            sizes="80px"
-            className="object-cover object-top"
-          />
+    <button
+      type="button"
+      onClick={onClick}
+      className={`h-8 rounded-full border border-[#C39150] px-5 text-xs font-medium ${
+        active ? "bg-[#C39150] text-white" : "text-[#C39150]"
+      }`}
+    >
+      {label} ({count})
+    </button>
+  )
+}
+
+function ProductSummary({ item }: { item: PendingReviewItem }) {
+  return (
+    <div className="flex gap-4">
+      <div className="relative h-16 w-14 shrink-0 overflow-hidden bg-[#f8f0e6]">
+        <Image
+          src={item.image}
+          alt={item.productName}
+          fill
+          sizes="56px"
+          className="object-cover object-top"
+        />
+      </div>
+      <div>
+        <h2 className="text-sm font-semibold text-black">{item.productName}</h2>
+        {item.variant ? (
+          <p className="mt-1 text-xs text-[#777]">Variant: {item.variant}</p>
+        ) : null}
+        <p className="text-xs text-[#777]">Qty: {item.quantity}</p>
+      </div>
+    </div>
+  )
+}
+
+function SubmittedReview({ review }: { review: ReviewData["submitted"][number] }) {
+  return (
+    <DashboardCard className="grid min-w-0 gap-4 p-5 lg:grid-cols-[minmax(0,1fr)_216px] lg:items-center">
+      <div className="min-w-0">
+        <h2 className="break-words text-lg font-semibold text-black">
+          {review.productName}
+        </h2>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <Stars filled={review.rating} />
+          <span className="min-w-0 break-words text-sm font-semibold text-black">
+            {review.title}
+          </span>
+          <span className="rounded-full bg-[#fbf3ea] px-3 py-1 text-[10px] font-semibold capitalize text-[#C39150]">
+            {review.status}
+          </span>
         </div>
-        <div>
-          <h2 className="text-lg font-semibold text-black">
-            {submittedReview.customer}
-          </h2>
-          <p className="text-xs text-[#777]">Colour: {submittedReview.colour}</p>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <Stars filled={submittedReview.rating} />
-            <span className="text-sm font-semibold text-black">
-              {submittedReview.title}
-            </span>
-          </div>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-[#666]">
-            {submittedReview.body}
-          </p>
-          <p className="mt-3 flex items-center gap-3 text-xs text-[#777]">
-            Reviewed on {submittedReview.date}
-            <ThumbsUp className="size-4" />
-            {submittedReview.helpful} found helpful
-          </p>
-        </div>
+        <p className="mt-3 max-w-full break-words text-sm leading-6 text-[#666] [overflow-wrap:anywhere]">
+          {review.message}
+        </p>
+        <p className="mt-3 flex items-center gap-3 text-xs text-[#777]">
+          Reviewed on {review.date}
+          <ThumbsUp className="size-4" />
+        </p>
       </div>
       <Link
-        href="/shop"
-        className="flex h-12 items-center justify-center bg-[#C39150] px-10 text-xs font-semibold tracking-[0.08em] text-white transition hover:bg-[#3F2617]"
+        href={`/product/${review.productSlug}`}
+        className="flex h-12 w-full items-center justify-center bg-[#C39150] px-6 text-xs font-semibold tracking-[0.08em] text-white transition hover:bg-[#3F2617] lg:w-[216px]"
       >
-        View Products
+        View Product
       </Link>
     </DashboardCard>
   )
 }
 
-function ReviewModal({ onClose }: { onClose: () => void }) {
+function ReviewModal({
+  item,
+  onClose,
+  onSubmitted,
+}: {
+  item: PendingReviewItem
+  onClose: () => void
+  onSubmitted: () => void
+}) {
+  const [rating, setRating] = useState(5)
+  const [title, setTitle] = useState("")
+  const [message, setMessage] = useState("")
+  const [feedback, setFeedback] = useState("")
+  const [isPending, startTransition] = useTransition()
+  const [media, setMedia] = useState<UploadedReviewMedia[]>([])
+  const { upload, uploading } = useFileUpload()
+
+  async function uploadReviewMedia(files: FileList | null) {
+    if (!files?.length) return
+
+    setFeedback("")
+
+    const availableSlots = Math.max(0, 5 - media.length)
+    const selectedFiles = Array.from(files).slice(0, availableSlots)
+
+    if (!selectedFiles.length) {
+      setFeedback("You can upload up to 5 photos or videos.")
+      return
+    }
+
+    try {
+      const uploaded = await Promise.all(
+        selectedFiles.map(async (file) => {
+          const result = await upload(file, "reviews")
+
+          return {
+            key: result.fileKey,
+            url: result.fileUrl,
+            contentType: file.type,
+          }
+        }),
+      )
+
+      setMedia((current) => [...current, ...uploaded])
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Media upload failed.")
+    }
+  }
+
+  function submitReview() {
+    setFeedback("")
+    startTransition(async () => {
+      const result = await submitReviewAction({
+        orderId: item.orderId,
+        productId: item.productId,
+        rating,
+        title,
+        message,
+        media: media.map((item) => ({
+          key: item.key,
+          contentType: item.contentType,
+        })),
+      })
+
+      if (!result.success) {
+        setFeedback(result.message)
+        return
+      }
+
+      onSubmitted()
+    })
+  }
+
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 px-4 py-8">
       <div className="w-full max-w-lg bg-white shadow-2xl">
@@ -159,35 +289,37 @@ function ReviewModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="p-6">
-          <div className="flex gap-4">
-            <div className="relative h-16 w-14 shrink-0 overflow-hidden bg-[#f8f0e6]">
-              <Image
-                src={submittedReview.image}
-                alt={submittedReview.product}
-                fill
-                sizes="56px"
-                className="object-cover object-top"
-              />
-            </div>
-            <div>
-              <h3 className="text-base font-semibold text-black">Bandhej Saree</h3>
-              <p className="mt-1 text-xs text-[#777]">Colour: Red</p>
+          <ProductSummary item={item} />
+
+          <div className="mt-6 block text-xs text-[#777]">
+            Overall Rating *
+            <div className="mt-2 flex gap-2 text-[#C39150]">
+              {Array.from({ length: 5 }, (_, index) => {
+                const value = index + 1
+
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-label={`${value} star rating`}
+                    onClick={() => setRating(value)}
+                  >
+                    <Star
+                      className="size-7"
+                      fill={value <= rating ? "currentColor" : "none"}
+                    />
+                  </button>
+                )
+              })}
             </div>
           </div>
-
-          <label className="mt-6 block text-xs text-[#777]">
-            Overall Rating *
-            <span className="mt-2 flex gap-2 text-[#C39150]">
-              {Array.from({ length: 5 }, (_, index) => (
-                <Star key={index} className="size-7" />
-              ))}
-            </span>
-          </label>
 
           <label className="mt-5 block text-xs text-[#777]">
             Review Title *
             <input
-              defaultValue="Summarize your experience"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder="Summarize your experience"
               className="mt-2 h-10 w-full border border-[#e1c5a5] px-4 text-sm font-semibold text-black outline-none focus:border-[#C39150]"
             />
           </label>
@@ -195,15 +327,84 @@ function ReviewModal({ onClose }: { onClose: () => void }) {
           <label className="mt-5 block text-xs text-[#777]">
             Your Review *
             <textarea
-              defaultValue="Tell us what you liked or disliked about this product"
+              value={message}
+              onChange={(event) => setMessage(event.target.value)}
+              placeholder="Tell us what you liked or disliked about this product"
               className="mt-2 h-28 w-full resize-none border border-[#e1c5a5] p-4 text-sm font-semibold text-black outline-none focus:border-[#C39150]"
             />
             <span className="mt-1 block text-right text-[10px] text-[#777]">
-              (0/100)
+              ({message.length}/500)
             </span>
           </label>
 
-          <PrimaryAction className="mt-2 w-full">Submit</PrimaryAction>
+          <label className="mt-5 block text-xs text-[#777]">
+            Photos or Videos
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
+              multiple
+              disabled={uploading || media.length >= 5}
+              onChange={(event) => {
+                void uploadReviewMedia(event.target.files)
+                event.target.value = ""
+              }}
+              className="mt-2 block w-full text-sm text-[#555] file:mr-4 file:h-10 file:border-0 file:bg-[#C39150] file:px-4 file:text-xs file:font-semibold file:tracking-[0.08em] file:text-white disabled:opacity-60"
+            />
+            <span className="mt-1 block text-[10px] text-[#777]">
+              Upload up to 5 files. Photos max 5MB, videos max 25MB.
+            </span>
+          </label>
+
+          {media.length ? (
+            <div className="mt-3 grid grid-cols-3 gap-3">
+              {media.map((item) => (
+                <div
+                  key={item.key}
+                  className="relative aspect-square overflow-hidden border border-[#e1c5a5] bg-[#fbf3ea]"
+                >
+                  {item.contentType.startsWith("video/") ? (
+                    <video
+                      src={item.url}
+                      className="size-full object-cover"
+                      muted
+                      controls
+                    />
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={item.url}
+                      alt="Review media preview"
+                      className="size-full object-cover"
+                    />
+                  )}
+                  <button
+                    type="button"
+                    aria-label="Remove media"
+                    onClick={() =>
+                      setMedia((current) =>
+                        current.filter((mediaItem) => mediaItem.key !== item.key),
+                      )
+                    }
+                    className="absolute right-1 top-1 flex size-6 items-center justify-center bg-black/60 text-white"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          {feedback ? (
+            <p className="mt-3 text-sm font-medium text-red-600">{feedback}</p>
+          ) : null}
+
+          <PrimaryAction
+            className="mt-4 w-full"
+            disabled={isPending || uploading}
+            onClick={submitReview}
+          >
+            {uploading ? "Uploading..." : isPending ? "Submitting..." : "Submit"}
+          </PrimaryAction>
         </div>
       </div>
     </div>
@@ -221,6 +422,14 @@ function Stars({ filled }: { filled: number }) {
         />
       ))}
     </span>
+  )
+}
+
+function EmptyState({ children }: { children: React.ReactNode }) {
+  return (
+    <DashboardCard className="p-6 text-sm font-medium text-[#777]">
+      {children}
+    </DashboardCard>
   )
 }
 

@@ -1,14 +1,14 @@
 import Image from "next/image"
 import Link from "next/link"
 
-import { recentOrders } from "@/components/dashboard/dashboard-data"
+import type { DashboardOrderCardView } from "@/services/order.service"
 
 export function OrderCard({
   order,
   primaryAction = "Track Order",
   secondaryAction = "View Details",
 }: {
-  order: (typeof recentOrders)[number]
+  order: DashboardOrderCardView
   primaryAction?: string
   secondaryAction?: string
 }) {
@@ -45,7 +45,11 @@ export function OrderCard({
             <h3 className="font-heading text-lg font-semibold leading-tight text-[#2d180f]">
               {order.product}
             </h3>
-            <p className="mt-1 text-xs text-[#777]">Colour: {order.colour}</p>
+            {order.variant ? (
+              <p className="mt-1 text-xs text-[#777]">
+                Variant: {order.variant}
+              </p>
+            ) : null}
             <p className="text-xs text-[#777]">Qty: {order.quantity}</p>
           </div>
         </div>

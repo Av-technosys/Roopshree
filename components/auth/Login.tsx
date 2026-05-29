@@ -2,7 +2,10 @@
 
 import Image from "next/image";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
+import { signInAction } from "@/actions/auth.action";
+import { useToast } from "@/components/common/ToastProvider";
 
 export default function Login({
   onCreateAccount,
@@ -11,7 +14,35 @@ export default function Login({
   onCreateAccount?: () => void;
   onForgotPassword?: () => void;
 }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { showToast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    setIsSubmitting(true);
+
+    const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
+    const response = await signInAction({ email, password });
+
+    setIsSubmitting(false);
+
+    if (!response.ok) {
+      showToast({ title: response.error ?? "Invalid email or password", tone: "error" });
+      setError(response.error ?? "Invalid email or password");
+      return;
+    }
+
+    showToast({ title: "Logged in successfully", tone: "success" });
+    router.push(callbackUrl);
+    router.refresh();
+  }
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-white lg:bg-[#f3dfc7] lg:bg-[url('/auth/login_bg.png')] lg:bg-cover lg:bg-center lg:bg-no-repeat">
@@ -40,17 +71,28 @@ export default function Login({
               </p>
             </div>
 
-            <form className="space-y-3 lg:space-y-5 xl:space-y-6">
-              <InputBox icon={<Mail size={18} />} placeholder="Email Address" />
+            <form className="space-y-3 lg:space-y-5 xl:space-y-6" onSubmit={handleLogin}>
+              <InputBox
+                icon={<Mail size={18} />}
+                placeholder="Email Address"
+                value={email}
+                onChange={setEmail}
+              />
 
               <InputBox
                 icon={<Lock size={18} />}
                 placeholder="Password"
                 type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={setPassword}
                 rightIcon={showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 onRightIconClick={() => setShowPassword((current) => !current)}
                 rightIconLabel={showPassword ? "Hide password" : "Show password"}
               />
+
+              {error && (
+                <p className="text-xs font-medium text-red-600 lg:text-sm">{error}</p>
+              )}
 
               <div className="text-right">
                 <button
@@ -64,9 +106,10 @@ export default function Login({
 
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className="h-11 w-full rounded-[4px] bg-[#c9914d] text-xs font-semibold tracking-[1px] text-white transition hover:bg-[#b57f3f] lg:h-14 xl:h-[58px] lg:text-base lg:tracking-[2px]"
               >
-                Login
+                {isSubmitting ? "Logging in..." : "Login"}
               </button>
             </form>
 
@@ -93,6 +136,8 @@ function InputBox({
   rightIconLabel,
   onRightIconClick,
   placeholder,
+  value,
+  onChange,
   type = "text",
 }: {
   icon: React.ReactNode;
@@ -100,6 +145,8 @@ function InputBox({
   rightIconLabel?: string;
   onRightIconClick?: () => void;
   placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
   type?: string;
 }) {
   return (
@@ -111,6 +158,8 @@ function InputBox({
       <input
         type={type}
         placeholder={placeholder}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
         className="w-full bg-transparent text-xs text-[#3b2418] outline-none placeholder:text-[#777] lg:text-base lg:placeholder:text-[#6f6b68] xl:text-lg"
       />
 

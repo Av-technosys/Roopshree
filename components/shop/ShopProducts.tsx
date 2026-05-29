@@ -1,8 +1,9 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { usePathname, useSearchParams } from "next/navigation"
 import {
   ChevronLeft,
   ChevronRight,
@@ -12,10 +13,10 @@ import {
   Trash2,
 } from "lucide-react"
 import { ShopMobileFilters } from "./ShopFilters"
+import type { getCatalogFilterOptions } from "@/services/product.service"
 import {
   formatPrice,
   productToCartItem,
-  shopProducts,
   type Product,
 } from "@/components/global/const"
 import { useAddToCart } from "@/hooks/useAddToCart"
@@ -23,36 +24,49 @@ import { useWishlist } from "@/hooks/useWishlist"
 import { useCartStore } from "@/store/cartStore"
 import { useWishlistStore } from "@/store/wishlistStore"
 
-const categories = [
-  { name: "Shrug", image: "/home/shrug.png" },
-  { name: "Gottapatti", image: "/home/gottapatti.png" },
-  { name: "Brouch", image: "/home/brouch.png" },
-  { name: "Zardozi", image: "/home/zardozi.png" },
-  { name: "Zardozi", image: "/home/zardozi.png" },
-]
-
 const pageSize = 12
-const totalPages = 70
 
-export default function ShopProducts() {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [sortBy, setSortBy] = useState("Featured")
-  const [activeCategory, setActiveCategory] = useState(0)
+export type ShopCategory = {
+  id?: string
+  name: string
+  slug?: string
+  href?: string
+  image: string
+}
 
-  const visibleProducts = useMemo(() => {
-    const start = (currentPage - 1) * pageSize
-    return Array.from({ length: pageSize }, (_, index) => {
-      const id = start + index + 1
-      const source = shopProducts[(id - 1) % shopProducts.length]
-      return {
-        ...source,
-        id,
+export default function ShopProducts({
+  products,
+  categories,
+  filterOptions,
+  total,
+  currentPage,
+}: {
+  products: Product[]
+  categories: ShopCategory[]
+  filterOptions: Awaited<ReturnType<typeof getCatalogFilterOptions>>
+  total: number
+  currentPage: number
+}) {
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const [sortBy, setSortBy] = useState(searchParams.get("sort") ?? "featured")
+  const totalPages = Math.max(1, Math.ceil(total / pageSize) || 1)
+  const pageNumber = Math.min(Math.max(currentPage, 1), totalPages)
+
+  function buildHref(updates: Record<string, string | number | null>) {
+    const params = new URLSearchParams(searchParams.toString())
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null || value === "") {
+        params.delete(key)
+        return
       }
-    })
-  }, [currentPage])
 
-  function goToPage(page: number) {
-    setCurrentPage(Math.min(Math.max(page, 1), totalPages))
+      params.set(key, String(value))
+    })
+
+    const query = params.toString()
+    return query ? `${pathname}?${query}` : pathname
   }
 
   return (
@@ -65,100 +79,97 @@ export default function ShopProducts() {
         All Categories
       </h2>
 
-      <div className="scrollbar-hidden flex max-w-full gap-4 overflow-x-auto pb-2 lg:gap-5">
+      {categories.length > 0 ? (
+        <div className="scrollbar-hidden flex max-w-full gap-6 overflow-x-auto pb-2 lg:gap-8">
         {categories.map((category, index) => (
-          <button
-            key={`${category.name}-${index}`}
-            type="button"
-            onClick={() => setActiveCategory(index)}
-            className="w-[88px] shrink-0 text-center sm:w-[104px] lg:w-[120px]"
+          <Link
+            key={`${category.slug ?? category.name}-${index}`}
+            href={buildHref({ category: category.slug ?? null, page: 1 })}
+            className="h-auto w-auto shrink-0"
           >
-            <span
-              className={`relative mx-auto block size-[88px] overflow-hidden rounded-full border-2 transition sm:size-[104px] lg:size-[120px] ${
-                activeCategory === index
-                  ? "border-[#c39150]"
-                  : "border-transparent"
-              }`}
-            >
-              <Image
-                src={category.image}
-                alt={category.name}
-                fill
-                sizes="(min-width: 1024px) 120px, (min-width: 640px) 104px, 88px"
-                className="object-cover object-top"
-              />
-            </span>
-            <span
-              className={`mt-3 block font-heading text-sm leading-none ${
-                activeCategory === index ? "text-[#c39150]" : "text-[#3F2617]"
-              }`}
-            >
+          {category.image ? (
+            <Image src={category.image} height={400} width={400} alt={category.name} className=" h-48 w-auto object-contain" />
+          ) : (
+            <span className="flex h-48 items-center justify-center bg-[#f8efe6] px-3 text-center text-sm text-[#3f2617]">
               {category.name}
             </span>
-          </button>
+          )}
+          </Link>
         ))}
-      </div>
+        </div>
+      ) : null}
 
       <div className="mt-8 flex items-center justify-between lg:hidden">
-        <ShopMobileFilters />
+        <ShopMobileFilters options={filterOptions} />
         <SortControl sortBy={sortBy} onSortChange={setSortBy} compact />
       </div>
 
       <h2 className="mt-7 hidden text-sm font-semibold text-[#111] lg:block">
-        All Products (69)
+        All Products ({total})
       </h2>
 
-      <div className="mt-6 grid min-w-0 grid-cols-2 gap-x-3 gap-y-7 md:grid-cols-3 md:gap-x-5 md:gap-y-8 lg:mt-4 xl:grid-cols-4">
-        {visibleProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+      {products.length > 0 ? (
+        <div className="mt-6 grid min-w-0 grid-cols-2 gap-x-3 gap-y-7 md:grid-cols-3 md:gap-x-5 md:gap-y-8 lg:mt-4 xl:grid-cols-4">
+          {products.map((product) => (
+          
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      ) : (
+        <div className="mt-6 border border-[#ead8c5] bg-[#fcf8f1] px-5 py-10 text-center text-sm font-medium text-[#3f2617]">
+          No products found in the database.
+        </div>
+      )}
 
-      <div className="mt-12 hidden items-center justify-end gap-2 text-xs text-[#3F2617] lg:flex">
-        <button
-          type="button"
+      <div className="mt-12 hidden items-center justify-end gap-2 text-xs font-medium text-[#3F2617] lg:flex">
+        <Link
           aria-label="Previous page"
-          onClick={() => goToPage(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="disabled:opacity-40"
+          href={buildHref({ page: Math.max(pageNumber - 1, 1) })}
+          className={`flex size-8 items-center justify-center rounded-[3px] border border-[#d8a15a] bg-white transition hover:border-[#c39150] hover:text-[#c39150] ${
+            pageNumber === 1 ? "pointer-events-none opacity-40" : ""
+          }`}
         >
           <ChevronLeft className="size-4" />
-        </button>
-        {[1, 2, 3, 4].map((page) => (
-          <button
+        </Link>
+        {Array.from({ length: Math.min(4, totalPages) }, (_, index) => index + 1).map((page) => (
+          <Link
             key={page}
-            type="button"
-            onClick={() => goToPage(page)}
-            className={`size-6 rounded-[2px] border text-xs ${
-              page === currentPage
+            href={buildHref({ page })}
+            className={`flex size-8 items-center justify-center rounded-[3px] border transition ${
+              page === pageNumber
                 ? "border-[#c39150] bg-[#C39150] text-white"
-                : "border-[#d8a15a] bg-white text-[#3F2617]"
+                : "border-[#d8a15a] bg-white text-[#3F2617] hover:border-[#c39150] hover:text-[#c39150]"
             }`}
           >
             {page}
-          </button>
+          </Link>
         ))}
-        <span>........</span>
-        <button
-          type="button"
-          onClick={() => goToPage(totalPages)}
-          className={`h-6 min-w-7 rounded-[2px] border px-1 ${
-            currentPage === totalPages
-              ? "border-[#c39150] bg-[#C39150] text-white"
-              : "border-[#d8a15a] bg-white text-[#3F2617]"
+        {totalPages > 4 ? (
+          <>
+            <span className="flex size-8 items-center justify-center text-[#3F2617]/55">
+              ...
+            </span>
+            <Link
+              href={buildHref({ page: totalPages })}
+              className={`flex h-8 min-w-8 items-center justify-center rounded-[3px] border px-2 transition ${
+                pageNumber === totalPages
+                  ? "border-[#c39150] bg-[#C39150] text-white"
+                  : "border-[#d8a15a] bg-white text-[#3F2617] hover:border-[#c39150] hover:text-[#c39150]"
+              }`}
+            >
+              {totalPages}
+            </Link>
+          </>
+        ) : null}
+        <Link
+          aria-label="Next page"
+          href={buildHref({ page: Math.min(pageNumber + 1, totalPages) })}
+          className={`flex size-8 items-center justify-center rounded-[3px] border border-[#d8a15a] bg-white transition hover:border-[#c39150] hover:text-[#c39150] ${
+            pageNumber === totalPages ? "pointer-events-none opacity-40" : ""
           }`}
         >
-          {totalPages}
-        </button>
-        <button
-          type="button"
-          aria-label="Next page"
-          onClick={() => goToPage(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="disabled:opacity-40"
-        >
           <ChevronRight className="size-4" />
-        </button>
+        </Link>
       </div>
     </section>
   )
@@ -182,25 +193,34 @@ function SortControl({
       Sort by:
       <select
         value={sortBy}
-        onChange={(event) => onSortChange(event.target.value)}
+        onChange={(event) => {
+          onSortChange(event.target.value)
+          const params = new URLSearchParams(window.location.search)
+          params.set("sort", event.target.value)
+          params.set("page", "1")
+          window.location.href = `${window.location.pathname}?${params.toString()}`
+        }}
         className={`rounded-[2px] border border-[#d8a15a] bg-white px-3 font-normal text-[#c39150] outline-none ${
           compact ? "h-9 w-[92px] text-xs" : "h-8 min-w-28 text-xs"
         }`}
       >
-        <option>Featured</option>
-        <option>Newest</option>
-        <option>Price Low</option>
+        <option value="featured">Featured</option>
+        <option value="newest">Newest</option>
+        <option value="price-low">Price Low</option>
+        <option value="price-high">Price High</option>
       </select>
     </label>
   )
 }
 
 function ProductCard({ product }: { product: Product }) {
-  const { handleAddToCart } = useAddToCart()
+  const {
+    handleAddToCart,
+    handleDecreaseCartItem,
+    handleIncreaseCartItem,
+    handleRemoveCartItem,
+  } = useAddToCart()
   const { handleToggleWishlist } = useWishlist()
-  const increase = useCartStore((state) => state.increase)
-  const decrease = useCartStore((state) => state.decrease)
-  const removeItem = useCartStore((state) => state.removeItem)
   const storeItem = productToCartItem(product)
   const cartQuantity = useCartStore(
     (state) =>
@@ -219,13 +239,19 @@ function ProductCard({ product }: { product: Product }) {
   return (
     <article className="group min-w-0">
       <div className="relative aspect-[0.75] overflow-hidden bg-[#f8efe6] md:aspect-[0.78]">
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          sizes="(min-width: 1280px) 220px, (min-width: 768px) 28vw, 48vw"
-          className={`object-cover transition duration-500 group-hover:scale-[1.04] ${product.imageClass ?? ""}`}
-        />
+        {product.image ? (
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            sizes="(min-width: 1280px) 220px, (min-width: 768px) 28vw, 48vw"
+            className={`object-cover transition duration-500 group-hover:scale-[1.04] ${product.imageClass ?? ""}`}
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center px-4 text-center text-xs font-medium text-[#3f2617]/70">
+            Product image coming soon
+          </div>
+        )}
         <button
           type="button"
           aria-label={`Add ${product.name} to wishlist`}
@@ -247,9 +273,9 @@ function ProductCard({ product }: { product: Product }) {
             <CartQuantityControls
               quantity={cartQuantity}
               productName={product.name}
-              onDecrease={() => decrease(storeItem.productId, storeItem.attributes)}
-              onIncrease={() => increase(storeItem.productId, storeItem.attributes)}
-              onRemove={() => removeItem(storeItem.productId, storeItem.attributes)}
+              onDecrease={() => handleDecreaseCartItem(storeItem)}
+              onIncrease={() => handleIncreaseCartItem(storeItem)}
+              onRemove={() => handleRemoveCartItem(storeItem)}
             />
           ) : (
             <button
@@ -263,7 +289,7 @@ function ProductCard({ product }: { product: Product }) {
         </div>
       </div>
 
-      <Link href="/product/traditional-bandhej-saree" className="block">
+      <Link href={`/product/${product.slug}`} className="block">
         <h3 className="mt-3 font-heading text-[15px] leading-snug text-[#3F2617] md:text-sm">
           {product.name}
         </h3>

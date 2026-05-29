@@ -6,15 +6,26 @@ import Trending from "@/components/home/Trending"
 import Reviews from "@/components/home/Reviews"
 import Heritage from "@/components/home/Heritage"
 import StayConnected from "@/components/home/StayConnected"
+import {
+  getCatalogCategories,
+  getFeaturedProducts,
+  getRecommendedProducts,
+} from "@/services/product.service"
 
-const Page = () => {
+const Page = async () => {
+  const [categories, newArrivals, trendingProducts] = await Promise.all([
+    getCatalogCategories(5),
+    getRecommendedProducts(5),
+    getFeaturedProducts(5),
+  ])
+
   return (
     <main className="flex-1">
       <HeroSection />
       <HomeShowcaseSection />
-      <CategorySection />
-      <Newarrival />
-      <Trending />
+      <CategorySection categories={categories} />
+      <Newarrival products={newArrivals} />
+      <Trending products={trendingProducts} />
       <Reviews />
       <Heritage />
       <StayConnected />

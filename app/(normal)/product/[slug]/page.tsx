@@ -1,12 +1,14 @@
 import ProductDetails from "@/components/product/ProductDetails"
 import ProductDescriptionReviews from "@/components/product/ProductDescriptionReviews"
 import YouMayAlsoLike from "@/components/product/YouMayAlsoLike"
+import { getProductDetailsBySlug } from "@/services/product.service"
 import {
   BadgeCheck,
   Leaf,
   LockKeyhole,
   Truck,
 } from "lucide-react"
+import { notFound } from "next/navigation"
 
 
 const benefits = [
@@ -33,11 +35,21 @@ const benefits = [
 ]
 
 
-const Page = () => {
+const Page = async ({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) => {
+  const { slug } = await params
+  const product = await getProductDetailsBySlug(slug)
+  if (!product) {
+    notFound()
+  }
+
   return (
     <div>
 
-      <ProductDetails />
+      <ProductDetails product={product} />
 
       <section className="bg-white py-14 md:pb-10">
         <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
@@ -62,7 +74,7 @@ const Page = () => {
         </div>
       </section>
 
-      <ProductDescriptionReviews />
+      <ProductDescriptionReviews product={product} />
       <YouMayAlsoLike />
       
 

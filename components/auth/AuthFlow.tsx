@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   ForgotOtpScreen,
   SetNewPasswordScreen,
@@ -19,13 +20,26 @@ type AuthView =
   | "signup-otp";
 
 export default function AuthFlow() {
-  const [view, setView] = useState<AuthView>("login");
+  const searchParams = useSearchParams();
+  const initialView = searchParams.get("view") === "signup" ? "signup" : "login";
+  const [view, setView] = useState<AuthView>(initialView);
+  const [signupCredentials, setSignupCredentials] = useState({
+    email: "",
+    password: "",
+  });
+  const [forgotPasswordState, setForgotPasswordState] = useState({
+    email: "",
+    code: "",
+  });
 
   if (view === "signup") {
     return (
       <Signup
         onLogin={() => setView("login")}
-        onVerifyOtp={() => setView("signup-otp")}
+        onVerifyOtp={(credentials) => {
+          setSignupCredentials(credentials);
+          setView("signup-otp");
+        }}
       />
     );
   }
@@ -33,6 +47,8 @@ export default function AuthFlow() {
   if (view === "signup-otp") {
     return (
       <SignupOtpScreen
+        email={signupCredentials.email}
+        password={signupCredentials.password}
         onBackToLogin={() => setView("login")}
         onVerifyOtp={() => setView("login")}
       />
@@ -44,7 +60,10 @@ export default function AuthFlow() {
       <Forgotpass
         onBackToLogin={() => setView("login")}
         onCreateAccount={() => setView("signup")}
-        onSendOtp={() => setView("forgot-otp")}
+        onSendOtp={(email) => {
+          setForgotPasswordState((current) => ({ ...current, email }));
+          setView("forgot-otp");
+        }}
       />
     );
   }
@@ -52,14 +71,24 @@ export default function AuthFlow() {
   if (view === "forgot-otp") {
     return (
       <ForgotOtpScreen
+        email={forgotPasswordState.email}
         onBackToLogin={() => setView("login")}
-        onVerifyOtp={() => setView("set-new-password")}
+        onVerifyOtp={(code) => {
+          setForgotPasswordState((current) => ({ ...current, code }));
+          setView("set-new-password");
+        }}
       />
     );
   }
 
   if (view === "set-new-password") {
-    return <SetNewPasswordScreen onBackToLogin={() => setView("login")} />;
+    return (
+      <SetNewPasswordScreen
+        email={forgotPasswordState.email}
+        code={forgotPasswordState.code}
+        onBackToLogin={() => setView("login")}
+      />
+    );
   }
 
   return (

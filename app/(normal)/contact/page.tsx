@@ -1,6 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 
+import { ContactEnquiryForm } from "@/components/contact/ContactEnquiryForm"
 import Hero from "@/components/contact/Hero"
 import { Button } from "@/components/ui/button"
 
@@ -77,53 +78,7 @@ function contact() {
                 <p>Come experience the art of Bandhej up close.</p>
               </div>
 
-              <form className="mt-7 bg-[#F7EFE6] px-7 py-9 md:px-10 md:py-11">
-                <p className="text-[0.65rem] font-semibold uppercase tracking-[0.48em] text-[#C39150]">
-                  Send a Message
-                </p>
-                <h3 className="mt-4 font-heading text-[2rem] font-medium leading-tight text-[#C39150]">
-                  Get in Touch
-                </h3>
-
-                <div className="mt-8 grid gap-x-7 gap-y-6 sm:grid-cols-2">
-                  <Field label="Full Name *" placeholder="Your name" />
-                  <Field label="Email Address *" placeholder="your@email.com" />
-                  <Field label="Phone Number" placeholder="+91 98765 43210" />
-                  <label className="block">
-                    <span className="text-[0.7rem] font-semibold text-[#22140f]">
-                      Category *
-                    </span>
-                    <select className="mt-3 h-12 w-full border border-[#C39150]/60 bg-transparent px-4 text-xs text-[#3F2617]/60 outline-none transition focus:border-[#3F2617]">
-                      <option>Select a category</option>
-                      <option>Bandhej Sarees</option>
-                      <option>Bandhej Dupattas</option>
-                      <option>Custom Order</option>
-                    </select>
-                  </label>
-                </div>
-
-                <div className="mt-6">
-                  <Field
-                    label="Subject *"
-                    placeholder="How can we help you"
-                  />
-                </div>
-
-                <label className="mt-6 block">
-                  <span className="text-[0.7rem] font-semibold text-[#22140f]">
-                    Message *
-                  </span>
-                  <textarea
-                    placeholder="Tell us more about your inquiry..."
-                    rows={7}
-                    className="mt-3 w-full resize-none border border-[#C39150]/60 bg-transparent px-4 py-4 text-xs outline-none transition placeholder:text-[#3F2617]/45 focus:border-[#3F2617]"
-                  />
-                </label>
-
-                <Button className="mt-9 h-12 w-48 rounded-[2px] bg-[#C39150] text-sm font-semibold tracking-[0.2em] text-white hover:bg-[#3F2617]">
-                  Send
-                </Button>
-              </form>
+              <ContactEnquiryForm />
             </div>
 
             <div>
@@ -241,21 +196,6 @@ function SectionEyebrow() {
       <span className="size-2.5 rotate-45 bg-[#C39150]" />
       <span className="h-px w-28 bg-linear-to-r from-[#C39150] to-transparent" />
     </div>
-  )
-}
-
-function Field({ label, placeholder }: { label: string; placeholder: string }) {
-  return (
-    <label className="block">
-      <span className="text-[0.7rem] font-semibold text-[#22140f]">
-        {label}
-      </span>
-      <input
-        type="text"
-        placeholder={placeholder}
-        className="mt-3 h-12 w-full border border-[#C39150]/60 bg-transparent px-4 text-xs outline-none transition placeholder:text-[#3F2617]/45 focus:border-[#3F2617]"
-      />
-    </label>
   )
 }
 

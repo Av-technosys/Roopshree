@@ -2,45 +2,78 @@ import Image from "next/image"
 import Link from "next/link"
 import { CalendarDays, Search, UserRound } from "lucide-react"
 
-import { blogCategories, blogPosts } from "@/components/global/const"
+import type { BlogCategoryView, BlogView } from "@/services/blog.service"
 
-export function BlogListingPage() {
+export function BlogListingPage({
+  posts,
+  categories,
+  activeCategory,
+  search,
+}: {
+  posts: BlogView[]
+  categories: BlogCategoryView[]
+  activeCategory?: string
+  search?: string
+}) {
   return (
     <main className="flex-1 bg-white pt-16">
       <BlogHero />
       <section className="mx-auto max-w-7xl px-5 py-10 sm:px-6 md:py-12 lg:px-8">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap gap-3">
-            {blogCategories.map((category, index) => (
-              <button
-                key={category}
-                type="button"
+            <Link
+              href="/blogs"
+              className={`inline-flex h-8 items-center rounded-full border px-6 text-xs font-semibold transition ${
+                !activeCategory
+                  ? "border-[#C39150] bg-[#C39150] text-white"
+                  : "border-transparent text-[#3F2617] hover:border-[#C39150]"
+              }`}
+            >
+              All
+            </Link>
+            {categories.map((category) => (
+              <Link
+                key={category.id}
+                href={`/blogs?category=${category.slug}`}
                 className={`h-8 rounded-full border px-6 text-xs font-semibold transition ${
-                  index === 0
+                  activeCategory === category.slug
                     ? "border-[#C39150] bg-[#C39150] text-white"
                     : "border-transparent text-[#3F2617] hover:border-[#C39150]"
                 }`}
               >
-                {category}
-              </button>
+                {category.name}
+              </Link>
             ))}
           </div>
 
-          <label className="flex h-9 w-full items-center gap-2 rounded-full border border-[#3F2617]/45 bg-white px-4 text-xs text-[#3F2617] sm:w-72">
-            <input
-              type="search"
-              placeholder="Search blog / journals"
-              className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[#3F2617]/70"
-            />
-            <Search className="size-4" />
-          </label>
+          <form action="/blogs" className="sm:w-72">
+            {activeCategory ? (
+              <input type="hidden" name="category" value={activeCategory} />
+            ) : null}
+            <label className="flex h-9 w-full items-center gap-2 rounded-full border border-[#3F2617]/45 bg-white px-4 text-xs text-[#3F2617]">
+              <input
+                name="search"
+                type="search"
+                defaultValue={search}
+                placeholder="Search blog / journals"
+                className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[#3F2617]/70"
+              />
+              <Search className="size-4" />
+            </label>
+          </form>
         </div>
 
-        <div className="mt-8 grid gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
-          {blogPosts.map((post, index) => (
-            <BlogCard key={`${post.title}-${index}`} post={post} />
-          ))}
-        </div>
+        {posts.length > 0 ? (
+          <div className="mt-8 grid gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
+            {posts.map((post) => (
+              <BlogCard key={post.id} post={post} />
+            ))}
+          </div>
+        ) : (
+          <div className="mt-8 border border-[#ead8c5] bg-[#fcf8f1] px-5 py-10 text-center text-sm font-medium text-[#3f2617]">
+            No blogs found in the database.
+          </div>
+        )}
       </section>
     </main>
   )
@@ -82,18 +115,24 @@ function BlogHero() {
   )
 }
 
-export function BlogCard({ post }: { post: (typeof blogPosts)[number] }) {
+export function BlogCard({ post }: { post: BlogView }) {
   return (
     <article className="group min-w-0">
       <Link href={`/blogs/${post.slug}`} className="block">
         <div className="relative aspect-[0.82] overflow-hidden bg-[#f7eadb]">
-          <Image
-            src={post.image}
-            alt={post.title}
-            fill
-            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-            className="object-cover object-top transition duration-500 group-hover:scale-[1.04]"
-          />
+          {post.image ? (
+            <Image
+              src={post.image}
+              alt={post.title}
+              fill
+              sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+              className="object-cover object-top transition duration-500 group-hover:scale-[1.04]"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center px-4 text-center text-sm font-medium text-[#3F2617]/70">
+              Blog image coming soon
+            </div>
+          )}
         </div>
         <h2 className="mt-4 font-heading text-sm font-semibold leading-snug text-[#3F2617]">
           {post.title}

@@ -1,6 +1,9 @@
 "use client";
 
 import { ArrowLeft, Mail } from "lucide-react";
+import { useState } from "react";
+import { forgotPasswordAction } from "@/actions/auth.action";
+import { useToast } from "@/components/common/ToastProvider";
 
 export default function Forgotpass({
   onBackToLogin,
@@ -9,8 +12,32 @@ export default function Forgotpass({
 }: {
   onBackToLogin?: () => void;
   onCreateAccount?: () => void;
-  onSendOtp?: () => void;
+  onSendOtp?: (email: string) => void;
 }) {
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showToast } = useToast();
+
+  async function handleForgotPassword(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    setIsSubmitting(true);
+
+    const response = await forgotPasswordAction({ email });
+
+    setIsSubmitting(false);
+
+    if (!response.ok) {
+      setError(response.error ?? "Unable to send OTP");
+      showToast({ title: response.error ?? "Unable to send OTP", tone: "error" });
+      return;
+    }
+
+    showToast({ title: "Password reset OTP sent", tone: "success" });
+    onSendOtp?.(email);
+  }
+
   return (
     <div className="min-h-screen w-full bg-white px-5 py-8 sm:px-8">
       <main className="mx-auto flex min-h-[calc(100vh-64px)] w-full max-w-[580px] flex-col justify-center">
@@ -34,10 +61,7 @@ export default function Forgotpass({
 
         <form
           className="space-y-8 "
-          onSubmit={(event) => {
-            event.preventDefault();
-            onSendOtp?.();
-          }}
+          onSubmit={handleForgotPassword}
         >
           <div className="flex h-14 items-center rounded-[4px] border border-[#c9914d] px-5 sm:h-16">
             <span className="mr-5 text-[#3b2418]">
@@ -47,15 +71,20 @@ export default function Forgotpass({
             <input
               type="email"
               placeholder="Email Address"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
               className="w-full bg-transparent text-sm text-[#3b2418] outline-none placeholder:text-[#8a8580] sm:text-base"
             />
           </div>
 
+          {error && <p className="text-sm font-medium text-red-600">{error}</p>}
+
           <button
             type="submit"
+            disabled={isSubmitting}
             className="h-14 w-full rounded-[4px] bg-[#c9914d] text-sm font-semibold tracking-[2px] text-white transition hover:bg-[#b57f3f] sm:h-[58px] sm:text-base"
           >
-            Send OTP
+            {isSubmitting ? "Sending..." : "Send OTP"}
           </button>
         </form>
 

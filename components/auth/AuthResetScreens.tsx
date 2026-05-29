@@ -2,16 +2,26 @@
 
 import { useRef, useState } from "react";
 import { ArrowLeft, Eye, EyeOff, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  confirmForgotPasswordAction,
+  confirmSignUpAction,
+  resendSignUpOtpAction,
+} from "@/actions/auth.action";
+import { useToast } from "@/components/common/ToastProvider";
 
 export function ForgotOtpScreen({
+  email,
   onBackToLogin,
   onVerifyOtp,
 }: {
+  email: string;
   onBackToLogin?: () => void;
-  onVerifyOtp?: () => void;
+  onVerifyOtp?: (code: string) => void;
 }) {
   return (
     <OtpScreen
+      email={email}
       title="Forgot Password"
       subtitle="Verify OTP to Reset Password"
       buttonText="Verify OTP"
@@ -22,14 +32,20 @@ export function ForgotOtpScreen({
 }
 
 export function SignupOtpScreen({
+  email,
+  password,
   onBackToLogin,
   onVerifyOtp,
 }: {
+  email: string;
+  password: string;
   onBackToLogin?: () => void;
   onVerifyOtp?: () => void;
 }) {
   return (
     <OtpScreen
+      email={email}
+      password={password}
       title="OTP Verification"
       subtitle="Verify OTP to Sign up"
       buttonText="Verify OTP"
@@ -40,12 +56,51 @@ export function SignupOtpScreen({
 }
 
 export function SetNewPasswordScreen({
+  email,
+  code,
   onBackToLogin,
 }: {
+  email: string;
+  code: string;
   onBackToLogin?: () => void;
 }) {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showToast } = useToast();
+
+  async function handleSetNewPassword(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match");
+      showToast({ title: "Passwords do not match", tone: "error" });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const response = await confirmForgotPasswordAction({
+      email,
+      code,
+      newPassword,
+    });
+
+    setIsSubmitting(false);
+
+    if (!response.ok) {
+      setError(response.error ?? "Unable to update password");
+      showToast({ title: response.error ?? "Unable to update password", tone: "error" });
+      return;
+    }
+
+    showToast({ title: "Password updated successfully", tone: "success" });
+    onBackToLogin?.();
+  }
 
   return (
     <PlainAuthShell onBackToLogin={onBackToLogin}>
@@ -60,10 +115,7 @@ export function SetNewPasswordScreen({
 
       <form
         className="space-y-6"
-        onSubmit={(event) => {
-          event.preventDefault();
-          onBackToLogin?.();
-        }}
+        onSubmit={handleSetNewPassword}
       >
         <PasswordInput
           placeholder="New Password"
@@ -71,6 +123,8 @@ export function SetNewPasswordScreen({
           icon={showNewPassword ? <EyeOff size={15} /> : <Eye size={15} />}
           label={showNewPassword ? "Hide new password" : "Show new password"}
           onToggle={() => setShowNewPassword((current) => !current)}
+          value={newPassword}
+          onChange={setNewPassword}
         />
 
         <PasswordInput
@@ -83,13 +137,18 @@ export function SetNewPasswordScreen({
               : "Show confirm password"
           }
           onToggle={() => setShowConfirmPassword((current) => !current)}
+          value={confirmPassword}
+          onChange={setConfirmPassword}
         />
+
+        {error && <p className="text-sm font-medium text-red-600">{error}</p>}
 
         <button
           type="submit"
+          disabled={isSubmitting}
           className="h-11 w-full rounded-[4px] bg-[#c9914d] text-xs font-semibold tracking-[2px] text-white transition hover:bg-[#b57f3f]"
         >
-          Update Password
+          {isSubmitting ? "Updating..." : "Update Password"}
         </button>
       </form>
     </PlainAuthShell>
@@ -97,19 +156,28 @@ export function SetNewPasswordScreen({
 }
 
 function OtpScreen({
+  email,
+  password,
   title,
   subtitle,
   buttonText,
   onBackToLogin,
   onVerifyOtp,
 }: {
+  email: string;
+  password?: string;
   title: string;
   subtitle: string;
   buttonText: string;
   onBackToLogin?: () => void;
-  onVerifyOtp?: () => void;
+  onVerifyOtp?: (code: string) => void;
 }) {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const router = useRouter();
+  const { showToast } = useToast();
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   function handleOtpChange(index: number, value: string) {
@@ -123,6 +191,60 @@ function OtpScreen({
     }
   }
 
+  async function handleVerifyOtp(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+
+    const code = otp.join("");
+
+    if (code.length !== 6) {
+      setError("Enter the 6 digit OTP");
+      showToast({ title: "Enter the 6 digit OTP", tone: "error" });
+      return;
+    }
+
+    if (!password) {
+      onVerifyOtp?.(code);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const response = await confirmSignUpAction({ email, code, password });
+
+    setIsSubmitting(false);
+
+    if (!response.ok) {
+      setError(response.error ?? "Unable to verify OTP");
+      showToast({ title: response.error ?? "Unable to verify OTP", tone: "error" });
+      return;
+    }
+
+    showToast({ title: "Account verified successfully", tone: "success" });
+    router.push("/dashboard");
+    router.refresh();
+    onVerifyOtp?.(code);
+  }
+
+  async function handleResendOtp() {
+    setError("");
+    setIsResending(true);
+
+    const response = await resendSignUpOtpAction({ email });
+
+    setIsResending(false);
+
+    if (!response.ok) {
+      setError(response.error ?? "Unable to resend OTP");
+      showToast({ title: response.error ?? "Unable to resend OTP", tone: "error" });
+      return;
+    }
+
+    setOtp(["", "", "", "", "", ""]);
+    inputRefs.current[0]?.focus();
+    showToast({ title: response.message ?? "OTP resent. Please check your inbox.", tone: "success" });
+  }
+
   return (
     <PlainAuthShell onBackToLogin={onBackToLogin}>
       <div className="mb-6">
@@ -134,10 +256,7 @@ function OtpScreen({
 
       <form
         className="space-y-6"
-        onSubmit={(event) => {
-          event.preventDefault();
-          onVerifyOtp?.();
-        }}
+        onSubmit={handleVerifyOtp}
       >
         <div className="grid grid-cols-6 gap-3 sm:gap-[26px]">
           {otp.map((digit, index) => (
@@ -161,12 +280,26 @@ function OtpScreen({
           ))}
         </div>
 
+        {error && <p className="text-sm font-medium text-red-600">{error}</p>}
+
         <button
           type="submit"
+          disabled={isSubmitting}
           className="h-11 w-full rounded-[4px] bg-[#c9914d] text-xs font-semibold tracking-[2px] text-white transition hover:bg-[#b57f3f]"
         >
-          {buttonText}
+          {isSubmitting ? "Verifying..." : buttonText}
         </button>
+
+        {password && (
+          <button
+            type="button"
+            disabled={isResending}
+            onClick={handleResendOtp}
+            className="w-full rounded-[4px] text-center text-xs font-semibold text-[#3b2418] underline transition hover:text-[#c9914d] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isResending ? "Resending OTP..." : "Resend OTP"}
+          </button>
+        )}
       </form>
     </PlainAuthShell>
   );
@@ -178,12 +311,16 @@ function PasswordInput({
   icon,
   label,
   onToggle,
+  value,
+  onChange,
 }: {
   placeholder: string;
   type: string;
   icon: React.ReactNode;
   label: string;
   onToggle: () => void;
+  value: string;
+  onChange: (value: string) => void;
 }) {
   return (
     <div className="flex h-11 items-center rounded-[4px] border border-[#c9914d] px-4">
@@ -194,6 +331,8 @@ function PasswordInput({
       <input
         type={type}
         placeholder={placeholder}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
         className="w-full bg-transparent text-sm text-[#3b2418] outline-none placeholder:text-[#8a8580]"
       />
 

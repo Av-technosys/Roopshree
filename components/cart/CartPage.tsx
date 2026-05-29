@@ -3,15 +3,19 @@
 import { CartItemRow } from "@/components/cart/CartItemRow"
 import { OrderSummary } from "@/components/cart/OrderSummary"
 import { ProductRecommendations } from "@/components/cart/ProductRecommendations"
-import { getCartSummary, products } from "@/components/global/const"
+import { getCartSummary, type Product } from "@/components/global/const"
 import { useCartStore } from "@/store/cartStore"
 import type { CartItem } from "@/store/cartTypes"
 
 const cartBackgroundImage = "/404.png"
 
-export function CartPage() {
+export function CartPage({
+  recommendedProducts,
+}: {
+  recommendedProducts?: Product[]
+}) {
   const cartItems = useCartStore((state) => state.items)
-  const recommendedProducts = products.slice(0, 5)
+  const productItems = recommendedProducts ?? []
 
   const summary = getCartSummary(cartItems)
 
@@ -36,7 +40,7 @@ export function CartPage() {
             />
           </div>
 
-          <ProductRecommendations products={recommendedProducts} />
+          <ProductRecommendations products={productItems} />
         </div>
       </section>
     </main>

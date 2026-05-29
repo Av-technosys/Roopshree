@@ -1,0 +1,19 @@
+export default function getEnvVariable(name: string): string {
+  const value = process.env[name];
+
+  if (!value) {
+    throw new Error(`Environment variable ${name} is not defined`);
+  }
+
+  return value;
+}
+
+export const AWS_REGION = getEnvVariable("AWS_REGION");
+export const SES_AWS_ACCESS_KEY_ID = getEnvVariable("SES_AWS_ACCESS_KEY_ID");
+export const SES_AWS_SECRET_ACCESS_KEY = getEnvVariable("SES_AWS_SECRET_ACCESS_KEY");   
+export const DATABASE_URL = getEnvVariable("DATABASE_URL");
+export const AWS_ACCESS_KEY_ID = getEnvVariable("AWS_ACCESS_KEY");
+export const COGNITO_CLIENT_ID = getEnvVariable("COGNITO_CLIENT_ID");
+export const COGNITO_CLIENT_SECRET = getEnvVariable("COGNITO_CLIENT_SECRET");
+export const USER_POOL_ID = getEnvVariable("USER_POOL_ID");
+export const AWS_SECRET_ACCESS_KEY = getEnvVariable("AWS_SECRET_KEY");

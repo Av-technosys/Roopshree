@@ -5,6 +5,8 @@ export type CartAttribute = {
 
 export type CartItem = {
   productId: string
+  dbProductId?: string
+  variantId?: string
   title: string
   price: number
   image: string

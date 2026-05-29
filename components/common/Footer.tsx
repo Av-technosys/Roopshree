@@ -1,27 +1,37 @@
 import Image from "next/image"
 import Link from "next/link"
-import { Camera, Mail } from "lucide-react"
 
+import { FooterNewsletterForm } from "@/components/common/FooterNewsletterForm"
 import { Button } from "@/components/ui/button"
+import { getCatalogCategories } from "@/services/product.service"
+import { IconBrandInstagram, IconMail } from "@tabler/icons-react"
 
-const quickLinks = ["Home", "About", "Shop", "Contact Us", "Enquiry", "Blogs"]
-const categories = [
-  "Gottapatti",
-  "Zardosi",
-  "Plain Fabric Dupatta",
-  "Brooch",
-  "Shrug",
-  "Jaal",
-  "Open Dupatta",
+type FooterLink = {
+  label: string
+  href: string
+}
+
+const quickLinks: FooterLink[] = [
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Shop", href: "/shop" },
+  { label: "Contact Us", href: "/contact" },
+  { label: "Enquiry", href: "/contact" },
+  { label: "Blogs", href: "/blogs" },
 ]
-const customerServices = [
-  "Orders",
-  "Terms & Conditions",
-  "Shipping",
-  "Privacy Policy",
+const customerServices: FooterLink[] = [
+  { label: "Orders", href: "/dashboard" },
+  { label: "Terms & Conditions", href: "/" },
+  { label: "Shipping", href: "/" },
+  { label: "Privacy Policy", href: "/" },
 ]
 
-const Footer = () => {
+const Footer = async () => {
+  const categories = (await getCatalogCategories(7)).map((category) => ({
+    label: category.name,
+    href: category.href,
+  }))
+
   return (
     <footer className="relative overflow-hidden border-t border-[#C39150] bg-[#F1E1CD] text-[#3F2617] md:bg-[#C39150]/15">
       <Image
@@ -48,11 +58,21 @@ const Footer = () => {
             confidence everywhere.
           </p>
           <div className="mt-5 flex gap-3">
-            <Button aria-label="Instagram" size="icon-sm" variant="ghost">
-              <Camera className="size-4 text-[#C39150]" />
+            <Button
+              aria-label="Instagram"
+              size="icon-sm"
+              variant="ghost"
+              className="bg-[#FEEDD0] hover:bg-[#FEEDD0]"
+            >
+              <IconBrandInstagram className="size-6 text-[#3F2617]/70" />
             </Button>
-            <Button aria-label="Email" size="icon-sm" variant="ghost">
-              <Mail className="size-4 text-[#C39150]" />
+            <Button
+              aria-label="Email"
+              size="icon-sm"
+              variant="ghost"
+              className="bg-[#FEEDD0] hover:bg-[#FEEDD0]"
+            >
+              <IconMail className="size-6 text-[#3F2617]/70" />
             </Button>
           </div>
         </div>
@@ -65,16 +85,7 @@ const Footer = () => {
           <h2 className="mb-5 text-xl font-medium text-[#3F2617]">
             Newsletter Subscription
           </h2>
-          <form className="space-y-3">
-            <input
-              type="email"
-              placeholder="Enter your Email"
-              className="h-11 w-full border border-[#C39150] bg-white/45 px-4 text-sm outline-none placeholder:text-[#3F2617]/60 focus:border-[#3F2617]"
-            />
-            <Button className="h-11 w-full rounded-none bg-[#3F2617] text-white hover:bg-[#C39150]">
-              Submit
-            </Button>
-          </form>
+          <FooterNewsletterForm />
           <p className="mt-5 text-sm leading-6 text-[#3F2617]/70">
             Your feedback helps us grow. Share your thoughts and suggestions
             with us anytime.
@@ -95,15 +106,15 @@ const Footer = () => {
   )
 }
 
-function FooterColumn({ title, items }: { title: string; items: string[] }) {
+function FooterColumn({ title, items }: { title: string; items: FooterLink[] }) {
   return (
     <div>
       <h2 className="mb-5 text-xl font-medium text-[#3F2617]">{title}</h2>
       <ul className="space-y-3 text-sm text-[#3F2617]/70">
         {items.map((item) => (
-          <li key={item}>
-            <Link href="/" className="transition-colors hover:text-[#C18F50]">
-              {item}
+          <li key={`${title}-${item.href}-${item.label}`}>
+            <Link href={item.href} className="transition-colors hover:text-[#C18F50]">
+              {item.label}
             </Link>
           </li>
         ))}

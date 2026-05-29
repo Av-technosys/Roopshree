@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1779867862746,
+      "tag": "0000_marvelous_virginia_dare",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1779875451504,
+      "tag": "0001_faithful_mantis",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779951422281,
+      "tag": "0002_nappy_scarecrow",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1780039999018,
+      "tag": "0003_real_cardiac",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import { OrderDetailPage } from "@/components/dashboard/OrderDetailPage"
+import { getDashboardOrderDetails } from "@/services/order.service"
 
 export default async function Page({
   params,
@@ -6,6 +7,7 @@ export default async function Page({
   params: Promise<{ orderId: string }>
 }) {
   const { orderId } = await params
+  const details = await getDashboardOrderDetails(orderId)
 
-  return <OrderDetailPage orderId={orderId} />
+  return <OrderDetailPage details={details} />
 }

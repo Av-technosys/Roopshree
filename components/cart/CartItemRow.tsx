@@ -2,20 +2,24 @@ import Image from "next/image"
 import { Minus, Plus, Trash2 } from "lucide-react"
 
 import { formatPrice } from "@/components/global/const"
+import { useAddToCart } from "@/hooks/useAddToCart"
 import { useWishlist } from "@/hooks/useWishlist"
-import { useCartStore } from "@/store/cartStore"
 import type { CartItem } from "@/store/cartTypes"
 import { useRouter } from "next/navigation"
 
 export function CartItemRow({ item }: { item: CartItem }) {
-  const increase = useCartStore((state) => state.increase)
-  const decrease = useCartStore((state) => state.decrease)
-  const removeItem = useCartStore((state) => state.removeItem)
+  const {
+    handleDecreaseCartItem,
+    handleIncreaseCartItem,
+    handleRemoveCartItem,
+  } = useAddToCart()
   const { handleToggleWishlist } = useWishlist()
   const router = useRouter()
   const total = item.price * item.quantity
   const wishlistItem = {
     productId: item.productId,
+    dbProductId: item.dbProductId,
+    variantId: item.variantId,
     title: item.title,
     price: item.price,
     image: item.image,
@@ -28,13 +32,19 @@ export function CartItemRow({ item }: { item: CartItem }) {
     <article className="grid gap-4 border-b border-[#3F2617]/55 py-4 md:grid-cols-[minmax(0,1fr)_110px_110px_110px_56px] md:items-start">
       <div className="flex min-w-0 gap-4">
         <div className="relative h-[74px] w-[62px] shrink-0 overflow-hidden bg-[#f7eadb]">
-          <Image
-            src={item.image}
-            alt={item.title}
-            fill
-            sizes="62px"
-            className="object-contain object-top"
-          />
+          {item.image ? (
+            <Image
+              src={item.image}
+              alt={item.title}
+              fill
+              sizes="62px"
+              className="object-contain object-top"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center px-2 text-center text-[10px] font-medium text-[#3f2617]/70">
+              No image
+            </div>
+          )}
         </div>
         <div className="min-w-0 pt-0.5">
           <h2 className="font-heading text-sm font-semibold leading-snug text-[#3F2617]">
@@ -54,7 +64,7 @@ export function CartItemRow({ item }: { item: CartItem }) {
           <button
             type="button"
             aria-label="Decrease quantity"
-            onClick={() => decrease(item.productId, item.attributes)}
+            onClick={() => handleDecreaseCartItem(item)}
           >
             <Minus className="size-3" />
           </button>
@@ -62,7 +72,7 @@ export function CartItemRow({ item }: { item: CartItem }) {
           <button
             type="button"
             aria-label="Increase quantity"
-            onClick={() => increase(item.productId, item.attributes)}
+            onClick={() => handleIncreaseCartItem(item)}
           >
             <Plus className="size-3" />
           </button>
@@ -76,7 +86,7 @@ export function CartItemRow({ item }: { item: CartItem }) {
         <button
           type="button"
           aria-label="Remove item"
-          onClick={() => removeItem(item.productId, item.attributes)}
+          onClick={() => handleRemoveCartItem(item)}
           className="text-red-500 transition hover:text-red-600"
         >
           <Trash2 className="size-4" />
@@ -87,7 +97,7 @@ export function CartItemRow({ item }: { item: CartItem }) {
         type="button"
         onClick={() => {
           handleToggleWishlist(wishlistItem)
-          removeItem(item.productId, item.attributes)
+          handleRemoveCartItem(item)
           router.push("/wishlist")
         }}
         className="text-left text-[11px] font-medium text-[#C39150] transition hover:text-[#3F2617] md:col-start-4 md:col-end-6 md:justify-self-end md:whitespace-nowrap md:text-right"

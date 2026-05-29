@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   ChevronLeft,
   ChevronRight,
@@ -13,6 +14,7 @@ import {
   Trash2,
 } from "lucide-react"
 
+import { formatPrice } from "@/components/global/const"
 import { Button } from "@/components/ui/button"
 import { useAddToCart } from "@/hooks/useAddToCart"
 import { useWishlist } from "@/hooks/useWishlist"
@@ -20,76 +22,129 @@ import { useCartStore } from "@/store/cartStore"
 import { useWishlistStore } from "@/store/wishlistStore"
 import type { CartItemInput } from "@/store/cartTypes"
 
-const colors = [
-  {
-    name: "Red",
-    image: "/product/color1.png",
-    mainImage: "/product/product_img.png",
-  },
-  {
-    name: "Rani Pink",
-    image: "/product/color2.png",
-    mainImage: "/product/color2.png",
-  },
-  {
-    name: "Green",
-    image: "/product/color3.png",
-    mainImage: "/product/color3.png",
-  },
-  {
-    name: "Wine",
-    image: "/product/color4.png",
-    mainImage: "/product/color4.png",
-  },
-]
-
-const galleryImages = [
-  {
-    src: "/product/product_img.png",
-    alt: "Front view of red Bandhej saree",
-  },
-  {
-    src: "/home/shrug.png",
-    alt: "Bandhej fabric detail",
-  },
-  {
-    src: "/home/zardozi.png",
-    alt: "Bandhej handwork border detail",
-  },
-  {
-    src: "/home/brouch.png",
-    alt: "Bandhej styling detail",
-  },
-]
+export type ProductDetailView = {
+  id: string
+  slug: string
+  name: string
+  sku: string
+  description: string
+  price: number
+  strikeThroughPrice: number | null
+  variants: {
+    id: string
+    title: string
+    sku: string
+    price: number
+    strikeThroughPrice: number | null
+    stockQuantity: number
+    color: string | null
+    fabric: string | null
+    size: string | null
+    isDefault: boolean
+    rating: number
+    reviewCount: number
+    image: string
+  }[]
+  media: {
+    id: string
+    src: string
+    alt: string
+    variantId: string
+    isPrimary: boolean
+  }[]
+  attributes: {
+    id: string
+    name: string
+    value: string
+  }[]
+  reviews: {
+    id: string
+    rating: number
+    title: string
+    message: string
+    reviewerName: string
+    createdAt: string
+  }[]
+  reviewSummary: {
+    averageRating: number
+    reviewCount: number
+    ratingRows: {
+      rating: number
+      percent: number
+    }[]
+  }
+}
 
 const breadcrumbs = ["Home", "Categories", "Products", "Product Details"]
 
-const ProductDetails = () => {
-  const { handleAddToCart } = useAddToCart()
+const ProductDetails = ({ product }: { product: ProductDetailView }) => {
+  const router = useRouter()
+  const {
+    handleAddToCart,
+    handleDecreaseCartItem,
+    handleIncreaseCartItem,
+    handleRemoveCartItem,
+  } = useAddToCart()
   const { handleToggleWishlist } = useWishlist()
-  const increase = useCartStore((state) => state.increase)
-  const decrease = useCartStore((state) => state.decrease)
-  const removeItem = useCartStore((state) => state.removeItem)
-  const [selectedColor, setSelectedColor] = useState(colors[0])
-  const [selectedGalleryImage, setSelectedGalleryImage] = useState<
-    (typeof galleryImages)[number] | null
-  >(null)
-  const displayedImage = selectedGalleryImage?.src ?? selectedColor.mainImage
-  const displayedAlt =
-    selectedGalleryImage?.alt ??
-    `Traditional Bandhej Saree in ${selectedColor.name}`
+  const defaultVariant =
+    product.variants.find((variant) => variant.isDefault) ??
+    product.variants[0] ??
+    null
+  const [selectedVariantId, setSelectedVariantId] = useState(
+    defaultVariant?.id ?? ""
+  )
+  const [selectedMediaId, setSelectedMediaId] = useState<string | null>(null)
+  const selectedVariant =
+    product.variants.find((variant) => variant.id === selectedVariantId) ??
+    defaultVariant
+  const selectedMedia =
+    product.media.find((item) => item.id === selectedMediaId) ??
+    product.media.find((item) => item.variantId === selectedVariant?.id) ??
+    product.media.find(
+      (item) => item.variantId === defaultVariant?.id && item.isPrimary
+    ) ??
+    product.media[0] ??
+    null
+  const selectedVariantMedia = product.media.filter(
+    (item) => item.variantId === selectedVariant?.id
+  )
+  const galleryMedia = selectedVariantMedia.length
+    ? selectedVariantMedia
+    : product.media.filter((item) => item.variantId === defaultVariant?.id)
+  const displayedImage = selectedMedia?.src ?? selectedVariant?.image ?? ""
+  const displayedAlt = selectedMedia?.alt ?? product.name
+  const price = selectedVariant?.price ?? product.price
+  const strikeThroughPrice =
+    selectedVariant?.strikeThroughPrice ?? product.strikeThroughPrice
+  const discount =
+    strikeThroughPrice && strikeThroughPrice > price
+      ? Math.round(((strikeThroughPrice - price) / strikeThroughPrice) * 100)
+      : null
+  const variantAttributes = useMemo(
+    () =>
+      [
+        selectedVariant?.color
+          ? { name: "Colour", value: selectedVariant.color }
+          : null,
+        selectedVariant?.fabric
+          ? { name: "Fabric", value: selectedVariant.fabric }
+          : null,
+        selectedVariant?.size
+          ? { name: "Size", value: selectedVariant.size }
+          : null,
+      ].filter(Boolean) as { name: string; value: string }[],
+    [selectedVariant]
+  )
   const cartItem: CartItemInput = {
-    productId: "traditional-bandhej-saree",
-    title: "Tradational Bandhej Saree with Lagdi Patta Saree",
-    price: 4850,
-    image: selectedColor.mainImage,
-    colour: selectedColor.name,
+    productId: `${product.slug}:${selectedVariant?.id ?? "default"}`,
+    dbProductId: product.id,
+    variantId: selectedVariant?.id,
+    title: product.name,
+    price,
+    image: displayedImage,
+    colour: selectedVariant?.color ?? undefined,
     imageClass: "object-top",
-    attributes: [
-      { name: "Colour", value: selectedColor.name },
-      { name: "Fabric", value: "Silk" },
-      { name: "Size", value: "Saree 5.5 mtr with Blouse 0.8 mtr" },
-    ],
+    attributes: variantAttributes.length ? variantAttributes : undefined,
   }
   const cartQuantity = useCartStore(
     (state) =>
@@ -120,154 +175,193 @@ const ProductDetails = () => {
         <div className="grid gap-9 lg:grid-cols-[1.05fr_0.95fr] lg:gap-7">
           <div className="min-w-0">
             <div className="relative aspect-[0.83] overflow-hidden bg-[#f2e4d7] sm:aspect-[0.78] lg:aspect-[0.83]">
-              <Image
-                src={displayedImage}
-                alt={displayedAlt}
-                fill
-                priority
-                sizes="(min-width: 1024px) 52vw, 100vw"
-                className="object-cover object-top"
-              />
+              {displayedImage ? (
+                <Image
+                  src={displayedImage}
+                  alt={displayedAlt}
+                  fill
+                  priority
+                  sizes="(min-width: 1024px) 52vw, 100vw"
+                  className="object-cover object-top"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center px-6 text-center text-sm font-medium text-[#3f2617]/70">
+                  Product image coming soon
+                </div>
+              )}
             </div>
 
-            <div className="mt-7 flex items-center gap-4">
-              <button
-                type="button"
-                aria-label="Previous product image"
-                className="hidden text-[#c39150] md:block"
-              >
-                <ChevronLeft className="size-4" />
-              </button>
+            {galleryMedia.length > 0 ? (
+              <div className="mt-7 flex items-center gap-4">
+                <button
+                  type="button"
+                  aria-label="Previous product image"
+                  className="hidden text-[#c39150] md:block"
+                >
+                  <ChevronLeft className="size-4" />
+                </button>
 
-              <div className="grid flex-1 grid-cols-4 gap-3 sm:gap-5">
-                {galleryImages.map((image) => (
-                  <button
-                    key={image.src}
-                    type="button"
-                    onClick={() => setSelectedGalleryImage(image)}
-                    className={`relative aspect-[0.78] overflow-hidden border transition ${
-                      displayedImage === image.src
-                        ? "border-[#c39150]"
-                        : "border-transparent"
-                    }`}
-                    aria-label="View product image"
-                  >
-                    <Image
-                      src={image.src}
-                      alt={image.alt}
-                      fill
-                      sizes="(min-width: 1024px) 130px, 24vw"
-                      className="object-cover object-top"
-                    />
-                  </button>
-                ))}
+                <div className="grid flex-1 grid-cols-4 gap-3 sm:gap-5">
+                  {galleryMedia.slice(0, 4).map((image) => (
+                    <button
+                      key={image.id}
+                      type="button"
+                      onClick={() => setSelectedMediaId(image.id)}
+                      className={`relative aspect-[0.78] overflow-hidden border transition ${
+                        selectedMedia?.id === image.id
+                          ? "border-[#c39150]"
+                          : "border-transparent"
+                      }`}
+                      aria-label="View product image"
+                    >
+                      <Image
+                        src={image.src}
+                        alt={image.alt}
+                        fill
+                        sizes="(min-width: 1024px) 130px, 24vw"
+                        className="object-cover object-top"
+                      />
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  aria-label="Next product image"
+                  className="hidden text-[#c39150] md:block"
+                >
+                  <ChevronRight className="size-4" />
+                </button>
               </div>
-
-              <button
-                type="button"
-                aria-label="Next product image"
-                className="hidden text-[#c39150] md:block"
-              >
-                <ChevronRight className="size-4" />
-              </button>
-            </div>
+            ) : null}
           </div>
 
           <div className="min-w-0 lg:pt-1">
             <h1 className="max-w-2xl font-heading text-[2rem] leading-[1.18] text-black md:text-[2.45rem]">
-              Tradational Bandhej Saree with Lagdi Patta Saree
+              {product.name}
             </h1>
             <p className="mt-5 text-xs font-semibold uppercase text-black">
-              SKU: RNPE-SAREE
+              SKU: {selectedVariant?.sku ?? product.sku}
             </p>
 
             <div className="mt-5 flex flex-wrap items-baseline gap-4">
               <p className="text-3xl font-bold text-black md:text-4xl">
-                ₹4,850
+                {formatPrice(price)}
               </p>
-              <p className="text-xl text-[#5f5a55] line-through">₹6,500</p>
-              <p className="text-xl text-[#c39150]">(25% OFF)</p>
+              {strikeThroughPrice ? (
+                <p className="text-xl text-[#5f5a55] line-through">
+                  {formatPrice(strikeThroughPrice)}
+                </p>
+              ) : null}
+              {discount ? (
+                <p className="text-xl text-[#c39150]">({discount}% OFF)</p>
+              ) : null}
             </div>
 
-            <p className="mt-7 max-w-[35rem] text-sm  leading-5 text-black">
-              Modal silk is a premium fabric known for its smooth and lustrous
-              texture. A Modal silk Bandhej piece is timeless, elegant, and
-              deeply rooted in tradition. It is traditionally woven in Gujarat
-              and Rajasthan. The fabric is strong, durable, and has a rich
-              glossy finish.
-            </p>
-
-            <div className="mt-7">
-              <p className="text-xs font-bold uppercase text-black">
-                Colour: {selectedColor.name}
+            {product.description ? (
+              <p className="mt-7 max-w-[35rem] text-sm leading-5 text-black">
+                {product.description}
               </p>
-              <div className="mt-4 flex gap-4">
-                {colors.map((color) => (
-                  <button
-                    key={color.name}
-                    type="button"
-                    onClick={() => {
-                      setSelectedColor(color)
-                      setSelectedGalleryImage(null)
-                    }}
-                    className={`relative h-24 w-20 overflow-hidden border transition md:h-[7.4rem] md:w-[6.1rem] ${
-                      selectedColor.name === color.name
-                        ? "border-[#c39150]"
-                        : "border-transparent"
-                    }`}
-                    aria-label={`Choose ${color.name}`}
+            ) : null}
+
+            {product.variants.length > 0 ? (
+              <div className="mt-7">
+                <p className="text-xs font-bold uppercase text-black">
+                  Colour: {selectedVariant?.color ?? selectedVariant?.title}
+                </p>
+                <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
+                  {product.variants.map((variant) => (
+                    <button
+                      key={variant.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedVariantId(variant.id)
+                        setSelectedMediaId(null)
+                      }}
+                      className={`overflow-hidden rounded-[3px] border bg-white text-left transition ${
+                        selectedVariant?.id === variant.id
+                          ? "border-[#c39150] shadow-sm"
+                          : "border-[#d8b278] hover:border-[#c39150]"
+                      }`}
+                    >
+                      <span className="relative block aspect-[0.78] bg-[#f8efe6]">
+                        {variant.image ? (
+                          <Image
+                            src={variant.image}
+                            alt={variant.title}
+                            fill
+                            sizes="120px"
+                            className="object-cover object-top"
+                          />
+                        ) : null}
+                      </span>
+                      <span className="block truncate px-2 py-2 text-xs font-semibold text-[#3f2617]">
+                        {variant.color ?? variant.title}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {variantAttributes.length > 0 ? (
+              <div className="mt-6 grid gap-3">
+                {variantAttributes.map((attribute) => (
+                  <div
+                    key={`${attribute.name}-${attribute.value}`}
+                    className="flex min-h-11 items-center justify-between gap-4 border border-[#d8b278] px-4 text-sm"
                   >
-                    <Image
-                      src={color.image}
-                      alt={`${color.name} saree color`}
-                      fill
-                      sizes="100px"
-                      className="object-cover object-top"
-                    />
-                  </button>
+                    <span className="text-xs font-medium uppercase text-black">
+                      {attribute.name}
+                    </span>
+                    <span className="text-right font-medium text-[#3f2617]">
+                      {attribute.value}
+                    </span>
+                  </div>
                 ))}
               </div>
-            </div>
-
-            <div className="mt-6 space-y-5">
-              <label className="block text-xs font-medium uppercase text-black">
-                Fabric
-                <select className="mt-3 h-12 w-full rounded-none border border-[#d8b278] bg-white px-4 text-sm font-medium text-black outline-none">
-                  <option>Silk</option>
-                </select>
-              </label>
-
-              <label className="block text-xs font-medium uppercase text-black">
-                Size
-                <select className="mt-3 h-12 w-full rounded-none border border-[#d8b278] bg-white px-4 text-sm font-medium text-black outline-none">
-                  <option>Saree 5.5 mtr with Blouse 0.8 mtr</option>
-                </select>
-              </label>
-            </div>
+            ) : null}
 
             <div className="mt-6 grid gap-2">
               {isInCart ? (
                 <ProductQuantityControls
                   quantity={cartQuantity}
                   onDecrease={() =>
-                    decrease(cartItem.productId, cartItem.attributes)
+                    handleDecreaseCartItem(cartItem)
                   }
                   onIncrease={() =>
-                    increase(cartItem.productId, cartItem.attributes)
+                    handleIncreaseCartItem(cartItem)
                   }
                   onRemove={() =>
-                    removeItem(cartItem.productId, cartItem.attributes)
+                    handleRemoveCartItem(cartItem)
                   }
                 />
               ) : (
                 <Button
                   onClick={() => handleAddToCart(cartItem)}
-                  className="h-12 rounded-none bg-[#c39150] text-sm font-semibold text-white hover:bg-[#3f2617]"
+                  disabled={selectedVariant?.stockQuantity === 0}
+                  className="h-12 rounded-none bg-[#c39150] text-sm font-semibold text-white hover:bg-[#3f2617] disabled:opacity-60"
                 >
-                  Add to cart
+                  {selectedVariant?.stockQuantity === 0
+                    ? "Out of stock"
+                    : "Add to cart"}
                 </Button>
               )}
-              <Button className="h-12 rounded-none bg-[#3f2617] text-sm font-semibold text-white hover:bg-[#c39150]">
+              <Button
+                disabled={selectedVariant?.stockQuantity === 0}
+                onClick={() => {
+                  window.sessionStorage.setItem(
+                    "roopshree-buy-now",
+                    JSON.stringify({
+                      ...cartItem,
+                      quantity: 1,
+                      addedAt: Date.now(),
+                    }),
+                  )
+                  router.push("/checkout?source=buy-now")
+                }}
+                className="h-12 rounded-none bg-[#3f2617] text-sm font-semibold text-white hover:bg-[#c39150] disabled:opacity-60"
+              >
                 Buy Now
               </Button>
             </div>

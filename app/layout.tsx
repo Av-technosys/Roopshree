@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist_Mono, Playfair_Display, Poppins } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { ToastProvider } from "@/components/common/ToastProvider";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -40,7 +41,9 @@ export default function RootLayout({
         geistMono.variable
       )}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ToastProvider>{children}</ToastProvider>
+      </body>
     </html>
   );
 }

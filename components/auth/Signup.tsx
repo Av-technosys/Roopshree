@@ -3,18 +3,65 @@
 import Image from "next/image";
 import { useState } from "react";
 import { Eye, EyeOff, Lock, Mail, Phone, User } from "lucide-react";
+import { signUpAction } from "@/actions/auth.action";
+import { useToast } from "@/components/common/ToastProvider";
 
 export default function Signup({
   onLogin,
   onVerifyOtp,
 }: {
   onLogin?: () => void;
-  onVerifyOtp?: () => void;
+  onVerifyOtp?: (credentials: { email: string; password: string }) => void;
 }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showToast } = useToast();
   const showWeakPasswordWarning =
     password.length > 0 && !isStrongPassword(password);
+
+  async function handleSignup(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      showToast({ title: "Passwords do not match", tone: "error" });
+      return;
+    }
+
+    if (!isStrongPassword(password)) {
+      setError("Please use a stronger password");
+      showToast({ title: "Please use a stronger password", tone: "error" });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const response = await signUpAction({
+      name,
+      email: normalizedEmail,
+      phone,
+      password,
+    });
+
+    setIsSubmitting(false);
+
+    if (!response.ok) {
+      setError(response.error ?? "Unable to create account");
+      showToast({ title: response.error ?? "Unable to create account", tone: "error" });
+      return;
+    }
+
+    showToast({ title: response.message ?? "OTP sent. Please check your inbox.", tone: "success" });
+    onVerifyOtp?.({ email: normalizedEmail, password });
+  }
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-white lg:bg-[#f3dfc7] lg:bg-[url('/auth/login_bg.png')] lg:bg-cover lg:bg-center lg:bg-no-repeat">
@@ -45,19 +92,28 @@ export default function Signup({
 
             <form
               className="space-y-3 lg:space-y-4 xl:space-y-5"
-              onSubmit={(event) => {
-                event.preventDefault();
-                onVerifyOtp?.();
-              }}
+              onSubmit={handleSignup}
             >
-              <InputBox icon={<User size={18} />} placeholder="Full Name" />
+              <InputBox
+                icon={<User size={18} />}
+                placeholder="Full Name"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+              />
 
-              <InputBox icon={<Mail size={18} />} placeholder="Email Address" />
+              <InputBox
+                icon={<Mail size={18} />}
+                placeholder="Email Address"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
 
               <InputBox
                 icon={<Phone size={18} />}
                 placeholder="Mobile Number"
                 type="tel"
+                value={phone}
+                onChange={(event) => setPhone(event.target.value)}
               />
 
               <InputBox
@@ -75,6 +131,8 @@ export default function Signup({
                 icon={<Lock size={18} />}
                 placeholder="Confirm Password"
                 type="password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
               />
 
               {showWeakPasswordWarning && (
@@ -83,11 +141,16 @@ export default function Signup({
                 </p>
               )}
 
+              {error && (
+                <p className="text-xs font-medium text-red-500">{error}</p>
+              )}
+
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className="h-11 w-full rounded-[4px] bg-[#c9914d] text-xs font-semibold tracking-[1px] text-white transition hover:bg-[#b57f3f] lg:h-11 lg:text-sm lg:tracking-[1.5px] xl:h-12 xl:text-base"
               >
-                Sign Up
+                {isSubmitting ? "Signing Up..." : "Sign Up"}
               </button>
             </form>
 

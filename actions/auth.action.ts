@@ -1,0 +1,278 @@
+'use server'
+
+import { cookies } from 'next/headers'
+import {
+  authSignIn,
+  cognitoConfirmForgotPassword,
+  cognitoConfirmSignUp,
+  cognitoForgotPassword,
+  cognitoResendConfirmationCode,
+  cognitoSignUp,
+} from '@/helper/cognito'
+import {
+  assertCompleteTokenSet,
+  getAuthCookiePayload,
+  getClearAuthCookiePayload,
+} from '@/lib/auth-cookies'
+import { getUserClaimsFromIdToken } from '@/lib/auth-token'
+import { syncProfileFromAuthClaimsService } from '@/services/user.service'
+
+type AuthActionResult = {
+  ok: boolean
+  error?: string
+  message?: string
+}
+
+function getNormalizedEmail(email: string) {
+  return email.trim().toLowerCase()
+}
+
+function getSignupPhoneNumber(phone: string) {
+  const digits = phone.replace(/[^\d]/g, '')
+  const withoutCountryCode =
+    digits.length === 12 && digits.startsWith('91') ? digits.slice(2) : digits
+
+  if (withoutCountryCode.length !== 10) {
+    throw new Error('Mobile number must be exactly 10 digits')
+  }
+
+  return `+91${withoutCountryCode}`
+}
+
+function getAuthErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message) {
+    return error.message
+  }
+
+  return fallback
+}
+
+function hasAuthErrorName(error: unknown, name: string) {
+  return error instanceof Error && error.name === name
+}
+
+function getDeliveryMessage(
+  details?: {
+    DeliveryMedium?: string
+    Destination?: string
+  },
+  fallback = 'OTP sent. Please check your inbox.',
+) {
+  if (!details?.Destination) return fallback
+
+  const medium = details.DeliveryMedium?.toLowerCase()
+  const destination = details.Destination
+
+  if (medium === 'email') {
+    return `OTP sent to ${destination}`
+  }
+
+  if (medium === 'sms') {
+    return `OTP sent on ${destination}`
+  }
+
+  return `OTP sent to ${destination}`
+}
+
+async function setAuthCookies(email: string, password: string) {
+  const cookieStore = await cookies()
+  const tokens = assertCompleteTokenSet(await authSignIn({ email, password }))
+
+  getAuthCookiePayload({ email, tokens }).forEach((cookie) => {
+    cookieStore.set(cookie.name, cookie.value, cookie.options)
+  })
+
+  try {
+    await syncProfileFromAuthClaimsService(getUserClaimsFromIdToken(tokens.idToken))
+  } catch (error) {
+    console.error('Unable to sync signed-in user profile:', error)
+  }
+}
+
+export async function signInAction({
+  email,
+  password,
+}: {
+  email: string
+  password: string
+}): Promise<AuthActionResult> {
+  const normalizedEmail = getNormalizedEmail(email)
+
+  if (!normalizedEmail || !password) {
+    return { ok: false, error: 'Email and password are required' }
+  }
+
+  try {
+    await setAuthCookies(normalizedEmail, password)
+
+    return { ok: true }
+  } catch (error) {
+    if (hasAuthErrorName(error, 'UserNotConfirmedException')) {
+      return { ok: false, error: 'Please verify your account OTP before login' }
+    }
+
+    return { ok: false, error: 'Invalid email or password' }
+  }
+}
+
+export async function signUpAction({
+  name,
+  email,
+  phone,
+  password,
+}: {
+  name: string
+  email: string
+  phone: string
+  password: string
+}): Promise<AuthActionResult> {
+  const fullName = name.trim()
+  const normalizedEmail = getNormalizedEmail(email)
+
+  if (!fullName || !normalizedEmail || !phone || !password) {
+    return { ok: false, error: 'Name, email, phone and password are required' }
+  }
+
+  let cognitoPhoneNumber: string
+
+  try {
+    cognitoPhoneNumber = getSignupPhoneNumber(phone)
+  } catch (error) {
+    return {
+      ok: false,
+      error: getAuthErrorMessage(error, 'Invalid mobile number'),
+    }
+  }
+
+  try {
+    const response = await cognitoSignUp({
+      email: normalizedEmail,
+      password,
+      userAttribute: [
+        { Name: 'name', Value: fullName },
+        { Name: 'email', Value: normalizedEmail },
+        { Name: 'phone_number', Value: cognitoPhoneNumber },
+      ],
+    })
+
+    return {
+      ok: true,
+      message: getDeliveryMessage(response.CodeDeliveryDetails),
+    }
+  } catch (error) {
+    console.error('Unable to create account:', error)
+
+    return {
+      ok: false,
+      error: getAuthErrorMessage(error, 'Unable to create account'),
+    }
+  }
+}
+
+export async function resendSignUpOtpAction({
+  email,
+}: {
+  email: string
+}): Promise<AuthActionResult> {
+  const normalizedEmail = getNormalizedEmail(email)
+
+  if (!normalizedEmail) {
+    return { ok: false, error: 'Email is required' }
+  }
+
+  try {
+    const response = await cognitoResendConfirmationCode({
+      email: normalizedEmail,
+    })
+
+    return {
+      ok: true,
+      message: getDeliveryMessage(response.CodeDeliveryDetails, 'OTP resent. Please check your inbox.'),
+    }
+  } catch (error) {
+    console.error('Unable to resend signup OTP:', error)
+
+    return {
+      ok: false,
+      error: getAuthErrorMessage(error, 'Unable to resend OTP'),
+    }
+  }
+}
+
+export async function confirmSignUpAction({
+  email,
+  code,
+  password,
+}: {
+  email: string
+  code: string
+  password: string
+}): Promise<AuthActionResult> {
+  const normalizedEmail = getNormalizedEmail(email)
+
+  if (!normalizedEmail || !code || !password) {
+    return { ok: false, error: 'Email, OTP and password are required' }
+  }
+
+  try {
+    await cognitoConfirmSignUp({ email: normalizedEmail, code })
+    await setAuthCookies(normalizedEmail, password)
+
+    return { ok: true }
+  } catch (error) {
+    return {
+      ok: false,
+      error: getAuthErrorMessage(error, 'Unable to verify account'),
+    }
+  }
+}
+
+export async function forgotPasswordAction({
+  email,
+}: {
+  email: string
+}): Promise<AuthActionResult> {
+  if (!email) {
+    return { ok: false, error: 'Email is required' }
+  }
+
+  try {
+    await cognitoForgotPassword({ email })
+
+    return { ok: true }
+  } catch {
+    return { ok: false, error: 'Unable to send OTP' }
+  }
+}
+
+export async function confirmForgotPasswordAction({
+  email,
+  code,
+  newPassword,
+}: {
+  email: string
+  code: string
+  newPassword: string
+}): Promise<AuthActionResult> {
+  if (!email || !code || !newPassword) {
+    return { ok: false, error: 'Email, OTP and new password are required' }
+  }
+
+  try {
+    await cognitoConfirmForgotPassword({ email, code, newPassword })
+
+    return { ok: true }
+  } catch {
+    return { ok: false, error: 'Unable to update password' }
+  }
+}
+
+export async function signOutAction(): Promise<AuthActionResult> {
+  const cookieStore = await cookies()
+
+  getClearAuthCookiePayload().forEach((cookie) => {
+    cookieStore.set(cookie.name, cookie.value, cookie.options)
+  })
+
+  return { ok: true }
+}

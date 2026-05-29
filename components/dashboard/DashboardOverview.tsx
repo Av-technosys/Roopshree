@@ -1,14 +1,28 @@
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 
-import {
-  defaultAddress,
-  overviewStats,
-  recentOrders,
-} from "@/components/dashboard/dashboard-data"
+import { overviewStats } from "@/components/dashboard/dashboard-data"
 import { OrderCard } from "@/components/dashboard/OrderCard"
+import type { AddressView } from "@/services/address.service"
+import type { DashboardOrderCardView } from "@/services/order.service"
 
-export function DashboardOverview() {
+export function DashboardOverview({
+  addresses,
+  orders,
+}: {
+  addresses: AddressView[]
+  orders: DashboardOrderCardView[]
+}) {
+  const stats = overviewStats.map((stat) =>
+    stat.label === "Addresses"
+      ? { ...stat, value: String(addresses.length) }
+      : stat.label === "Orders"
+        ? { ...stat, value: String(orders.length) }
+      : stat,
+  )
+  const defaultAddress =
+    addresses.find((address) => address.isDefault) ?? addresses[0] ?? null
+
   return (
     <div>
       <h1 className="hidden font-heading text-2xl font-semibold text-black lg:block">
@@ -16,7 +30,7 @@ export function DashboardOverview() {
       </h1>
 
       <section className="mt-0 grid gap-4 sm:grid-cols-2 xl:grid-cols-4 lg:mt-5">
-        {overviewStats.map((stat) => {
+        {stats.map((stat) => {
           const Icon = stat.icon
 
           return (
@@ -52,19 +66,31 @@ export function DashboardOverview() {
             </Link>
           </div>
           <div className="space-y-5">
-            {recentOrders.map((order, index) => (
-              <OrderCard key={`${order.id}-${index}`} order={order} />
-            ))}
+            {orders.length > 0 ? (
+              orders.map((order) => (
+                <OrderCard key={order.slug} order={order} />
+              ))
+            ) : (
+              <div className="border border-[#ead8c4] bg-white p-6 text-sm text-[#777]">
+                No orders yet.
+              </div>
+            )}
           </div>
         </section>
 
-        <DefaultAddressCard />
+        <DefaultAddressCard address={defaultAddress} />
       </div>
     </div>
   )
 }
 
-function DefaultAddressCard() {
+function DefaultAddressCard({ address }: { address: AddressView | null }) {
+  const addressSummary = address
+    ? [address.line1, address.postalCode, address.city, address.state]
+        .filter(Boolean)
+        .join(", ")
+    : ""
+
   return (
     <aside className="h-fit bg-[#432414] p-4 text-white shadow-sm">
       <div className="flex items-center justify-between gap-4">
@@ -74,21 +100,25 @@ function DefaultAddressCard() {
         </Link>
       </div>
 
-      <div className="mt-7 flex flex-wrap gap-2">
-        {defaultAddress.tags.map((tag) => (
-          <span
-            key={tag}
-            className="rounded-full bg-white px-3 py-1 text-[10px] font-semibold text-[#2974e6]"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
+      {address ? (
+        <>
+          <div className="mt-7">
+            <span className="rounded-full bg-white px-3 py-1 text-[10px] font-semibold text-[#2974e6]">
+              Default
+            </span>
+          </div>
 
-      <h3 className="mt-3 text-sm font-semibold">{defaultAddress.name}</h3>
-      <p className="mt-2 text-xs leading-5 text-white/75">
-        {defaultAddress.address}
-      </p>
+          <h3 className="mt-3 text-sm font-semibold">{address.fullName}</h3>
+          <p className="mt-2 text-xs text-white/75">{address.phone}</p>
+          <p className="mt-2 text-xs leading-5 text-white/75">
+            {addressSummary}
+          </p>
+        </>
+      ) : (
+        <p className="mt-7 text-xs leading-5 text-white/75">
+          No default address saved yet.
+        </p>
+      )}
     </aside>
   )
 }

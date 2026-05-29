@@ -3,26 +3,35 @@ import Link from "next/link"
 
 import { FooterNewsletterForm } from "@/components/common/FooterNewsletterForm"
 import { Button } from "@/components/ui/button"
+import { getCatalogCategories } from "@/services/product.service"
 import { IconBrandInstagram, IconMail } from "@tabler/icons-react"
 
-const quickLinks = ["Home", "About", "Shop", "Contact Us", "Enquiry", "Blogs"]
-const categories = [
-  "Gottapatti",
-  "Zardosi",
-  "Plain Fabric Dupatta",
-  "Brooch",
-  "Shrug",
-  "Jaal",
-  "Open Dupatta",
+type FooterLink = {
+  label: string
+  href: string
+}
+
+const quickLinks: FooterLink[] = [
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Shop", href: "/shop" },
+  { label: "Contact Us", href: "/contact" },
+  { label: "Enquiry", href: "/contact" },
+  { label: "Blogs", href: "/blogs" },
 ]
-const customerServices = [
-  "Orders",
-  "Terms & Conditions",
-  "Shipping",
-  "Privacy Policy",
+const customerServices: FooterLink[] = [
+  { label: "Orders", href: "/dashboard" },
+  { label: "Terms & Conditions", href: "/" },
+  { label: "Shipping", href: "/" },
+  { label: "Privacy Policy", href: "/" },
 ]
 
-const Footer = () => {
+const Footer = async () => {
+  const categories = (await getCatalogCategories(7)).map((category) => ({
+    label: category.name,
+    href: category.href,
+  }))
+
   return (
     <footer className="relative overflow-hidden border-t border-[#C39150] bg-[#F1E1CD] text-[#3F2617] md:bg-[#C39150]/15">
       <Image
@@ -97,15 +106,15 @@ const Footer = () => {
   )
 }
 
-function FooterColumn({ title, items }: { title: string; items: string[] }) {
+function FooterColumn({ title, items }: { title: string; items: FooterLink[] }) {
   return (
     <div>
       <h2 className="mb-5 text-xl font-medium text-[#3F2617]">{title}</h2>
       <ul className="space-y-3 text-sm text-[#3F2617]/70">
         {items.map((item) => (
-          <li key={item}>
-            <Link href="/" className="transition-colors hover:text-[#C18F50]">
-              {item}
+          <li key={`${title}-${item.href}-${item.label}`}>
+            <Link href={item.href} className="transition-colors hover:text-[#C18F50]">
+              {item.label}
             </Link>
           </li>
         ))}

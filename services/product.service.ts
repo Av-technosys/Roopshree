@@ -13,6 +13,8 @@ import {
   listCatalogProductFilterOptionRows,
   updateProductRecord,
   listVariantFilterOptionRows,
+  searchCategoryRows,
+  searchProductRows,
   type ProductListQuery,
   type ProductListRow,
 } from '@/repositories/product.repository'
@@ -101,6 +103,36 @@ export async function getCatalogCategories(limit = 8) {
     href: `/shop?category=${category.slug}`,
     image: category.imageKey ? getS3ObjectPreviewUrl(category.imageKey) : '',
   }))
+}
+
+export async function searchCatalog(term: string) {
+  const query = term.trim()
+
+  if (query.length < 3) {
+    return {
+      products: [],
+      categories: [],
+    }
+  }
+
+  const [products, categories] = await Promise.all([
+    searchProductRows(query, 5),
+    searchCategoryRows(query, 4),
+  ])
+
+  return {
+    products: products.map(mapProductRow).map((product) => ({
+      ...product,
+      href: `/product/${product.slug}`,
+    })),
+    categories: categories.map((category) => ({
+      id: category.id,
+      name: category.name,
+      slug: category.slug,
+      href: `/shop?category=${category.slug}`,
+      image: category.imageKey ? getS3ObjectPreviewUrl(category.imageKey) : '',
+    })),
+  }
 }
 
 function uniqueOptions(values: (string | null | undefined)[]) {

@@ -90,6 +90,7 @@ export async function addProductToUserCart(input: CartMutationInput) {
         .select()
         .from(cartItems)
         .where(getCartItemWhere(cart.id, input as { productId: string; variantId?: string | null }))
+        .for("update")
         .limit(1)
 
       if (existingItem) {
@@ -126,6 +127,12 @@ export async function changeUserCartItemQuantity(input: CartMutationInput & { de
     return { success: false, message: "Product id is required" }
   }
 
+  const delta = Math.trunc(Number(input.delta))
+
+  if (!Number.isFinite(delta) || delta === 0) {
+    return { success: true }
+  }
+
   try {
     await db.transaction(async (tx) => {
       const cart = await getOrCreateLockedCart(tx, userId)
@@ -133,11 +140,22 @@ export async function changeUserCartItemQuantity(input: CartMutationInput & { de
         .select()
         .from(cartItems)
         .where(getCartItemWhere(cart.id, input as { productId: string; variantId?: string | null }))
+        .for("update")
         .limit(1)
 
-      if (!existingItem) return
+      if (!existingItem) {
+        if (delta > 0) {
+          await tx.insert(cartItems).values({
+            cartId: cart.id,
+            productId: input.productId as string,
+            variantId: input.variantId || null,
+            quantity: delta,
+          })
+        }
+        return
+      }
 
-      const nextQuantity = existingItem.quantity + input.delta
+      const nextQuantity = existingItem.quantity + delta
 
       if (nextQuantity <= 0) {
         await tx.delete(cartItems).where(eq(cartItems.id, existingItem.id))
@@ -146,7 +164,7 @@ export async function changeUserCartItemQuantity(input: CartMutationInput & { de
 
       await tx
         .update(cartItems)
-        .set({ quantity: nextQuantity })
+        .set({ quantity: sql`${cartItems.quantity} + ${delta}` })
         .where(eq(cartItems.id, existingItem.id))
     })
 

@@ -8,6 +8,7 @@ import {
   getCatalogProductPage,
   getFeaturedProducts,
   getRecommendedProducts,
+  searchCatalog,
   updateProduct,
 } from '@/services/product.service'
 
@@ -47,4 +48,8 @@ export async function getRecommendedProductsAction(limit?: number) {
 
 export async function getCatalogCategoriesAction(limit?: number) {
   return getCatalogCategories(limit)
+}
+
+export async function searchCatalogAction(term: string) {
+  return searchCatalog(term)
 }

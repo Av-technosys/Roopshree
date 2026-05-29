@@ -1,4 +1,4 @@
-import { and, asc, countDistinct, desc, eq, inArray, ne, sql, type SQL } from 'drizzle-orm'
+import { and, asc, countDistinct, desc, eq, ilike, inArray, ne, or, sql, type SQL } from 'drizzle-orm'
 import {
   categories,
   mediaAssets,
@@ -89,6 +89,10 @@ export type CategoryListRow = {
   slug: string
   imageKey: string | null
 }
+
+export type CatalogSearchProductRow = ProductListRow
+
+export type CatalogSearchCategoryRow = CategoryListRow
 
 export type ProductFilterOptionRow = {
   name: string
@@ -313,6 +317,88 @@ export async function listCategoryRows(limit = 12): Promise<CategoryListRow[]> {
       imageKey: categories.bannerImage,
     })
     .from(categories)
+    .orderBy(asc(categories.name))
+    .limit(limit)
+}
+
+export async function searchProductRows(
+  term: string,
+  limit = 5,
+): Promise<CatalogSearchProductRow[]> {
+  const search = `%${term.trim()}%`
+
+  return db
+    .select({
+      id: products.id,
+      slug: products.slug,
+      name: products.name,
+      sku: products.sku,
+      basePrice: products.basePrice,
+      strikeThroughPrice: products.strikeThroughPrice,
+      variantId: productVariants.id,
+      variantTitle: productVariants.title,
+      variantPrice: productVariants.price,
+      variantStrikeThroughPrice: productVariants.strikeThroughPrice,
+      color: productVariants.color,
+      variantBannerImage: productVariants.bannerImage,
+      imageKey: mediaAssets.key,
+      imageAlt: mediaAssets.altText,
+    })
+    .from(products)
+    .leftJoin(
+      productVariants,
+      and(
+        eq(productVariants.productId, products.id),
+        eq(productVariants.isDefault, true),
+        eq(productVariants.isActive, true),
+      ),
+    )
+    .leftJoin(
+      productMedia,
+      and(
+        eq(productMedia.productId, products.id),
+        eq(productMedia.variantId, productVariants.id),
+        eq(productMedia.isPrimary, true),
+      ),
+    )
+    .leftJoin(mediaAssets, eq(mediaAssets.id, productMedia.mediaAssetId))
+    .where(
+      and(
+        ne(products.status, 'archived'),
+        or(
+          ilike(products.name, search),
+          ilike(products.slug, search),
+          ilike(products.sku, search),
+          ilike(productVariants.title, search),
+          ilike(productVariants.sku, search),
+          sql`exists (
+            select 1 from ${productCategories}
+            inner join ${categories} on ${categories.id} = ${productCategories.categoryId}
+            where ${productCategories.productId} = ${products.id}
+            and (${ilike(categories.name, search)} or ${ilike(categories.slug, search)})
+          )`,
+        ),
+      ),
+    )
+    .orderBy(desc(products.isFeatured), asc(products.name), asc(products.id))
+    .limit(limit)
+}
+
+export async function searchCategoryRows(
+  term: string,
+  limit = 4,
+): Promise<CatalogSearchCategoryRow[]> {
+  const search = `%${term.trim()}%`
+
+  return db
+    .select({
+      id: categories.id,
+      name: categories.name,
+      slug: categories.slug,
+      imageKey: categories.bannerImage,
+    })
+    .from(categories)
+    .where(or(ilike(categories.name, search), ilike(categories.slug, search)))
     .orderBy(asc(categories.name))
     .limit(limit)
 }

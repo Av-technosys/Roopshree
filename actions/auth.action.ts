@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers'
 import {
   authSignIn,
+  cognitoChangePassword,
   cognitoConfirmForgotPassword,
   cognitoConfirmSignUp,
   cognitoForgotPassword,
@@ -15,6 +16,7 @@ import {
   getClearAuthCookiePayload,
 } from '@/lib/auth-cookies'
 import { getUserClaimsFromIdToken } from '@/lib/auth-token'
+import { requireUser } from '@/lib/auth'
 import { syncProfileFromAuthClaimsService } from '@/services/user.service'
 
 type AuthActionResult = {
@@ -264,6 +266,66 @@ export async function confirmForgotPasswordAction({
     return { ok: true }
   } catch {
     return { ok: false, error: 'Unable to update password' }
+  }
+}
+
+export async function changePasswordAction({
+  currentPassword,
+  newPassword,
+  confirmPassword,
+}: {
+  currentPassword: string
+  newPassword: string
+  confirmPassword: string
+}): Promise<AuthActionResult> {
+  let normalizedEmail = ''
+
+  try {
+    const user = await requireUser()
+    normalizedEmail = getNormalizedEmail(user.email ?? '')
+  } catch {
+    return { ok: false, error: 'Please sign in again to update your password' }
+  }
+
+  if (!normalizedEmail) {
+    return { ok: false, error: 'Please sign in again to update your password' }
+  }
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return { ok: false, error: 'Current password, new password and confirmation are required' }
+  }
+
+  if (newPassword !== confirmPassword) {
+    return { ok: false, error: 'New password and confirmation do not match' }
+  }
+
+  if (currentPassword === newPassword) {
+    return { ok: false, error: 'New password must be different from current password' }
+  }
+
+  try {
+    const tokens = assertCompleteTokenSet(
+      await authSignIn({ email: normalizedEmail, password: currentPassword }),
+    )
+
+    await cognitoChangePassword({
+      accessToken: tokens.accessToken,
+      currentPassword,
+      newPassword,
+    })
+
+    await setAuthCookies(normalizedEmail, newPassword)
+
+    return { ok: true, message: 'Password updated successfully' }
+  } catch (error) {
+    if (hasAuthErrorName(error, 'NotAuthorizedException')) {
+      return { ok: false, error: 'Current password is incorrect' }
+    }
+
+    return {
+      ok: false,
+      error: getAuthErrorMessage(error, 'Unable to update password'),
+    }
   }
 }
 

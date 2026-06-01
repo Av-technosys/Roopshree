@@ -59,7 +59,7 @@ const HeroSection = () => {
           <motion.h1
             variants={fadeUp}
             transition={{ duration: 0.65, ease: "easeOut" }}
-            className="font-heading text-[2.65rem] leading-[0.9] text-[#C18F50] md:text-[#3F2617] sm:text-5xl md:text-6xl lg:text-7xl"
+            className="-ml-[0.1em] font-heading text-[2.65rem] leading-[0.9] text-[#C18F50] md:text-[#3F2617] sm:text-5xl md:text-6xl lg:text-7xl"
           >
             BANDHEJ
             <span className="block font-heading italic text-white sm:text-5xl md:text-6xl md:text-[#C18F50] lg:text-8xl">

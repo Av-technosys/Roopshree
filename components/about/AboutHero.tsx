@@ -40,7 +40,7 @@ const AboutHero = () => {
             About Us
           </p>
 
-          <h1 className="font-heading text-[2.65rem] leading-[0.94] text-[#3f2617] sm:text-5xl md:text-6xl lg:text-7xl">
+          <h1 className="-ml-[0.04em] font-heading text-[2.65rem] leading-[0.94] text-[#3f2617] sm:text-5xl md:text-6xl lg:text-7xl">
             A STORY OF
             <span className="block italic text-[#c18f50] sm:text-6xl md:text-7xl lg:text-8xl">
               Roopshree

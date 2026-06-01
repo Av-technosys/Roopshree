@@ -52,7 +52,7 @@ const HeroSection = () => {
           <motion.h1
             variants={fadeUp}
             transition={{ duration: 0.65, ease: "easeOut" }}
-            className="text-[2.65rem] leading-[0.92] text-[#3F2617] sm:text-5xl md:text-6xl lg:text-7xl"
+            className="-ml-[0.04em] text-[2.65rem] leading-[0.92] text-[#3F2617] sm:text-5xl md:text-6xl lg:text-7xl"
           >
             Where Heritage Meets <span className="text-[#C18F50] italic ">Elegance</span>
           </motion.h1>

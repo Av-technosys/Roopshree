@@ -6,6 +6,7 @@ import { sendTemplateEmail } from "@/lib/email";
 import { userSubjects } from "@/email-templates/userSubjects";
 
 type TemplateData = Record<string, string | number | null | undefined>;
+const emailLogoUrl = "https://d2co0ksrpuk490.cloudfront.net/roop-logo.png";
 
 function injectTemplate(html: string, data: TemplateData) {
   return html.replace(/{{(.*?)}}/g, (_, key) => {
@@ -20,9 +21,7 @@ function getBaseUrl() {
 }
 
 function getLogoUrl() {
-  const baseUrl = getBaseUrl().replace(/\/$/, "");
-
-  return baseUrl ? `${baseUrl}/header-logo.png` : "";
+  return emailLogoUrl;
 }
 
 function sendUserTemplateEmail({

@@ -1,4 +1,5 @@
 import {
+  countDashboardOrders,
   findDashboardOrderDetailRow,
   findOrderById,
   listDashboardOrderRows,
@@ -83,6 +84,16 @@ export async function getDashboardOrders(limit?: number) {
   const rows = await listDashboardOrderRows(userId, limit)
 
   return rows.map(mapOrderCard)
+}
+
+export async function getDashboardOrderCount() {
+  const userId = await getCurrentDbUserId()
+
+  if (!userId) {
+    return 0
+  }
+
+  return countDashboardOrders(userId)
 }
 
 export async function getDashboardOrderDetails(orderId: string) {

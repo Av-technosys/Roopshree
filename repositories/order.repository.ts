@@ -1,4 +1,4 @@
-import { desc, eq, inArray, or } from 'drizzle-orm'
+import { count, desc, eq, inArray, or } from 'drizzle-orm'
 
 import { orderItems, orders, payments } from '@/db/schema/orders'
 import { db } from '@/lib/db'
@@ -51,6 +51,15 @@ export async function listDashboardOrderRows(userId: string, limit?: number) {
     order,
     items: items.filter((item) => item.orderId === order.id),
   }))
+}
+
+export async function countDashboardOrders(userId: string) {
+  const [row] = await db
+    .select({ value: count() })
+    .from(orders)
+    .where(eq(orders.userId, userId))
+
+  return row?.value ?? 0
 }
 
 export async function findDashboardOrderDetailRow(userId: string, orderId: string) {

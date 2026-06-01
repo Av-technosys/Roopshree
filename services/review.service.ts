@@ -1,6 +1,7 @@
 import { revalidatePath } from 'next/cache'
 
 import {
+  countUserReviews,
   createProductReview,
   findDeliveredReviewItems,
   listAdminReviewRows,
@@ -70,6 +71,16 @@ export async function getDashboardReviewData() {
       date: formatDate(review.createdAt),
     })),
   }
+}
+
+export async function getDashboardReviewCount() {
+  const userId = await getCurrentDbUserId()
+
+  if (!userId) {
+    return 0
+  }
+
+  return countUserReviews(userId)
 }
 
 export async function submitProductReview(input: {

@@ -8,6 +8,7 @@ import {
   validateEnquiryContactPayload,
   validateNewsletterContactPayload,
 } from '@/validators/customer-contact.validator'
+import { notifyNewsletterSignupEmail } from '@/lib/email-notifications'
 
 type ContactActionResult = {
   success: boolean
@@ -25,6 +26,11 @@ export async function submitNewsletterContactAction(
     const payload = validateNewsletterContactPayload(formDataToObject(formData))
 
     await createNewsletterContact(payload)
+    try {
+      await notifyNewsletterSignupEmail({ email: payload.email })
+    } catch (emailError) {
+      console.error('Unable to send newsletter email:', emailError)
+    }
 
     return {
       success: true,

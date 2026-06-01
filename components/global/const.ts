@@ -5,6 +5,7 @@ export type Product = {
   name: string
   colour: string
   price: number
+  stockQuantity?: number
   rating?: number
   reviewCount?: number
   image: string
@@ -22,6 +23,7 @@ export function productToCartItem(product: Product) {
     variantId: product.variantId ?? undefined,
     title: product.name,
     price: product.price,
+    stockQuantity: product.stockQuantity,
     image: product.image,
     colour: product.colour,
     imageClass: product.imageClass,

@@ -225,15 +225,14 @@ function ProductCard({ product }: { product: Product }) {
   const storeItem = productToCartItem(product)
   const cartQuantity = useCartStore(
     (state) =>
-      state.items.find(
-        (item) =>
-          item.productId === storeItem.productId &&
-          JSON.stringify(item.attributes ?? []) ===
-            JSON.stringify(storeItem.attributes ?? [])
-      )?.quantity ?? 0
+      state.getItemQuantity(
+        storeItem.productId,
+        storeItem.attributes,
+        storeItem.variantId
+      )
   )
   const isWishlisted = useWishlistStore((state) =>
-    state.items.some((item) => item.productId === storeItem.productId)
+    state.hasItem(storeItem.productId, storeItem.dbProductId)
   )
   const isInCart = cartQuantity > 0
 

@@ -19,6 +19,12 @@ function getBaseUrl() {
   return process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "";
 }
 
+function getLogoUrl() {
+  const baseUrl = getBaseUrl().replace(/\/$/, "");
+
+  return baseUrl ? `${baseUrl}/header-logo.png` : "";
+}
+
 function sendUserTemplateEmail({
   to,
   subject,
@@ -37,6 +43,7 @@ function sendUserTemplateEmail({
     template,
     data: {
       baseUrl: getBaseUrl(),
+      logoUrl: getLogoUrl(),
       email: to,
       "Customer First Name": data?.customerName || data?.userName || "",
       ...data,
@@ -62,6 +69,7 @@ function sendGenericTemplateEmail({
     template,
     data: {
       baseUrl: getBaseUrl(),
+      logoUrl: getLogoUrl(),
       email: to,
       "Customer First Name": data?.customerName || data?.userName || "",
       ...data,
@@ -93,7 +101,11 @@ export async function getWelcomeTemplate(name: string) {
   );
   const html = fs.readFileSync(filePath, "utf-8");
 
-  return injectTemplate(html, { name, "Customer First Name": name });
+  return injectTemplate(html, {
+    name,
+    logoUrl: getLogoUrl(),
+    "Customer First Name": name,
+  });
 }
 
 export async function getOrderTemplate(data: {
@@ -114,6 +126,7 @@ export async function getOrderTemplate(data: {
 
   return injectTemplate(html, {
     ...data,
+    logoUrl: getLogoUrl(),
     "Customer First Name": data.customerName,
     "Order ID": data.orderId,
     "Order Date": getDeliveryDateValue(),

@@ -20,6 +20,27 @@ type SendTemplateEmailParams = {
   data?: TemplateData;
 };
 
+function getBaseUrl() {
+  const vercelUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "";
+
+  return (
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXTAUTH_URL ||
+    vercelUrl
+  ).replace(/\/$/, "");
+}
+
+function getDefaultTemplateData(): TemplateData {
+  const baseUrl = getBaseUrl();
+
+  return {
+    baseUrl,
+    logoUrl: baseUrl ? `${baseUrl}/header-logo.png` : "",
+  };
+}
+
 function escapeHtml(value: string) {
   return value
     .replace(/&/g, "&amp;")
@@ -84,7 +105,10 @@ export const sendTemplateEmail = async ({
   type,
   data,
 }: SendTemplateEmailParams) => {
-  const html = renderTemplate(loadTemplate(template, type), data);
+  const html = renderTemplate(loadTemplate(template, type), {
+    ...getDefaultTemplateData(),
+    ...data,
+  });
 
   return sendEmail({
     to,

@@ -11,7 +11,6 @@ type SendEmailParams = {
 
 type TemplateData = Record<string, string | number | null | undefined>;
 type TemplateType = "generic" | "user";
-const emailLogoUrl = "https://d2co0ksrpuk490.cloudfront.net/roop-logo.png";
 
 type SendTemplateEmailParams = {
   to: string;
@@ -35,10 +34,12 @@ function getBaseUrl() {
 
 function getDefaultTemplateData(): TemplateData {
   const baseUrl = getBaseUrl();
+  const logoUrl =
+    process.env.EMAIL_LOGO_URL || (baseUrl ? `${baseUrl}/header-logo.png` : "");
 
   return {
     baseUrl,
-    logoUrl: emailLogoUrl,
+    logoUrl,
   };
 }
 

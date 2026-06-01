@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { NewsletterSignupForm } from "@/components/common/NewsletterSignupForm";
 
 export default function NewsletterSection() {
   return (
@@ -34,24 +35,14 @@ export default function NewsletterSection() {
               inbox.
             </p>
 
-            <form
-              className="mt-5 flex max-w-[520px] gap-2 md:mt-8 md:gap-3"
-              onSubmit={(event) => event.preventDefault()}
-            >
-              <input
-                type="email"
-                placeholder="Enter your Email"
-                required
-                className="h-10 min-w-0 flex-1 rounded-[2px] border border-[#3F2617] bg-white/10 px-3 text-xs text-[#3F2617] outline-none placeholder:text-[#3F2617]/65 focus:border-[#C39150] md:h-[52px] md:px-4 md:text-base"
+            <div className="mt-5 max-w-[520px] md:mt-8">
+              <NewsletterSignupForm
+                layout="inline"
+                inputClassName="h-10 w-full rounded-[2px] border border-[#3F2617] bg-white/10 px-3 text-xs text-[#3F2617] outline-none placeholder:text-[#3F2617]/65 focus:border-[#C39150] md:h-[52px] md:px-4 md:text-base"
+                buttonClassName="h-10 w-[90px] shrink-0 rounded-[2px] bg-[#3F2617] text-xs font-semibold text-white transition-colors hover:bg-[#C39150] md:h-[52px] md:w-[146px] md:text-base"
+                errorClassName="text-xs font-medium text-red-700"
               />
-
-              <button
-                type="submit"
-                className="h-10 w-[90px] shrink-0 rounded-[2px] bg-[#3F2617] text-xs font-semibold text-white transition-colors hover:bg-[#C39150] md:h-[52px] md:w-[146px] md:text-base"
-              >
-                Submit
-              </button>
-            </form>
+            </div>
           </div>
         </div>
       </div>

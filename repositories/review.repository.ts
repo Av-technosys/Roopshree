@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, sql } from 'drizzle-orm'
+import { and, count, desc, eq, inArray, sql } from 'drizzle-orm'
 
 import { orderItems, orders } from '@/db/schema/orders'
 import { mediaAssets, products } from '@/db/schema/products'
@@ -62,6 +62,15 @@ export async function listUserReviews(userId: string) {
     .innerJoin(products, eq(products.id, reviews.productId))
     .where(eq(reviews.userId, userId))
     .orderBy(desc(reviews.createdAt))
+}
+
+export async function countUserReviews(userId: string) {
+  const [row] = await db
+    .select({ value: count() })
+    .from(reviews)
+    .where(eq(reviews.userId, userId))
+
+  return row?.value ?? 0
 }
 
 export async function userCanReviewProduct({

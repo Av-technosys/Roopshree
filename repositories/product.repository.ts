@@ -79,6 +79,7 @@ export type ProductListRow = {
   variantTitle: string | null
   variantPrice: number | null
   variantStrikeThroughPrice: number | null
+  stockQuantity: number | null
   color: string | null
   variantBannerImage: string | null
   imageKey: string | null
@@ -266,6 +267,7 @@ export async function listProductRows(
       variantTitle: productVariants.title,
       variantPrice: productVariants.price,
       variantStrikeThroughPrice: productVariants.strikeThroughPrice,
+      stockQuantity: productVariants.stockQuantity,
       color: productVariants.color,
       variantBannerImage: productVariants.bannerImage,
       imageKey: mediaAssets.key,
@@ -345,6 +347,7 @@ export async function searchProductRows(
       variantTitle: productVariants.title,
       variantPrice: productVariants.price,
       variantStrikeThroughPrice: productVariants.strikeThroughPrice,
+      stockQuantity: productVariants.stockQuantity,
       color: productVariants.color,
       variantBannerImage: productVariants.bannerImage,
       imageKey: mediaAssets.key,

@@ -141,6 +141,7 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
     variantId: selectedVariant?.id,
     title: product.name,
     price,
+    stockQuantity: selectedVariant?.stockQuantity,
     image: displayedImage,
     colour: selectedVariant?.color ?? undefined,
     imageClass: "object-top",
@@ -148,16 +149,15 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
   }
   const cartQuantity = useCartStore(
     (state) =>
-      state.items.find(
-        (item) =>
-          item.productId === cartItem.productId &&
-          JSON.stringify(item.attributes ?? []) ===
-            JSON.stringify(cartItem.attributes ?? [])
-      )?.quantity ?? 0
+      state.getItemQuantity(
+        cartItem.productId,
+        cartItem.attributes,
+        cartItem.variantId
+      )
   )
   const isInCart = cartQuantity > 0
   const isWishlisted = useWishlistStore((state) =>
-    state.items.some((item) => item.productId === cartItem.productId)
+    state.hasItem(cartItem.productId, cartItem.dbProductId)
   )
 
   return (

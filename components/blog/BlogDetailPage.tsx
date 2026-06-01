@@ -9,6 +9,7 @@ import {
 } from "lucide-react"
 
 import { BlogCard } from "@/components/blog/BlogListingPage"
+import { NewsletterSignupForm } from "@/components/common/NewsletterSignupForm"
 import type { BlogView } from "@/services/blog.service"
 
 export function BlogDetailPage({
@@ -212,17 +213,16 @@ function BlogSignup() {
       <p className="mt-2 text-xs leading-5 text-white/70">
         Get textile stories and styling inspiration delivered to your inbox.
       </p>
-      <input
-        type="email"
-        placeholder="Your email"
-        className="mt-4 h-10 w-full border border-white/20 bg-white/10 px-3 text-xs outline-none placeholder:text-white/50"
-      />
-      <button
-        type="button"
-        className="mt-3 h-10 w-full bg-[#C39150] text-xs font-semibold text-white hover:bg-white hover:text-[#3F2617]"
-      >
-        Subscribe
-      </button>
+      <div className="mt-4">
+        <NewsletterSignupForm
+          inputClassName="h-10 w-full border border-white/20 bg-white/10 px-3 text-xs outline-none placeholder:text-white/50"
+          buttonClassName="mt-3 h-10 w-full rounded-none bg-[#C39150] text-xs font-semibold text-white hover:bg-white hover:text-[#3F2617]"
+          buttonText="Subscribe"
+          pendingText="Subscribing..."
+          placeholder="Your email"
+          errorClassName="text-xs font-medium text-red-200"
+        />
+      </div>
     </section>
   )
 }

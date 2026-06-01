@@ -1,6 +1,6 @@
 "use server"
 
-import { and, asc, eq, sql } from "drizzle-orm"
+import { and, asc, count, eq, sql } from "drizzle-orm"
 
 import { wishlistItems, wishlists } from "@/db/schema/orders"
 import {
@@ -12,6 +12,11 @@ import {
 import { db } from "@/lib/db"
 import { getCurrentDbUserId } from "@/lib/current-db-user"
 import { getS3ObjectPreviewUrl } from "@/lib/s3"
+
+type WishlistMutationInput = {
+  productId?: string
+  isWishlisted?: boolean
+}
 
 async function getOrCreateLockedWishlist(
   tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
@@ -48,6 +53,73 @@ async function getOrCreateLockedWishlist(
   await tx.execute(sql`SELECT id FROM wishlists WHERE id = ${wishlist.id} FOR UPDATE`)
 
   return wishlist
+}
+
+async function validateProductExists(
+  tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
+  productId: string,
+) {
+  const [product] = await tx
+    .select({ id: products.id })
+    .from(products)
+    .where(eq(products.id, productId))
+    .limit(1)
+
+  return Boolean(product)
+}
+
+export async function setUserWishlistItem(input: WishlistMutationInput) {
+  const userId = await getCurrentDbUserId()
+
+  if (!userId) {
+    return { success: true, userIsNotLoggedIn: true }
+  }
+
+  if (!input.productId) {
+    return { success: false, message: "Product id is required" }
+  }
+
+  try {
+    await db.transaction(async (tx) => {
+      const productExists = await validateProductExists(tx, input.productId as string)
+
+      if (!productExists) {
+        throw new Error("Product not found")
+      }
+
+      const wishlist = await getOrCreateLockedWishlist(tx, userId)
+      const [existingItem] = await tx
+        .select()
+        .from(wishlistItems)
+        .where(
+          and(
+            eq(wishlistItems.wishlistId, wishlist.id),
+            eq(wishlistItems.productId, input.productId as string),
+          ),
+        )
+        .limit(1)
+
+      if (input.isWishlisted) {
+        if (!existingItem) {
+          await tx.insert(wishlistItems).values({
+            wishlistId: wishlist.id,
+            productId: input.productId as string,
+          })
+        }
+
+        return
+      }
+
+      if (existingItem) {
+        await tx.delete(wishlistItems).where(eq(wishlistItems.id, existingItem.id))
+      }
+    })
+
+    return { success: true }
+  } catch (error) {
+    console.error("Set wishlist item failed:", error)
+    return { success: false, message: "Failed to update wishlist" }
+  }
 }
 
 export async function toggleUserWishlistItem(productId?: string) {
@@ -144,6 +216,9 @@ export async function getUserWishlistItems() {
         variantTitle: productVariants.title,
         variantPrice: productVariants.price,
         variantColor: productVariants.color,
+        variantFabric: productVariants.fabric,
+        variantSize: productVariants.size,
+        variantStockQuantity: productVariants.stockQuantity,
         variantBannerImage: productVariants.bannerImage,
         addedAt: wishlistItems.createdAt,
       })
@@ -173,6 +248,13 @@ export async function getUserWishlistItems() {
     const items = rows.map((row) => {
       const imageKey = row.imageKey ?? row.variantBannerImage
       const productId = row.variantId ? `${row.slug}:${row.variantId}` : row.slug
+      const attributes = [
+        row.variantColor ? { name: "Colour", value: row.variantColor } : null,
+        row.variantFabric ? { name: "Fabric", value: row.variantFabric } : null,
+        row.variantSize ? { name: "Size", value: row.variantSize } : null,
+      ].filter((attribute): attribute is { name: string; value: string } =>
+        Boolean(attribute),
+      )
 
       return {
         productId,
@@ -180,12 +262,11 @@ export async function getUserWishlistItems() {
         variantId: row.variantId ?? undefined,
         title: row.variantTitle ?? row.name,
         price: (row.variantPrice ?? row.basePrice) / 100,
+        stockQuantity: row.variantStockQuantity ?? undefined,
         image: imageKey ? getS3ObjectPreviewUrl(imageKey) : "",
         colour: row.variantColor ?? undefined,
         imageClass: "object-top",
-        attributes: row.variantColor
-          ? [{ name: "Colour", value: row.variantColor }]
-          : undefined,
+        attributes: attributes.length > 0 ? attributes : undefined,
         addedAt: row.addedAt.getTime(),
       }
     })
@@ -194,5 +275,26 @@ export async function getUserWishlistItems() {
   } catch (error) {
     console.error("Get wishlist items failed:", error)
     return { success: false, message: "Failed to load wishlist", items: [] }
+  }
+}
+
+export async function getUserWishlistCount() {
+  const userId = await getCurrentDbUserId()
+
+  if (!userId) {
+    return 0
+  }
+
+  try {
+    const [row] = await db
+      .select({ value: count() })
+      .from(wishlists)
+      .innerJoin(wishlistItems, eq(wishlistItems.wishlistId, wishlists.id))
+      .where(eq(wishlists.userId, userId))
+
+    return row?.value ?? 0
+  } catch (error) {
+    console.error("Get wishlist count failed:", error)
+    return 0
   }
 }

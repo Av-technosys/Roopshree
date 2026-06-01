@@ -22,7 +22,7 @@ function getBaseUrl() {
 function getLogoUrl() {
   const baseUrl = getBaseUrl().replace(/\/$/, "");
 
-  return baseUrl ? `${baseUrl}/header-logo.png` : "";
+  return process.env.EMAIL_LOGO_URL || (baseUrl ? `${baseUrl}/header-logo.png` : "");
 }
 
 function sendUserTemplateEmail({

@@ -1,6 +1,6 @@
 "use server"
 
-import { and, asc, eq, sql } from "drizzle-orm"
+import { and, asc, desc, eq, sql } from "drizzle-orm"
 
 import { cartItems, carts } from "@/db/schema/orders"
 import {
@@ -19,8 +19,83 @@ type CartMutationInput = {
   quantity?: number
 }
 
+type CartTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0]
+
+class CartMutationError extends Error {}
+
+function normalizeRequestedQuantity(quantity?: number) {
+  const numericQuantity = Number(quantity ?? 1)
+
+  if (!Number.isFinite(numericQuantity)) {
+    return null
+  }
+
+  return Math.trunc(numericQuantity)
+}
+
+async function resolveCartLine(
+  tx: CartTransaction,
+  productId: string,
+  variantId?: string | null,
+) {
+  const [product] = await tx
+    .select({ id: products.id })
+    .from(products)
+    .where(eq(products.id, productId))
+    .limit(1)
+
+  if (!product) {
+    throw new CartMutationError("Product not found")
+  }
+
+  const [variant] = await tx
+    .select({
+      id: productVariants.id,
+      isActive: productVariants.isActive,
+      stockQuantity: productVariants.stockQuantity,
+    })
+    .from(productVariants)
+    .where(
+      variantId
+        ? and(
+            eq(productVariants.id, variantId),
+            eq(productVariants.productId, productId),
+          )
+        : and(
+            eq(productVariants.productId, productId),
+            eq(productVariants.isActive, true),
+          ),
+    )
+    .orderBy(desc(productVariants.isDefault), asc(productVariants.title))
+    .limit(1)
+
+  if (!variant) {
+    throw new CartMutationError(
+      variantId ? "Variant not found for product" : "Product variant not found",
+    )
+  }
+
+  return {
+    variantId: variant.id,
+    isActive: variant.isActive,
+    stockQuantity: variant.stockQuantity,
+  }
+}
+
+function validatePositiveQuantity(quantity: number) {
+  if (quantity <= 0) {
+    throw new CartMutationError("Quantity must be positive")
+  }
+}
+
+function validateStock(stockQuantity: number, requestedQuantity: number) {
+  if (requestedQuantity > stockQuantity) {
+    throw new CartMutationError("Requested quantity is not available")
+  }
+}
+
 async function getOrCreateLockedCart(
-  tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
+  tx: CartTransaction,
   userId: string,
 ) {
   let [cart] = await tx
@@ -68,6 +143,128 @@ function getCartItemWhere(
       ? eq(cartItems.variantId, input.variantId)
       : sql`${cartItems.variantId} IS NULL`,
   )
+}
+
+export async function setUserCartItemQuantity(input: CartMutationInput) {
+  const userId = await getCurrentDbUserId()
+
+  if (!userId) {
+    return { success: true, userIsNotLoggedIn: true }
+  }
+
+  if (!input.productId) {
+    return { success: false, message: "Product id is required" }
+  }
+
+  const productId = input.productId
+  const quantity = normalizeRequestedQuantity(input.quantity)
+
+  if (quantity === null) {
+    return { success: false, message: "Quantity is required" }
+  }
+
+  try {
+    await db.transaction(async (tx) => {
+      const cart = await getOrCreateLockedCart(tx, userId)
+      let variantId = input.variantId ?? null
+      let existingProductItemId: string | null = null
+
+      if (!variantId) {
+        const existingProductItems = await tx
+          .select({
+            id: cartItems.id,
+            variantId: cartItems.variantId,
+          })
+          .from(cartItems)
+          .where(
+            and(
+              eq(cartItems.cartId, cart.id),
+              eq(cartItems.productId, productId),
+            ),
+          )
+          .limit(2)
+
+        if (existingProductItems.length === 1) {
+          existingProductItemId = existingProductItems[0].id
+          variantId = existingProductItems[0].variantId
+        } else if (existingProductItems.length > 1) {
+          throw new CartMutationError("Variant id is required")
+        }
+      }
+
+      if (quantity <= 0) {
+        if (existingProductItemId && !input.variantId) {
+          await tx.delete(cartItems).where(eq(cartItems.id, existingProductItemId))
+        } else {
+          await tx
+            .delete(cartItems)
+            .where(
+              getCartItemWhere(cart.id, {
+                productId,
+                variantId,
+              }),
+            )
+        }
+
+        return
+      }
+
+      const cartLine = await resolveCartLine(tx, productId, variantId)
+
+      validatePositiveQuantity(quantity)
+
+      if (!cartLine.isActive) {
+        throw new CartMutationError("Product variant is not active")
+      }
+
+      validateStock(cartLine.stockQuantity, quantity)
+
+      const [existingItem] = await tx
+        .select()
+        .from(cartItems)
+        .where(
+          getCartItemWhere(cart.id, {
+            productId,
+            variantId: cartLine.variantId,
+          }),
+        )
+        .limit(1)
+
+      const [legacyExistingItem] =
+        !existingItem && existingProductItemId && !input.variantId
+          ? await tx
+              .select()
+              .from(cartItems)
+              .where(eq(cartItems.id, existingProductItemId))
+              .limit(1)
+          : []
+      const itemToUpdate = existingItem ?? legacyExistingItem
+
+      if (itemToUpdate) {
+        await tx
+          .update(cartItems)
+          .set({ quantity, variantId: cartLine.variantId })
+          .where(eq(cartItems.id, itemToUpdate.id))
+        return
+      }
+
+      await tx.insert(cartItems).values({
+        cartId: cart.id,
+        productId,
+        variantId: cartLine.variantId,
+        quantity,
+      })
+    })
+
+    return { success: true }
+  } catch (error) {
+    if (error instanceof CartMutationError) {
+      return { success: false, message: error.message }
+    }
+
+    console.error("Set cart quantity failed:", error)
+    return { success: false, message: "Failed to update cart" }
+  }
 }
 
 export async function addProductToUserCart(input: CartMutationInput) {
@@ -223,6 +420,7 @@ export async function getUserCartItems() {
         variantColor: productVariants.color,
         variantFabric: productVariants.fabric,
         variantSize: productVariants.size,
+        variantStockQuantity: productVariants.stockQuantity,
         variantBannerImage: productVariants.bannerImage,
         quantity: cartItems.quantity,
         addedAt: cartItems.createdAt,
@@ -259,6 +457,7 @@ export async function getUserCartItems() {
         variantId: row.variantId ?? undefined,
         title: row.variantTitle ?? row.name,
         price: (row.variantPrice ?? row.basePrice) / 100,
+        stockQuantity: row.variantStockQuantity ?? undefined,
         image: imageKey ? getS3ObjectPreviewUrl(imageKey) : "",
         colour: row.variantColor ?? undefined,
         imageClass: "object-top",

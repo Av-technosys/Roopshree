@@ -9,7 +9,7 @@ export default function getEnvVariable(name: string): string {
 }
 
 export const AWS_REGION = getEnvVariable("AWS_REGION");
-export const SES_ACCESS_KEY_ID = getEnvVariable("SES_ACCESS_KEY_ID");
+export const SES_ACCESS_KEY_ID = getEnvVariable("SES_AWS_ACCESS_KEY_ID");
 export const SES_AWS_SECRET_ACCESS_KEY = getEnvVariable("SES_AWS_SECRET_ACCESS_KEY");   
 export const DATABASE_URL = getEnvVariable("DATABASE_URL");
 export const ACCESS_KEY_ID = getEnvVariable("ACCESS_KEY");

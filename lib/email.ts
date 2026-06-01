@@ -34,10 +34,12 @@ function getBaseUrl() {
 
 function getDefaultTemplateData(): TemplateData {
   const baseUrl = getBaseUrl();
+  const logoUrl =
+    process.env.EMAIL_LOGO_URL || (baseUrl ? `${baseUrl}/header-logo.png` : "");
 
   return {
     baseUrl,
-    logoUrl: baseUrl ? `${baseUrl}/header-logo.png` : "",
+    logoUrl,
   };
 }
 

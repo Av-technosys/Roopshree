@@ -34,7 +34,7 @@ const CategorySection = ({
               <Link
                 key={category.id ?? category.name}
                 href={category.href}
-                className="group relative block aspect-[334/473] w-[42vw] min-w-[10rem] shrink-0 snap-start overflow-hidden bg-[#f8efe6] sm:w-[18rem] md:w-[20rem] lg:w-auto lg:min-w-0 lg:shrink"
+                className="group relative block aspect-[334/473] w-[42vw] min-w-[10rem] shrink-0 snap-start overflow-hidden bg-transparent sm:w-[18rem] md:w-[20rem] lg:w-auto lg:min-w-0 lg:shrink"
                 aria-label={`Explore ${category.name}`}
               >
                 {category.image ? (

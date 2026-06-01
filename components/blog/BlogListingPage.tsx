@@ -95,7 +95,7 @@ function BlogHero() {
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#C39150]">
             Blogs / Journal
           </p>
-          <h1 className="mt-4 font-heading text-[3rem] leading-[0.95] text-[#3F2617] sm:text-6xl md:text-7xl">
+          <h1 className="-ml-[0.04em] mt-4 font-heading text-[3rem] leading-[0.95] text-[#3F2617] sm:text-6xl md:text-7xl">
             Stories Woven
             <span className="block italic text-[#C39150]">In Tradition</span>
           </h1>

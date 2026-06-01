@@ -8,6 +8,7 @@ const subjects = {
   firstOrder: "Thank You for Your First Order with Roopshree Bandhej",
   orderShipped: "Roopshree Bandhej - Your Order is Shipped",
   orderDelivered: "Roopshree Bandhej - Your Order Has Been Delivered",
+  newsletter: "Roopshree Bandhej - You are subscribed",
 }
 
 function getBaseUrl() {
@@ -159,6 +160,22 @@ export async function notifyOrderDeliveredEmail({
       "Order ID": orderId,
       "Delivery Date": deliveryDate,
       "Review Link": reviewLink || "/dashboard/reviews",
+    },
+  })
+}
+
+export async function notifyNewsletterSignupEmail({ email }: { email: string }) {
+  const customerName = email.split("@")[0] || "Customer"
+  const subscriptionLink = getBaseUrl() || "/"
+
+  return sendUserEmail({
+    to: email,
+    subject: subjects.newsletter,
+    template: "newsletter",
+    data: {
+      customerName,
+      "Customer First Name": customerName,
+      "Subscription Link": subscriptionLink,
     },
   })
 }

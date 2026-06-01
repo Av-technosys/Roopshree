@@ -9,16 +9,26 @@ import type { DashboardOrderCardView } from "@/services/order.service"
 export function DashboardOverview({
   addresses,
   orders,
+  orderCount,
+  wishlistCount,
+  reviewCount,
 }: {
   addresses: AddressView[]
   orders: DashboardOrderCardView[]
+  orderCount: number
+  wishlistCount: number
+  reviewCount: number
 }) {
   const stats = overviewStats.map((stat) =>
     stat.label === "Addresses"
       ? { ...stat, value: String(addresses.length) }
       : stat.label === "Orders"
-        ? { ...stat, value: String(orders.length) }
-      : stat,
+        ? { ...stat, value: String(orderCount) }
+        : stat.label === "Wishlist"
+          ? { ...stat, value: String(wishlistCount) }
+          : stat.label === "Reviews"
+            ? { ...stat, value: String(reviewCount) }
+            : stat,
   )
   const defaultAddress =
     addresses.find((address) => address.isDefault) ?? addresses[0] ?? null

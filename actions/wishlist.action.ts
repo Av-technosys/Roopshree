@@ -1,6 +1,6 @@
 "use server"
 
-import { and, asc, eq, sql } from "drizzle-orm"
+import { and, asc, count, eq, sql } from "drizzle-orm"
 
 import { wishlistItems, wishlists } from "@/db/schema/orders"
 import {
@@ -194,5 +194,26 @@ export async function getUserWishlistItems() {
   } catch (error) {
     console.error("Get wishlist items failed:", error)
     return { success: false, message: "Failed to load wishlist", items: [] }
+  }
+}
+
+export async function getUserWishlistCount() {
+  const userId = await getCurrentDbUserId()
+
+  if (!userId) {
+    return 0
+  }
+
+  try {
+    const [row] = await db
+      .select({ value: count() })
+      .from(wishlists)
+      .innerJoin(wishlistItems, eq(wishlistItems.wishlistId, wishlists.id))
+      .where(eq(wishlists.userId, userId))
+
+    return row?.value ?? 0
+  } catch (error) {
+    console.error("Get wishlist count failed:", error)
+    return 0
   }
 }

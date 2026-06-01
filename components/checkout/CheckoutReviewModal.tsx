@@ -147,15 +147,26 @@ export function CheckoutReviewModal({
             return
           }
 
+          if (!completeResult.orderId) {
+            showToast({
+              title: "Order confirmation is unavailable",
+              tone: "error",
+            })
+            return
+          }
+
           if (completeResult.source === "cart") {
             clearCart()
           } else {
             window.sessionStorage.removeItem("roopshree-buy-now")
           }
+
+          const confirmationUrl = `/order-confirmation?orderId=${encodeURIComponent(
+            completeResult.orderId,
+          )}`
+
           showToast({ title: "Payment successful", tone: "success" })
-          onClose()
-          router.push("/dashboard/")
-          router.refresh()
+          window.location.assign(confirmationUrl)
         },
       })
 

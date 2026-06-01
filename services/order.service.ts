@@ -5,6 +5,7 @@ import {
   updateOrderStatusRecord,
 } from '@/repositories/order.repository'
 import { getCurrentDbUserId } from '@/lib/current-db-user'
+import { getCurrentUser } from '@/lib/auth'
 
 const allowedOrderStatuses = ['pending', 'paid', 'shipped', 'delivered', 'cancelled']
 
@@ -143,6 +144,43 @@ export async function getDashboardOrderDetails(orderId: string) {
       price: formatCurrency(item.productPrice),
       total: formatCurrency(item.productPrice * item.quantity),
       image: item.productImage || '/home/new-arrival-model.png',
+    })),
+  }
+}
+
+export async function getOrderConfirmationDetails(orderId: string) {
+  const [details, sessionUser] = await Promise.all([
+    getDashboardOrderDetails(orderId),
+    getCurrentUser(),
+  ])
+
+  if (!details) {
+    return null
+  }
+
+  return {
+    order: {
+      orderId: details.order.orderNumber,
+      email: sessionUser?.email ?? '',
+      orderDate: formatDate(details.order.createdAt),
+      paymentMethod:
+        details.payment.method?.toUpperCase() ??
+        details.payment.provider.toUpperCase(),
+      paymentStatus: details.payment.status,
+      estimatedDelivery: '3 - 5 Days',
+      totalPaid: formatCurrency(details.order.totalAmount),
+    },
+    address: {
+      name: sessionUser?.name || sessionUser?.email?.split('@')[0] || 'Customer',
+      line1: details.address.line,
+      phone: details.address.phone,
+    },
+    items: details.items.map((item) => ({
+      product: item.product,
+      variant: item.variant || 'Default',
+      quantity: item.quantity,
+      total: item.total,
+      image: item.image,
     })),
   }
 }

@@ -4,6 +4,10 @@ import {
   findPurchasePaymentsPage,
   updateOrderStatusRecord,
 } from '@/repositories/admin.repository'
+import {
+  notifyOrderDeliveredEmail,
+  notifyOrderShippedEmail,
+} from '@/lib/email-notifications'
 import type { OrderQuery, PaymentQuery } from '@/validators/admin-query.validator'
 
 function pageMeta(page: number, pageSize: number, totalItems: number) {
@@ -25,7 +29,45 @@ export async function fetchOrdersService(query: OrderQuery = {}) {
 }
 
 export async function updateOrderStatusService(orderId: string, status: string) {
-  await updateOrderStatusRecord(orderId, status)
+  const order = await updateOrderStatusRecord(orderId, status)
+
+  if (order?.userEmail && order.previousStatus !== status) {
+    const customerName =
+      order.userName || order.userEmail.split('@')[0] || 'Customer'
+    const orderNumber = order.orderNumber || order.id
+
+    if (status === 'shipped') {
+      try {
+        await notifyOrderShippedEmail({
+          email: order.userEmail,
+          customerName,
+          orderId: orderNumber,
+          courierName: order.courierName,
+          trackingNumber: order.trackingNumber,
+          trackingLink: order.trackingUrl,
+        })
+      } catch (emailError) {
+        console.error('Unable to send shipping email:', emailError)
+      }
+    }
+
+    if (status === 'delivered') {
+      try {
+        await notifyOrderDeliveredEmail({
+          email: order.userEmail,
+          customerName,
+          orderId: orderNumber,
+          deliveryDate: new Date().toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          }),
+        })
+      } catch (emailError) {
+        console.error('Unable to send delivery email:', emailError)
+      }
+    }
+  }
 
   return { success: true, message: 'Order status updated' }
 }

@@ -19,13 +19,13 @@ function getS3BucketName() {
 
 function getS3ClientConfig(): S3ClientConfig {
   const accessKeyId =
-    process.env.S3_AWS_ACCESS_KEY_ID ??
-    process.env.AWS_ACCESS_KEY_ID ??
-    process.env.AWS_ACCESS_KEY
+    process.env.S3_ACCESS_KEY_ID ??
+    process.env.ACCESS_KEY_ID ??
+    process.env.ACCESS_KEY
   const secretAccessKey =
     process.env.S3_AWS_SECRET_ACCESS_KEY ??
     process.env.AWS_SECRET_ACCESS_KEY ??
-    process.env.AWS_SECRET_KEY
+    process.env.SECRET_KEY
 
   if (!accessKeyId || !secretAccessKey) {
     return {

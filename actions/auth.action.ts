@@ -17,6 +17,7 @@ import {
 } from '@/lib/auth-cookies'
 import { getUserClaimsFromIdToken } from '@/lib/auth-token'
 import { requireUser } from '@/lib/auth'
+import { notifyWelcomeEmail } from '@/lib/email-notifications'
 import { syncProfileFromAuthClaimsService } from '@/services/user.service'
 
 type AuthActionResult = {
@@ -219,6 +220,14 @@ export async function confirmSignUpAction({
   try {
     await cognitoConfirmSignUp({ email: normalizedEmail, code })
     await setAuthCookies(normalizedEmail, password)
+    try {
+      await notifyWelcomeEmail({
+        email: normalizedEmail,
+        customerName: normalizedEmail.split('@')[0],
+      })
+    } catch (emailError) {
+      console.error('Unable to send welcome email:', emailError)
+    }
 
     return { ok: true }
   } catch (error) {

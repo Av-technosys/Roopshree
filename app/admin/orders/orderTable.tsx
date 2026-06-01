@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Eye } from "lucide-react";
 import { Select } from "@/components/select";
@@ -42,6 +42,7 @@ const orderStatus = [
 export default function OrderTable({ page, orders, pageSize }: OrderTableProps) {
   const startIndex = (page - 1) * pageSize;
   const [isPending, startTransition] = useTransition();
+  const [orderRows, setOrderRows] = useState(orders);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -60,8 +61,8 @@ export default function OrderTable({ page, orders, pageSize }: OrderTableProps) 
           </TableRow>
         </TableHeader>
         <TableBody>
-          {orders.length ? (
-            orders.map((order, index) => (
+          {orderRows.length ? (
+            orderRows.map((order, index) => (
               <TableRow key={order.id} className={isPending ? "opacity-60" : ""}>
                 <TableCell>{startIndex + index + 1}</TableCell>
                 <TableCell>{order.id}</TableCell>
@@ -73,8 +74,19 @@ export default function OrderTable({ page, orders, pageSize }: OrderTableProps) 
                       value={order.status}
                       selectItems={orderStatus}
                       onValueChange={(value) => {
-                        startTransition(() => {
-                          void updateOrderStatus(order.id, value);
+                        startTransition(async () => {
+                          const result = await updateOrderStatus(order.id, value);
+
+                          if (!result.success) {
+                            return;
+                          }
+
+                          setOrderRows((currentRows) =>
+                            currentRows.map((row) =>
+                              row.id === order.id ? { ...row, status: value } : row,
+                            ),
+                          );
+                          router.refresh();
                         });
                       }}
                     />

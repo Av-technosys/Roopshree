@@ -49,10 +49,34 @@ export async function findOrdersPage(query: OrderQuery) {
 }
 
 export async function updateOrderStatusRecord(orderId: string, status: string) {
+  const [existingOrder] = await db
+    .select({
+      id: orders.id,
+      orderNumber: orders.orderNumber,
+      previousStatus: orders.status,
+      userEmail: users.email,
+      userName: users.name,
+      courierName: orders.courierName,
+      trackingNumber: orders.trackingNumber,
+      trackingUrl: orders.trackingUrl,
+      deliveredAt: orders.deliveredAt,
+    })
+    .from(orders)
+    .leftJoin(users, eq(orders.userId, users.id))
+    .where(eq(orders.id, orderId))
+    .limit(1)
+
   await db
     .update(orders)
-    .set({ status: status as any, updatedAt: new Date() })
+    .set({
+      status: status as any,
+      updatedAt: new Date(),
+      ...(status === 'shipped' ? { shipedAt: new Date() } : {}),
+      ...(status === 'delivered' ? { deliveredAt: new Date() } : {}),
+    })
     .where(eq(orders.id, orderId))
+
+  return existingOrder ?? null
 }
 
 export async function findOrderDetails(id: string) {

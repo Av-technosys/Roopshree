@@ -2,7 +2,7 @@
 
 import crypto from "node:crypto"
 
-import { and, eq, sql } from "drizzle-orm"
+import { and, count, eq, sql } from "drizzle-orm"
 
 import {
   cartItems,
@@ -20,6 +20,11 @@ import {
 import { addresses } from "@/db/schema/users"
 import { db } from "@/lib/db"
 import { getCurrentDbUserId } from "@/lib/current-db-user"
+import { getCurrentUser } from "@/lib/auth"
+import {
+  notifyFirstOrderEmail,
+  notifyOrderConfirmationEmail,
+} from "@/lib/email-notifications"
 import { getS3ObjectPreviewUrl } from "@/lib/s3"
 
 type ShippingDetails = {
@@ -182,6 +187,18 @@ function getTotals(items: CheckoutItemSnapshot[]) {
     gst,
     total: subtotal + shipping + gst,
   }
+}
+
+function formatDate(date: Date) {
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  })
+}
+
+function formatCurrency(amountInPaise: number) {
+  return `₹${(amountInPaise / 100).toLocaleString("en-IN")}`
 }
 
 function signCheckoutPayload(payload: CheckoutTokenPayload) {
@@ -597,7 +614,12 @@ export async function completeRazorpayPayment(input: {
           country: orderShipping.country ?? "India",
           totalAmount: checkout.amountInPaise,
         })
-        .returning({ id: orders.id })
+        .returning({
+          id: orders.id,
+          orderNumber: orders.orderNumber,
+          createdAt: orders.createdAt,
+          totalAmount: orders.totalAmount,
+        })
 
       await tx.insert(orderItems).values(
         checkout.items.map((item) => ({
@@ -634,8 +656,54 @@ export async function completeRazorpayPayment(input: {
         )
       }
 
-      return { orderId: order.id, source: checkout.source }
+      return {
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        createdAt: order.createdAt,
+        totalAmount: order.totalAmount,
+        source: checkout.source,
+        items: checkout.items,
+      }
     })
+
+    if (result.source) {
+      const sessionUser = await getCurrentUser()
+      const email = sessionUser?.email
+
+      if (email) {
+        const customerName =
+          sessionUser?.name || email.split("@")[0] || "Customer"
+
+        try {
+          await notifyOrderConfirmationEmail({
+            email,
+            customerName,
+            orderId: result.orderNumber,
+            orderDate: formatDate(result.createdAt),
+            productNames: result.items
+              .map((item) => item.productName)
+              .filter(Boolean)
+              .join(", "),
+            orderTotal: formatCurrency(result.totalAmount),
+          })
+        } catch (emailError) {
+          console.error("Unable to send order confirmation email:", emailError)
+        }
+
+        try {
+          const [orderCount] = await db
+            .select({ value: count() })
+            .from(orders)
+            .where(eq(orders.userId, userId))
+
+          if ((orderCount?.value ?? 0) === 1) {
+            await notifyFirstOrderEmail({ email, customerName })
+          }
+        } catch (emailError) {
+          console.error("Unable to send first order email:", emailError)
+        }
+      }
+    }
 
     return { success: true, orderId: result.orderId, source: result.source }
   } catch (error) {

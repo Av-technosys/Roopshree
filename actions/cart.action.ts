@@ -192,8 +192,6 @@ export async function setUserCartItemQuantity(input: CartMutationInput) {
         }
       }
 
-      const cartLine = await resolveCartLine(tx, productId, variantId)
-
       if (quantity <= 0) {
         if (existingProductItemId && !input.variantId) {
           await tx.delete(cartItems).where(eq(cartItems.id, existingProductItemId))
@@ -203,13 +201,15 @@ export async function setUserCartItemQuantity(input: CartMutationInput) {
             .where(
               getCartItemWhere(cart.id, {
                 productId,
-                variantId: cartLine.variantId,
+                variantId,
               }),
             )
         }
 
         return
       }
+
+      const cartLine = await resolveCartLine(tx, productId, variantId)
 
       validatePositiveQuantity(quantity)
 

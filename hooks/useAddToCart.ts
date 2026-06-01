@@ -208,6 +208,85 @@ export function useAddToCart() {
     return true
   }
 
+  async function syncItemNow(item: CartItem | CartItemInput) {
+    if (!item.dbProductId) {
+      showToast({ title: "Unable to sync this cart item", tone: "error" })
+      return false
+    }
+
+    const key = getCartItemKey(item)
+    const existingTimer = pendingSyncs.get(key)
+
+    if (existingTimer) {
+      clearTimeout(existingTimer)
+      pendingSyncs.delete(key)
+    }
+
+    const nextVersion = (syncVersions.get(key) ?? 0) + 1
+    const quantity = useCartStore
+      .getState()
+      .getItemQuantity(item.productId, item.attributes, item.variantId)
+    const variantId = getVariantIdentity(item)
+
+    syncVersions.set(key, nextVersion)
+    syncItems.set(key, {
+      productId: item.productId,
+      dbProductId: item.dbProductId,
+      variantId: variantId ?? undefined,
+      attributes: item.attributes,
+      quantity,
+    })
+
+    try {
+      activeSyncCount += 1
+
+      const result = await setUserCartItemQuantity({
+        productId: item.dbProductId,
+        variantId: variantId ?? undefined,
+        quantity,
+      })
+
+      if (syncVersions.get(key) !== nextVersion) {
+        return true
+      }
+
+      syncItems.delete(key)
+
+      if (result.userIsNotLoggedIn) {
+        showToast({ title: "Please sign in to update your cart", tone: "info" })
+        await syncCartFromDb({ force: true })
+        redirectToAuth()
+        return false
+      }
+
+      if (!result.success) {
+        console.error(result.message ?? "Cart sync failed")
+        showToast({
+          title: result.message ?? "Unable to update cart",
+          tone: "error",
+        })
+        await syncCartFromDb({ force: true })
+        return false
+      }
+
+      scheduleSettledCartSync()
+      return true
+    } catch (error) {
+      console.error(error)
+      showToast({ title: "Unable to update cart", tone: "error" })
+
+      if (syncVersions.get(key) === nextVersion) {
+        syncItems.delete(key)
+        await syncCartFromDb({ force: true })
+        return false
+      }
+
+      return true
+    } finally {
+      activeSyncCount = Math.max(0, activeSyncCount - 1)
+    }
+  }
+
   async function handleAddToCart(product: CartItemInput) {
     const previousItems = useCartStore.getState().items
 
@@ -264,7 +343,13 @@ export function useAddToCart() {
     decreaseOptimistic(item.productId, item.attributes, item.variantId)
     localCartVersion += 1
 
-    if (!debouncedSyncItem(item)) {
+    const nextQuantity = useCartStore
+      .getState()
+      .getItemQuantity(item.productId, item.attributes, item.variantId)
+    const syncSucceeded =
+      nextQuantity <= 0 ? await syncItemNow(item) : debouncedSyncItem(item)
+
+    if (!syncSucceeded) {
       setCart(previousItems)
       return false
     }
@@ -278,7 +363,7 @@ export function useAddToCart() {
     removeItem(item.productId, item.attributes, item.variantId)
     localCartVersion += 1
 
-    if (!debouncedSyncItem(item)) {
+    if (!(await syncItemNow(item))) {
       setCart(previousItems)
       return false
     }

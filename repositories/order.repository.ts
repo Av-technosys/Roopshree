@@ -1,4 +1,4 @@
-import { desc, eq, inArray } from 'drizzle-orm'
+import { desc, eq, inArray, or } from 'drizzle-orm'
 
 import { orderItems, orders, payments } from '@/db/schema/orders'
 import { db } from '@/lib/db'
@@ -57,7 +57,7 @@ export async function findDashboardOrderDetailRow(userId: string, orderId: strin
   const [order] = await db
     .select()
     .from(orders)
-    .where(eq(orders.id, orderId))
+    .where(or(eq(orders.id, orderId), eq(orders.orderNumber, orderId)))
     .limit(1)
 
   if (!order || order.userId !== userId) {

@@ -73,6 +73,8 @@ export type ProductListRow = {
   sku: string
   basePrice: number
   strikeThroughPrice: number | null
+  rating: number
+  reviewCount: number
   variantId: string | null
   variantTitle: string | null
   variantPrice: number | null
@@ -258,6 +260,8 @@ export async function listProductRows(
       sku: products.sku,
       basePrice: products.basePrice,
       strikeThroughPrice: products.strikeThroughPrice,
+      rating: products.rating,
+      reviewCount: products.reviewCount,
       variantId: productVariants.id,
       variantTitle: productVariants.title,
       variantPrice: productVariants.price,
@@ -335,6 +339,8 @@ export async function searchProductRows(
       sku: products.sku,
       basePrice: products.basePrice,
       strikeThroughPrice: products.strikeThroughPrice,
+      rating: products.rating,
+      reviewCount: products.reviewCount,
       variantId: productVariants.id,
       variantTitle: productVariants.title,
       variantPrice: productVariants.price,

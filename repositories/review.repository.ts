@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from 'drizzle-orm'
+import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 
 import { orderItems, orders } from '@/db/schema/orders'
 import { mediaAssets, products } from '@/db/schema/products'
@@ -194,22 +194,59 @@ export async function listReviewMediaRows(reviewIds: string[]) {
 
 export async function updateReviewStatusRecord(id: string, status: ReviewStatus) {
   async function persist(nextStatus: StoredReviewStatus) {
-    await db
-      .update(reviews)
-      .set({
-        status: nextStatus as typeof reviews.$inferInsert.status,
-        updatedAt: new Date(),
-      })
-      .where(eq(reviews.id, id))
+    return db.transaction(async (tx) => {
+      const [updatedReview] = await tx
+        .update(reviews)
+        .set({
+          status: nextStatus as typeof reviews.$inferInsert.status,
+          updatedAt: new Date(),
+        })
+        .where(eq(reviews.id, id))
+        .returning({ productId: reviews.productId })
+
+      if (!updatedReview) {
+        return null
+      }
+
+      const [ratingStats] = await tx
+        .select({
+          averageRating: sql<string | null>`avg(${reviews.rating})`,
+          reviewCount: sql<number>`count(*)::int`,
+        })
+        .from(reviews)
+        .where(
+          and(
+            eq(reviews.productId, updatedReview.productId),
+            sql`${reviews.status}::text in ('accepted', 'approved')`,
+          ),
+        )
+
+      await tx
+        .update(products)
+        .set({
+          rating: Math.round(Number(ratingStats?.averageRating ?? 0) * 100),
+          reviewCount: Number(ratingStats?.reviewCount ?? 0),
+          updatedAt: new Date(),
+        })
+        .where(eq(products.id, updatedReview.productId))
+
+      const [product] = await tx
+        .select({ slug: products.slug })
+        .from(products)
+        .where(eq(products.id, updatedReview.productId))
+        .limit(1)
+
+      return product
+    })
   }
 
   try {
-    await persist(status)
+    return await persist(status)
   } catch (error) {
     if (status !== 'accepted') {
       throw error
     }
 
-    await persist('approved')
+    return persist('approved')
   }
 }

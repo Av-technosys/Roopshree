@@ -10,6 +10,7 @@ import {
   Heart,
   Minus,
   Plus,
+  Star,
   Trash2,
 } from "lucide-react"
 import { ShopMobileFilters } from "./ShopFilters"
@@ -293,6 +294,13 @@ function ProductCard({ product }: { product: Product }) {
         <h3 className="mt-3 font-heading text-[15px] leading-snug text-[#3F2617] md:text-sm">
           {product.name}
         </h3>
+        {product.reviewCount ? (
+          <p className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-[#6b4a2e]">
+            <Star className="size-3 fill-[#D4A056] text-[#D4A056]" />
+            <span>{product.rating?.toFixed(1)}</span>
+            <span className="text-[#8b7868]">({product.reviewCount})</span>
+          </p>
+        ) : null}
         <p className="mt-1 text-sm font-medium text-[#111] md:text-xs md:text-[#c39150]">
           {formatPrice(product.price)}
         </p>

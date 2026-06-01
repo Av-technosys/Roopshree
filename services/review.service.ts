@@ -154,9 +154,13 @@ export async function getAdminReviews() {
 }
 
 export async function updateReviewStatus(id: string, status: ReviewStatus) {
-  await updateReviewStatusRecord(id, status)
+  const product = await updateReviewStatusRecord(id, status)
 
   revalidatePath('/admin/reviews')
+  revalidatePath('/shop')
+  if (product?.slug) {
+    revalidatePath(`/product/${product.slug}`)
+  }
 
   return { success: true, message: 'Review status updated.' }
 }

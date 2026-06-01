@@ -1,7 +1,8 @@
 "use client"
 
-import { type FormEvent, useTransition } from "react"
+import { type FormEvent, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { Eye, EyeOff } from "lucide-react"
 import {
   DashboardCard,
   DashboardPageTitle,
@@ -9,6 +10,7 @@ import {
   PrimaryAction,
 } from "@/components/dashboard/DashboardPrimitives"
 import { useToast } from "@/components/common/ToastProvider"
+import { changePasswordAction } from "@/actions/auth.action"
 import { updateProfile } from "@/helper/user/action"
 import type { ProfileView } from "@/services/user.service"
 
@@ -20,6 +22,9 @@ export function ProfileSettings({
   const router = useRouter()
   const { showToast } = useToast()
   const [isPending, startTransition] = useTransition()
+  const [isPasswordPending, startPasswordTransition] = useTransition()
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -38,6 +43,42 @@ export function ProfileSettings({
       })
 
       if (result.success) {
+        router.refresh()
+      }
+    })
+  }
+
+  function handlePasswordSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    const form = event.currentTarget
+    const formData = new FormData(form)
+    const currentPassword = String(formData.get("currentPassword") ?? "")
+    const newPassword = String(formData.get("newPassword") ?? "")
+    const confirmPassword = String(formData.get("confirmPassword") ?? "")
+
+    if (newPassword !== confirmPassword) {
+      showToast({
+        title: "New password and confirmation do not match",
+        tone: "error",
+      })
+      return
+    }
+
+    startPasswordTransition(async () => {
+      const result = await changePasswordAction({
+        currentPassword,
+        newPassword,
+        confirmPassword,
+      })
+
+      showToast({
+        title: result.message ?? result.error ?? "Unable to update password",
+        tone: result.ok ? "success" : "error",
+      })
+
+      if (result.ok) {
+        form.reset()
         router.refresh()
       }
     })
@@ -84,12 +125,39 @@ export function ProfileSettings({
           <h2 className="font-heading text-xl font-medium text-black">
             Change Password
           </h2>
-          <div className="mt-5 grid max-w-md gap-4">
-            <Field label="Current Password" type="password" />
-            <Field label="New Password" type="password" />
-            <Field label="Confirm New Password" type="password" />
-          </div>
-          <PrimaryAction className="mt-4">Update Password</PrimaryAction>
+          <form onSubmit={handlePasswordSubmit}>
+            <div className="mt-5 grid max-w-md gap-4">
+              <PasswordField
+                label="Current Password"
+                name="currentPassword"
+                showPassword={showCurrentPassword}
+                onToggleShowPassword={() =>
+                  setShowCurrentPassword((current) => !current)
+                }
+              />
+              <PasswordField
+                label="New Password"
+                name="newPassword"
+                showPassword={showNewPassword}
+                onToggleShowPassword={() =>
+                  setShowNewPassword((current) => !current)
+                }
+              />
+              <Field
+                label="Confirm New Password"
+                name="confirmPassword"
+                type="password"
+                required
+              />
+            </div>
+            <PrimaryAction
+              type="submit"
+              className="mt-4"
+              disabled={isPasswordPending}
+            >
+              {isPasswordPending ? "Updating..." : "Update Password"}
+            </PrimaryAction>
+          </form>
         </DashboardCard>
 
         <DashboardCard className="p-5 sm:p-6">
@@ -109,5 +177,43 @@ export function ProfileSettings({
         </DashboardCard>
       </div>
     </div>
+  )
+}
+
+function PasswordField({
+  label,
+  name,
+  showPassword,
+  onToggleShowPassword,
+}: {
+  label: string
+  name: string
+  showPassword: boolean
+  onToggleShowPassword: () => void
+}) {
+  return (
+    <label className="block min-w-0 text-xs text-[#777]">
+      {label}
+      <span className="mt-1 flex h-10 w-full items-center border border-[#e1c5a5] bg-white focus-within:border-[#C39150]">
+        <input
+          name={name}
+          type={showPassword ? "text" : "password"}
+          required
+          className="h-full min-w-0 flex-1 bg-transparent px-4 text-sm font-medium text-black outline-none"
+        />
+        <button
+          type="button"
+          aria-label={showPassword ? `Hide ${label}` : `Show ${label}`}
+          onClick={onToggleShowPassword}
+          className="flex size-10 shrink-0 items-center justify-center text-[#6f625b] transition hover:text-[#C39150]"
+        >
+          {showPassword ? (
+            <EyeOff className="size-4" />
+          ) : (
+            <Eye className="size-4" />
+          )}
+        </button>
+      </span>
+    </label>
   )
 }

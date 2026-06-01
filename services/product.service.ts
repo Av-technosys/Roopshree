@@ -55,6 +55,8 @@ function mapProductRow(row: ProductListRow) {
     name: row.name,
     colour: row.color ?? '',
     price,
+    rating: row.rating / 100,
+    reviewCount: row.reviewCount,
     image,
     imageClass: 'object-top',
   }

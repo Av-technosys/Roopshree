@@ -54,9 +54,9 @@ const ProductDescriptionReviews = ({
             </h2>
 
             {product.description ? (
-              <p className="mt-4 max-w-3xl text-sm leading-6 text-black">
+              <div className="mt-4 max-w-3xl text-sm leading-6 text-black whitespace-pre-wrap">
                 {product.description}
-              </p>
+              </div>
             ) : null}
 
             {specs.length > 0 ? (

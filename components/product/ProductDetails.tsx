@@ -28,6 +28,7 @@ export type ProductDetailView = {
   name: string
   sku: string
   description: string
+  short_description: string
   price: number
   strikeThroughPrice: number | null
   variants: {
@@ -207,11 +208,10 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
                       key={image.id}
                       type="button"
                       onClick={() => setSelectedMediaId(image.id)}
-                      className={`relative aspect-[0.78] overflow-hidden border transition ${
-                        selectedMedia?.id === image.id
+                      className={`relative aspect-[0.78] overflow-hidden border transition ${selectedMedia?.id === image.id
                           ? "border-[#c39150]"
                           : "border-transparent"
-                      }`}
+                        }`}
                       aria-label="View product image"
                     >
                       <Image
@@ -258,9 +258,9 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
               ) : null}
             </div>
 
-            {product.description ? (
-              <p className="mt-7 max-w-[35rem] text-sm leading-5 text-black">
-                {product.description}
+            {product.short_description ? (
+              <p className="mt-7 max-w-[35rem] text-sm leading-5 text-black whitespace-pre-wrap">
+                {product.short_description}
               </p>
             ) : null}
 
@@ -278,11 +278,10 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
                         setSelectedVariantId(variant.id)
                         setSelectedMediaId(null)
                       }}
-                      className={`overflow-hidden rounded-[3px] border bg-white text-left transition ${
-                        selectedVariant?.id === variant.id
+                      className={`overflow-hidden rounded-[3px] border bg-white text-left transition ${selectedVariant?.id === variant.id
                           ? "border-[#c39150] shadow-sm"
                           : "border-[#d8b278] hover:border-[#c39150]"
-                      }`}
+                        }`}
                     >
                       <span className="relative block aspect-[0.78] bg-[#f8efe6]">
                         {variant.image ? (

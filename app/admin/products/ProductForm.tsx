@@ -167,33 +167,33 @@ export default function ProductForm({ product }: ProductFormProps) {
   const [variants, setVariants] = useState<VariantRow[]>(
     product?.productVariantRes?.length
       ? product.productVariantRes.map((variant) => ({
-          id: variant.id,
-          sku: variant.sku,
-          title: variant.title,
-          price: rupees(variant.price),
-          strikeThroughPrice: rupees(variant.strikeThroughPrice),
-          stockQuantity: String(variant.stockQuantity),
-          size: variant.size ?? "",
-          color: variant.color ?? "",
-          fabric: variant.fabric ?? "",
-          banner: (() => {
-            const variantMedia = mediaByVariant.get(variant.id) ?? [];
-            const bannerKey = variant.bannerImage ?? variantMedia[0]?.key ?? "";
+        id: variant.id,
+        sku: variant.sku,
+        title: variant.title,
+        price: rupees(variant.price),
+        strikeThroughPrice: rupees(variant.strikeThroughPrice),
+        stockQuantity: String(variant.stockQuantity),
+        size: variant.size ?? "",
+        color: variant.color ?? "",
+        fabric: variant.fabric ?? "",
+        banner: (() => {
+          const variantMedia = mediaByVariant.get(variant.id) ?? [];
+          const bannerKey = variant.bannerImage ?? variantMedia[0]?.key ?? "";
 
-            if (!bannerKey) return null;
+          if (!bannerKey) return null;
 
-            return {
-              key: bannerKey,
-              previewUrl:
-                variantMedia.find((item) => item.key === bannerKey)?.previewUrl ??
-                variantMedia[0]?.previewUrl ??
-                bannerKey,
-            };
-          })(),
-          gallery: (mediaByVariant.get(variant.id) ?? []).slice(1),
-          isDefault: variant.isDefault,
-          isActive: variant.isActive,
-        }))
+          return {
+            key: bannerKey,
+            previewUrl:
+              variantMedia.find((item) => item.key === bannerKey)?.previewUrl ??
+              variantMedia[0]?.previewUrl ??
+              bannerKey,
+          };
+        })(),
+        gallery: (mediaByVariant.get(variant.id) ?? []).slice(1),
+        isDefault: variant.isDefault,
+        isActive: variant.isActive,
+      }))
       : [{ ...emptyVariant, isDefault: true }],
   );
 
@@ -300,51 +300,7 @@ export default function ProductForm({ product }: ProductFormProps) {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
         <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Product</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2">
-              <Field label="Name">
-                <Input value={name} onChange={(event) => setName(event.target.value)} required />
-              </Field>
-              <Field label="SKU">
-                <Input value={sku} onChange={(event) => setSku(event.target.value)} required />
-              </Field>
-              <Field label="Base price">
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={price}
-                  onChange={(event) => setPrice(event.target.value)}
-                  required
-                />
-              </Field>
-              <Field label="Strike-through price">
-                <Input
-                  type="number"
-                  min={price ? Number(price) + 0.01 : 0}
-                  step="0.01"
-                  value={strikeThroughPrice}
-                  onChange={(event) => setStrikeThroughPrice(event.target.value)}
-                />
-              </Field>
-              <Field label="Short description" className="md:col-span-2">
-                <Textarea
-                  value={shortDescription}
-                  onChange={(event) => setShortDescription(event.target.value)}
-                />
-              </Field>
-              <Field label="Description" className="md:col-span-2">
-                <Textarea
-                  value={description}
-                  onChange={(event) => setDescription(event.target.value)}
-                  className="min-h-32"
-                />
-              </Field>
-            </CardContent>
-          </Card>
+
 
           <DynamicRows
             title="Variants"
@@ -521,7 +477,54 @@ export default function ProductForm({ product }: ProductFormProps) {
                 </div>
               </div>
             ))}
+
           </DynamicRows>
+
+          <Card>
+            <CardHeader>
+              {/* <CardTitle>Product</CardTitle> */}
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-2">
+              {/* <Field label="Name">
+                <Input value={name} onChange={(event) => setName(event.target.value)} required />
+              </Field> */}
+              {/* <Field label="SKU">
+                <Input value={sku} onChange={(event) => setSku(event.target.value)} required />
+              </Field>
+              <Field label="Base price">
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={price}
+                  onChange={(event) => setPrice(event.target.value)}
+                  required
+                />
+              </Field>
+              <Field label="Strike-through price">
+                <Input
+                  type="number"
+                  min={price ? Number(price) + 0.01 : 0}
+                  step="0.01"
+                  value={strikeThroughPrice}
+                  onChange={(event) => setStrikeThroughPrice(event.target.value)}
+                />
+              </Field> */}
+              <Field label="Short description" className="md:col-span-2">
+                <Textarea
+                  value={shortDescription}
+                  onChange={(event) => setShortDescription(event.target.value)}
+                />
+              </Field>
+              <Field label="Description" className="md:col-span-2">
+                <Textarea
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                  className="min-h-32"
+                />
+              </Field>
+            </CardContent>
+          </Card>
 
           <KeyValueRows
             title="Attributes"

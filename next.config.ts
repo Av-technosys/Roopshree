@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "d209jjsil73ccf.cloudfront.net", // CloudFront CDN
       },
+      {
+        protocol: "https",
+        hostname: "roopshree.s3.ap-south-1.amazonaws.com", // S3 Bucket fallback
+      },
     ],
   },
 };

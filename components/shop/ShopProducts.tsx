@@ -86,10 +86,10 @@ export default function ShopProducts({
           <Link
             key={`${category.slug ?? category.name}-${index}`}
             href={buildHref({ category: category.slug ?? null, page: 1 })}
-            className="h-auto w-auto shrink-0"
+            className="block h-auto w-auto shrink-0"
           >
           {category.image ? (
-            <Image src={category.image} height={400} width={400} alt={category.name} className=" h-48 w-auto object-contain" />
+            <Image src={category.image} height={400} width={400} alt={category.name} className=" h-48 w-auto object-contain" unoptimized />
           ) : (
             <span className="flex h-48 items-center justify-center bg-[#f8efe6] px-3 text-center text-sm text-[#3f2617]">
               {category.name}

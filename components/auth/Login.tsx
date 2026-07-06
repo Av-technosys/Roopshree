@@ -40,7 +40,11 @@ export default function Login({
     }
 
     showToast({ title: "Logged in successfully", tone: "success" });
-    router.push(callbackUrl);
+    if (response.isAdmin) {
+      router.push("/admin");
+    } else {
+      router.push(callbackUrl);
+    }
     router.refresh();
   }
 

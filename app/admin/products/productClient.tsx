@@ -75,15 +75,15 @@ export default function ProductClient({
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex justify-end gap-4">
-            {/* <Button onClick={() => router.push("/admin/products/upload-csv")} variant="outline">
+            <Button onClick={() => router.push("/admin/products/upload-csv")} variant="outline">
               Upload CSV
-            </Button> */}
+            </Button>
             <Button onClick={() => router.push("/admin/products/add")}>
               <Plus />
               Add Product
             </Button>
           </div>
-{/* <Button onClick={() => router.push("/admin/products/upload-csv")} variant="outline">
+          {/* <Button onClick={() => router.push("/admin/products/upload-csv")} variant="outline">
               Upload CSV
             </Button> */}
           <div className="mb-6 flex flex-col gap-3 lg:flex-row">

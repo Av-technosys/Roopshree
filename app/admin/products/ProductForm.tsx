@@ -493,9 +493,9 @@ export default function ProductForm({ product }: ProductFormProps) {
               {/* <CardTitle>Product</CardTitle> */}
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
-              {/* <Field label="Name">
+              <Field label="Name">
                 <Input value={name} onChange={(event) => setName(event.target.value)} required />
-              </Field> */}
+              </Field>
               {/* <Field label="SKU">
                 <Input value={sku} onChange={(event) => setSku(event.target.value)} required />
               </Field>

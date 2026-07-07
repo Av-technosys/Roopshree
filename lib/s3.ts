@@ -83,3 +83,36 @@ export async function createS3ImageUploadUrl({
   return getSignedUrl(s3Client, command, { expiresIn })
 }
 
+export async function uploadImageFromUrlToS3(imageUrl: string, folder = 'products') {
+  if (!imageUrl) return null;
+
+  try {
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image from ${imageUrl}: ${response.statusText}`);
+    }
+
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const uniqueId = crypto.randomUUID();
+    const extension = contentType.split('/')[1] || 'jpg';
+    const key = `${folder}/${new Date().getFullYear()}/${uniqueId}.${extension}`;
+
+    const command = new PutObjectCommand({
+      Bucket: getS3BucketName(),
+      Key: key,
+      ContentType: contentType,
+      Body: buffer,
+    });
+
+    await s3Client.send(command);
+
+    return key;
+  } catch (error) {
+    console.error(`Error uploading image from URL (${imageUrl}):`, error);
+    return null;
+  }
+}
+

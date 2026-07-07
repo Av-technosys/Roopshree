@@ -251,28 +251,35 @@ export default function ProductForm({ product }: ProductFormProps) {
   async function handleVariantMediaUpload(
     variantIndex: number,
     target: "banner" | "gallery",
-    file?: File,
+    files?: FileList | null,
   ) {
-    if (!file) return;
-
-    const localPreviewUrl = URL.createObjectURL(file);
+    if (!files || files.length === 0) return;
 
     try {
-      const { fileKey } = await upload(file, "products");
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const localPreviewUrl = URL.createObjectURL(file);
+        try {
+          const { fileKey } = await upload(file, "products");
+          return { key: fileKey, previewUrl: localPreviewUrl };
+        } catch (error) {
+          URL.revokeObjectURL(localPreviewUrl);
+          throw error;
+        }
+      });
+
+      const uploadedMediaItems = await Promise.all(uploadPromises);
+
       setVariants((currentVariants) =>
         currentVariants.map((variant, index) => {
           if (index !== variantIndex) return variant;
 
-          const mediaItem = { key: fileKey, previewUrl: localPreviewUrl };
-
           return target === "banner"
-            ? { ...variant, banner: mediaItem }
-            : { ...variant, gallery: [...variant.gallery, mediaItem] };
+            ? { ...variant, banner: uploadedMediaItems[0] }
+            : { ...variant, gallery: [...variant.gallery, ...uploadedMediaItems] };
         }),
       );
-      toast.success("Media uploaded");
+      toast.success(target === "banner" ? "Banner uploaded" : `${uploadedMediaItems.length} images uploaded to gallery`);
     } catch (error) {
-      URL.revokeObjectURL(localPreviewUrl);
       toast.error(error instanceof Error ? error.message : "Media upload failed");
     }
   }
@@ -383,7 +390,7 @@ export default function ProductForm({ product }: ProductFormProps) {
                         hidden
                         accept="image/*"
                         onChange={(event) =>
-                          handleVariantMediaUpload(index, "banner", event.target.files?.[0])
+                          handleVariantMediaUpload(index, "banner", event.target.files)
                         }
                       />
                     </label>
@@ -398,9 +405,10 @@ export default function ProductForm({ product }: ProductFormProps) {
                         <input
                           type="file"
                           hidden
+                          multiple
                           accept="image/*"
                           onChange={(event) =>
-                            handleVariantMediaUpload(index, "gallery", event.target.files?.[0])
+                            handleVariantMediaUpload(index, "gallery", event.target.files)
                           }
                         />
                       </label>

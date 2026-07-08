@@ -153,21 +153,22 @@ async function replaceProductVariants(tx: any, productId: string, variants: any[
   await tx.delete(productVariants).where(eq(productVariants.productId, productId))
 
   const normalized = normalizeVariants(variants)
+
+  if (!normalized.length) {
+    throw new Error('At least one variant with a SKU and Title is required.')
+  }
+
   const values = normalized.map((variant) => ({
     ...variant.value,
     productId,
   }))
 
-  if (values.length) {
-    const inserted = await tx.insert(productVariants).values(values).returning()
+  const inserted = await tx.insert(productVariants).values(values).returning()
 
-    return inserted.map((variant: any, index: number) => ({
-      ...variant,
-      source: normalized[index]?.source ?? {},
-    }))
-  }
-
-  return []
+  return inserted.map((variant: any, index: number) => ({
+    ...variant,
+    source: normalized[index]?.source ?? {},
+  }))
 }
 
 async function replaceProductMedia(
@@ -177,35 +178,52 @@ async function replaceProductMedia(
 ) {
   await tx.delete(productMedia).where(eq(productMedia.productId, productId))
 
+  // Collect all image entries across variants
+  const allEntries: { variantId: string; key: string; index: number }[] = []
   for (const variant of variants) {
     const imageKeys = [
       normalizeImage(variant.source.banner),
       ...(variant.source.gallery ?? []).map(normalizeImage),
     ].filter(Boolean) as string[]
 
-    for (const [index, key] of imageKeys.entries()) {
-      const [asset] = await tx
-        .insert(mediaAssets)
-        .values({
-          key,
-          contentType: 'image/*',
-          ownerType: 'product',
-        })
-        .onConflictDoUpdate({
-          target: mediaAssets.key,
-          set: { key },
-        })
-        .returning({ id: mediaAssets.id })
-
-      await tx.insert(productMedia).values({
-        productId,
-        variantId: variant.id,
-        mediaAssetId: asset.id,
-        sortOrder: index,
-        isPrimary: index === 0,
-      })
-    }
+    imageKeys.forEach((key, index) => {
+      allEntries.push({ variantId: variant.id, key, index })
+    })
   }
+
+  if (!allEntries.length) return
+
+  // Batch upsert all mediaAssets in ONE query
+  const insertedAssets = await tx
+    .insert(mediaAssets)
+    .values(
+      allEntries.map(({ key }) => ({
+        key,
+        contentType: 'image/*',
+        ownerType: 'product',
+      })),
+    )
+    .onConflictDoUpdate({
+      target: mediaAssets.key,
+      set: { key: sql`excluded.key` },
+    })
+    .returning({ id: mediaAssets.id, key: mediaAssets.key })
+
+  // Build a key → asset id map
+  const keyToAssetId = new Map<string, string>(
+    insertedAssets.map((a: { id: string; key: string }) => [a.key, a.id]),
+  )
+
+  // Batch insert all productMedia in ONE query
+  await tx.insert(productMedia).values(
+    allEntries.map(({ variantId, key, index }) => ({
+      productId,
+      variantId,
+      mediaAssetId: keyToAssetId.get(key)!,
+      sortOrder: index,
+      isPrimary: index === 0,
+    })),
+  )
 }
 
 export async function findProductsPage(query: AdminProductQuery) {

@@ -34,7 +34,7 @@ function buildProductBaseValues(payload: AdminProductPayload) {
 
   return {
     name,
-    sku: String(variant.sku ?? payload.sku ?? slugify(name)).trim(),
+    sku: (String(variant.sku || payload.sku || slugify(name)).trim()) || slugify(name),
     slug: slugify(name),
     shortDescription: payload.shortDescription || null,
     description: variant.description ?? payload.description ?? null,

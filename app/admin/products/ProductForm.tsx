@@ -209,6 +209,13 @@ export default function ProductForm({ product }: ProductFormProps) {
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    const validVariants = variants.filter((variant) => variant.sku && variant.title);
+
+    if (validVariants.length === 0) {
+      toast.error("At least one variant must have a SKU and Title filled in.");
+      return;
+    }
+
     const payload = {
       name,
       sku,
@@ -221,15 +228,13 @@ export default function ProductForm({ product }: ProductFormProps) {
       categoryIds,
       attributes: attributes.filter((item) => item.name && item.value),
       filters: filters.filter((item) => item.name && item.value),
-      variants: variants
-        .filter((variant) => variant.sku && variant.title)
-        .map((variant) => ({
-          ...variant,
-          banner: variant.banner?.key ?? "",
-          gallery: variant.gallery
-            .filter((item) => item.key)
-            .map((item) => ({ key: item.key })),
-        })),
+      variants: validVariants.map((variant) => ({
+        ...variant,
+        banner: variant.banner?.key ?? "",
+        gallery: variant.gallery
+          .filter((item) => item.key)
+          .map((item) => ({ key: item.key })),
+      })),
     };
 
     startTransition(async () => {
@@ -311,7 +316,30 @@ export default function ProductForm({ product }: ProductFormProps) {
 
           <DynamicRows
             title="Variants"
-            onAdd={() => setVariants([...variants, { ...emptyVariant }])}
+            onAdd={() => {
+              const first = variants[0];
+              const replicated: VariantRow =
+                first && (first.sku || first.title || first.price || first.size || first.color || first.fabric)
+                  ? {
+                      ...emptyVariant,
+                      // Copy common fields from the first variant
+                      price: first.price,
+                      strikeThroughPrice: first.strikeThroughPrice,
+                      size: first.size,
+                      color: first.color,
+                      fabric: first.fabric,
+                      stockQuantity: first.stockQuantity,
+                      isActive: first.isActive,
+                      // Replicate sku and title too; reset only media/isDefault
+                      sku: first.sku,
+                      title: first.title,
+                      banner: null,
+                      gallery: [],
+                      isDefault: false,
+                    }
+                  : { ...emptyVariant };
+              setVariants([...variants, replicated]);
+            }}
           >
             {variants.map((variant, index) => (
               <div key={index} className="grid gap-3 border-b pb-4 last:border-b-0 md:grid-cols-3">

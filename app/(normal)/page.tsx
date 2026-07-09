@@ -27,6 +27,18 @@ export const metadata: Metadata = {
     "pure georgette bandhani dupatta",
     "ethnic wear online",
   ],
+  openGraph: {
+    title: "Authentic Bandhej Sarees & Dupattas from Rajasthan | Roopshree",
+    description: "Shop handcrafted Bandhej sarees & dupattas from Roopshree. Authentic heritage from Rajasthan with trusted quality. Explore the latest collection and shop online.",
+    url: "https://roopshree-one.vercel.app/",
+    type: "website",
+    images: [{ url: "https://roopshree-one.vercel.app/header-logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Authentic Bandhej Sarees & Dupattas from Rajasthan | Roopshree",
+    description: "Shop handcrafted Bandhej sarees & dupattas from Roopshree. Authentic heritage from Rajasthan with trusted quality. Explore the latest collection and shop online.",
+  },
 };
 
 const Page = async () => {

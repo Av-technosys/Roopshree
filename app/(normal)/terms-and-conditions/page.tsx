@@ -7,6 +7,17 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://roopshreebandhej.com/terms-and-conditions",
   },
+  openGraph: {
+    title: "Terms & Conditions | Roopshree Shopping Policies",
+    description: "Review Roopshree's Terms & Conditions covering orders, payments, shipping, returns, and website usage policies for our Bandhej saree and dupatta collections.",
+    url: "https://roopshree-one.vercel.app/terms-and-conditions",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Terms & Conditions | Roopshree Shopping Policies",
+    description: "Review Roopshree's Terms & Conditions covering orders, payments, shipping, returns, and website usage policies for our Bandhej saree and dupatta collections.",
+  },
 };
 
 export default function TermsAndConditions() {

@@ -7,6 +7,17 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://roopshreebandhej.com/privacy-policy",
   },
+  openGraph: {
+    title: "Our Privacy Policy | Roopshree",
+    description: "Read Roopshree's Privacy Policy to understand how we collect, use, and protect your personal information while you shop on our website.",
+    url: "https://roopshree-one.vercel.app/privacy-policy",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Our Privacy Policy | Roopshree",
+    description: "Read Roopshree's Privacy Policy to understand how we collect, use, and protect your personal information while you shop on our website.",
+  },
 };
 
 export default function PrivacyPolicy() {

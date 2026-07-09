@@ -16,7 +16,7 @@ export const dashboardNavItems = [
   { label: "Address Book", href: "/dashboard/address-book", icon: MapPin },
   { label: "Wishlist", href: "/dashboard/wishlist", icon: Heart },
   { label: "Reviews & Ratings", href: "/dashboard/reviews", icon: Star },
-  { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
+  // { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
 ]
 
 export const signOutItem = {

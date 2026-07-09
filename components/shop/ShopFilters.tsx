@@ -460,12 +460,31 @@ function ColorFilter({
 }) {
   if (items.length === 0) return null
 
+  // Map custom color names to specific hex codes
+  const COLOR_MAP: Record<string, string> = {
+    red: "#E53935",
+    rani: "#E71C80",
+    "red orange": "#FF5349",
+    green: "#4CAF50",
+    purple: "#9C27B0",
+    pink: "#FF69B4",
+    maroon: "#800000",
+    "yellow red": "#FF8C00",
+  }
+
+  // Only show colors that are defined in our map
+  const validItems = items.filter((item) => item.value.toLowerCase() in COLOR_MAP)
+
+  if (validItems.length === 0) return null
+
   return (
     <div>
       <FilterHeading title="Colour" />
       <div className="mt-2 flex flex-wrap gap-2">
-        {items.map((item) => {
+        {validItems.map((item) => {
           const selected = selectedValues.has(item.value)
+          
+          const backgroundColor = COLOR_MAP[item.value.toLowerCase()]
 
           return (
             <button
@@ -479,7 +498,7 @@ function ColorFilter({
                   ? "border-[#3F2617] ring-2 ring-[#c39150]/40"
                   : "border-black/10"
               }`}
-              style={{ backgroundColor: item.value }}
+              style={{ backgroundColor }}
             >
               {selected ? <Check className="size-3 text-white" /> : null}
             </button>
@@ -536,6 +555,8 @@ function RangeSlider({
   const minPercent = ((value.min - min) / (safeMax - min)) * 100
   const maxPercent = ((value.max - min) / (safeMax - min)) * 100
 
+  const thumbClasses = "[&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-[18px] [&::-webkit-slider-thumb]:w-[18px] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-[3px] [&::-webkit-slider-thumb]:border-[#C39150] [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:relative [&::-webkit-slider-thumb]:z-20 [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:h-[18px] [&::-moz-range-thumb]:w-[18px] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-[3px] [&::-moz-range-thumb]:border-[#C39150] [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:shadow-sm [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:relative [&::-moz-range-thumb]:z-20"
+
   return (
     <div className="relative h-5">
       <div className="absolute left-0 right-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-[#ead0ad]" />
@@ -550,7 +571,7 @@ function RangeSlider({
         step={100}
         value={value.min}
         onChange={(event) => onUpdateMin(Number(event.target.value))}
-        className="range-thumb absolute inset-0 h-5 w-full appearance-none bg-transparent"
+        className={`absolute inset-0 h-5 w-full appearance-none bg-transparent pointer-events-none ${thumbClasses}`}
       />
       <input
         type="range"
@@ -559,7 +580,7 @@ function RangeSlider({
         step={100}
         value={value.max}
         onChange={(event) => onUpdateMax(Number(event.target.value))}
-        className="range-thumb absolute inset-0 h-5 w-full appearance-none bg-transparent"
+        className={`absolute inset-0 h-5 w-full appearance-none bg-transparent pointer-events-none ${thumbClasses}`}
       />
     </div>
   )

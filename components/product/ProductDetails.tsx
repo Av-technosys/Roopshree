@@ -77,20 +77,11 @@ export type ProductDetailView = {
   };
 };
 
-const breadcrumbs = [
-  {
-    title: "Home",
-    link: "/",
-  },
-  {
-    title: "Products",
-    link: "/shop",
-  },
-  {
-    title: "Product Details",
-    link: "#",
-  },
-];
+const breadcrumbLinks = [
+  { label: "Home", href: "/" },
+  { label: "Shop", href: "/shop" },
+  { label: "Product Details", href: null },
+]
 
 const ProductDetails = ({ product }: { product: ProductDetailView }) => {
   const router = useRouter();
@@ -179,15 +170,19 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
     <section className="bg-white pb-14 pt-24 text-[#111] md:pt-20">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <nav className="mb-6 flex flex-wrap items-center gap-2 text-[0.68rem] font-semibold text-black">
-          {breadcrumbs.map(({ title, link }, index) => (
-            <Link
-              href={link}
-              key={link}
-              className="inline-flex items-center gap-2"
-            >
-              {title}
-              <span className="text-[#3f2617]">&gt;</span>
-            </Link>
+          {breadcrumbLinks.map((item, index) => (
+            <span key={item.label} className="inline-flex items-center gap-2">
+              {item.href ? (
+                <Link href={item.href} className="hover:text-[#C39150]">
+                  {item.label}
+                </Link>
+              ) : (
+                <span className="text-[#3f2617]">{item.label}</span>
+              )}
+              {index < breadcrumbLinks.length - 1 ? (
+                <span className="text-[#3f2617]">&gt;</span>
+              ) : null}
+            </span>
           ))}
         </nav>
 

@@ -83,28 +83,43 @@ export const qualityItems = [
 
 export const galleryItems = [
   {
-    src: "/home/showcase.png",
-    alt: "Embroidered red Bandhej textile detail",
-    className: "object-[48%_center]",
+    src: "/gallery/gallery1.webp",
+    alt: "Roopshree Bandhej collection 1",
+    className: "object-center",
   },
   {
-    src: "/about/ourstory.png",
-    alt: "Woman wearing a red Bandhej dupatta",
-    className: "object-[24%_center]",
+    src: "/gallery/gallery2.webp",
+    alt: "Roopshree Bandhej collection 2",
+    className: "object-center",
   },
   {
-    src: "/home/brouch.png",
-    alt: "Bandhej brooch and jewelry detail",
-    className: "object-[48%_35%]",
+    src: "/gallery/gallery3.webp",
+    alt: "Roopshree Bandhej collection 3",
+    className: "object-center",
   },
   {
-    src: "/home/gottpatti.png",
-    alt: "Gottapatti Bandhej border detail",
-    className: "object-[50%_32%]",
+    src: "/gallery/gallery4.webp",
+    alt: "Roopshree Bandhej collection 4",
+    className: "object-center",
   },
   {
-    src: "/home/zardozi.png",
-    alt: "Red Bandhej garment styling",
-    className: "object-[45%_30%]",
+    src: "/gallery/gallery5.webp",
+    alt: "Roopshree Bandhej collection 5",
+    className: "object-center",
+  },
+  {
+    src: "/gallery/gallery6.webp",
+    alt: "Roopshree Bandhej collection 6",
+    className: "object-center",
+  },
+  {
+    src: "/gallery/gallery7.webp",
+    alt: "Roopshree Bandhej collection 7",
+    className: "object-center",
+  },
+  {
+    src: "/gallery/gallery8.webp",
+    alt: "Roopshree Bandhej collection 8",
+    className: "object-center",
   },
 ]

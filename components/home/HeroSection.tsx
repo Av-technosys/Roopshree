@@ -46,7 +46,7 @@ const HeroSection = () => {
           <motion.p
             variants={fadeUp}
             transition={{ duration: 0.55, ease: "easeOut" }}
-            className="mb-2 text-[0.64rem] font-heading font-medium uppercase tracking-[0.18em] text-[#C39150] md:mb-4 md:text-sm md:tracking-[0.32em]"
+            className="mb-2 text-[0.64rem]  font-medium uppercase tracking-[0.18em] text-[#C39150] md:mb-4 md:text-sm md:tracking-[0.32em] font-serif"
           >
             Timeless Tradition
           </motion.p>
@@ -54,7 +54,7 @@ const HeroSection = () => {
           <motion.h1
             variants={fadeUp}
             transition={{ duration: 0.65, ease: "easeOut" }}
-            className="-ml-[0.1em] text-[2.65rem] leading-[0.9] text-[#3F2617] sm:text-5xl md:text-6xl lg:text-7xl"
+            className="-ml-[0.1em] text-[2.65rem] font-playfairDisplay  leading-[0.9] text-[#3F2617] sm:text-5xl md:text-6xl lg:text-7xl"
           >
             BANDHEJ
             <span className="block text-[#C18F50] sm:text-5xl md:text-6xl lg:text-8xl">

@@ -85,10 +85,10 @@ const Newarrival = ({ products: fetchedProducts }: { products?: Product[] }) => 
 
       <div className="mx-auto max-w-7xl px-5 py-10 sm:px-6 md:pt-20 pb-10 lg:px-8">
         <div className="text-center text-[#17110d]">
-          <h2 className="font-heading text-2xl leading-tight sm:text-4xl">
+          <h2 className="font-semibold text-2xl leading-tight sm:text-5xl">
             New Arrival
           </h2>
-          <p className="mx-auto mt-2 max-w-[18rem] text-[0.62rem] font-medium leading-4 sm:max-w-none sm:text-xs">
+          <p className="mx-auto mt-2 max-w-[18rem] text-[0.62rem] font-medium leading-4 sm:max-w-none sm:text-lg">
             Step into the Season With Our Latest Bandhej Creations
           </p>
         </div>

@@ -21,7 +21,7 @@ const CategorySection = ({
         <div className="text-center">
           <h2 className="font-heading text-[2.35rem] leading-tight text-black sm:text-5xl md:text-6xl">
             Every Dupatta, A Story of{" "}
-            <span className="text-[#c39150]">Grace.</span>
+            <span className="text-[#c39150] font-heading">Grace.</span>
           </h2>
           <p className="mt-4 text-base font-medium text-black sm:text-lg">
             Explore Our Collection

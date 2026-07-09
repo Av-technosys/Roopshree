@@ -1,117 +1,194 @@
 "use client"
 
 import Image from "next/image"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
 import {
-  ArrowRight,
-  BadgeCheck,
-  Leaf,
-  LockKeyhole,
-  Truck,
+  Heart,
+  Minus,
+  Plus,
+  Star,
+  Trash2,
 } from "lucide-react"
-import { Card } from "../ui/card"
+import {
+  formatPrice,
+  productToCartItem,
+  type Product,
+} from "@/components/global/const"
+import { useAddToCart } from "@/hooks/useAddToCart"
+import { useWishlist } from "@/hooks/useWishlist"
+import { useCartStore } from "@/store/cartStore"
+import { useWishlistStore } from "@/store/wishlistStore"
 
-const collections = [
-  "Renial brooch Dupata With Krishna Buta",
-  "Renial brooch Dupata With Krishna Buta",
-  "Renial brooch Dupata With Krishna Buta",
-  "Renial brooch Dupata With Krishna Buta",
-]
+type HomeShowcaseSectionProps = {
+  products?: Product[]
+}
 
-const benefits = [
-  {
-    icon: Truck,
-    title: "Free Shipping",
-    description: "With Love & Tradition",
-  },
-  {
-    icon: BadgeCheck,
-    title: "Premium Quality",
-    description: "Finest Fabrics",
-  },
-  {
-    icon: Leaf,
-    title: "Natural Dyes",
-    description: "Eco-Friendly Colours",
-  },
-  {
-    icon: LockKeyhole,
-    title: "Secure Payment",
-    description: "Fast & Secure",
-  },
-]
-
-const HomeShowcaseSection = () => {
-  const router = useRouter()
-
-  const handleCardClick = () => {
-    router.push("/shop")
-  }
+const HomeShowcaseSection = ({ products = [] }: HomeShowcaseSectionProps) => {
 
   return (
     <section className="bg-white py-14 md:py-20">
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <div className="text-center text-[#17110d]">
-            <h2 className="font-heading text-2xl leading-tight sm:text-4xl pb-10">
-                Spotlight
-            </h2>
-            </div>
-        <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-4">
-          {collections.map((title, index) => (
-            <Card
-              key={`${title}-${index}`}
-              onClick={handleCardClick}
-              className="group relative aspect-square overflow-hidden rounded-[4px] border border-[#ead8c5]  transition duration-300 hover:border-[#c39150]/70 cursor-pointer"
-            >
-              <div className="absolute bottom-[22%] left-[6.4%] top-[27%] z-10 flex w-[58%] flex-col">
-                <Image
-                  src="/about/timelesselegance.png"
-                  alt=""
-                  width={83}
-                  height={67}
-                  className="mb-[6%] h-3.5 w-4 object-contain sm:h-7 sm:w-8 md:h-4 md:w-5 lg:h-5 lg:w-6 xl:h-6 xl:w-7"
-                />
-                <h2 className="font-heading text-[clamp(0.5rem,3vw,1.35rem)] leading-[1.28] text-[#3f2617] text-pretty sm:text-[clamp(1.1rem,2.7vw,1.45rem)] md:text-[clamp(0.68rem,1.32vw,0.9rem)] lg:text-[clamp(0.86rem,1.2vw,1.08rem)] xl:text-[clamp(0.95rem,1.03vw,1.1rem)]">
-                  {title}
-                </h2>
-                <span className="mt-auto inline-flex items-center gap-1.5 text-xs text-[#3f2617] sm:gap-4 sm:text-sm md:gap-2 md:text-[0.68rem] lg:gap-3 lg:text-sm xl:gap-4 xl:text-[0.95rem]">
-                  Explore Now
-                  <ArrowRight className="size-2 text-[#c39150] transition-transform duration-300 group-hover:translate-x-1 sm:size-4 md:size-3 lg:size-4" />
-                </span>
-              </div>
-
-              <Image
-                src="/home/showcase.png"
-                alt={title}
-                width={198}
-                height={329}
-                sizes="(min-width: 1280px) 185px, (min-width: 640px) 215px, 190px"
-                className="absolute bottom-0 right-[-7%] top-0 h-full w-auto max-w-none object-contain object-right opacity-95 sm:right-[-3%] xl:right-[-8%]"
-              />
-            </Card>
-          ))}
+          <h2 className="font-heading font-semibold text-5xl leading-tight sm:text-5xl pb-10">
+            Featured Products
+          </h2>
         </div>
+        {products.length > 0 ? (
+          <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:grid-cols-3 md:gap-x-5 md:gap-y-8 lg:grid-cols-4">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        ) : null}
 
-        <div className="mt-5 grid gap-x-8 gap-y-8 rounded-[4px] border border-[#ead8c5] bg-[#fcf8f1] px-8 py-8 sm:grid-cols-2 lg:grid-cols-4 lg:px-12">
-          {benefits.map(({ icon: Icon, title, description }) => (
-            <div
-              key={title}
-              className="flex items-center gap-5 text-[#3f2617]"
-            >
-              <Icon className="size-9 shrink-0 text-[#c39150]" />
-              <div>
-                <h3 className="font-heading text-base uppercase leading-tight  xl:text-sm">
-                  {title}
-                </h3>
-                <p className="mt-1 text-sm text-[#3f2617]/90">
-                  {description}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
+  )
+}
+
+function ProductCard({ product }: { product: Product }) {
+  const {
+    handleAddToCart,
+    handleDecreaseCartItem,
+    handleIncreaseCartItem,
+    handleRemoveCartItem,
+  } = useAddToCart()
+  const { handleToggleWishlist } = useWishlist()
+  const storeItem = productToCartItem(product)
+  const cartQuantity = useCartStore(
+    (state) =>
+      state.getItemQuantity(
+        storeItem.productId,
+        storeItem.attributes,
+        storeItem.variantId
+      )
+  )
+  const isWishlisted = useWishlistStore((state) =>
+    state.hasItem(storeItem.productId, storeItem.dbProductId)
+  )
+  const isInCart = cartQuantity > 0
+
+  return (
+    <article className="group min-w-0">
+      <div className="relative aspect-[0.75] overflow-hidden bg-[#f8efe6] md:aspect-[0.78]">
+        <Link
+          href={`/product/${product.slug}`}
+          className="absolute inset-0"
+          aria-label={`View ${product.name}`}
+        >
+          {product.image ? (
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              sizes="(min-width: 1280px) 220px, (min-width: 768px) 28vw, 48vw"
+              className={`object-cover transition duration-500 group-hover:scale-[1.04] ${product.imageClass ?? ""}`}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center px-4 text-center text-xs font-medium text-[#3f2617]/70">
+              Product image coming soon
+            </div>
+          )}
+        </Link>
+        <button
+          type="button"
+          aria-label={`Add ${product.name} to wishlist`}
+          onClick={() => handleToggleWishlist(storeItem)}
+          className={`absolute right-3 top-3 z-10 flex size-8 translate-y-0 items-center justify-center rounded-full bg-[#C39150] text-white opacity-100 transition duration-300 md:translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 ${
+            isWishlisted ? "md:opacity-100" : ""
+          }`}
+        >
+          <Heart className="size-4" fill={isWishlisted ? "currentColor" : "none"} />
+        </button>
+        <div
+          className={`absolute inset-x-2 bottom-2 z-10 transition duration-300 md:inset-x-3 md:bottom-3 ${
+            isInCart
+              ? "translate-y-0 opacity-100"
+              : "translate-y-0 opacity-100 md:translate-y-4 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100"
+          }`}
+        >
+          {isInCart ? (
+            <CartQuantityControls
+              quantity={cartQuantity}
+              productName={product.name}
+              onDecrease={() => handleDecreaseCartItem(storeItem)}
+              onIncrease={() => handleIncreaseCartItem(storeItem)}
+              onRemove={() => handleRemoveCartItem(storeItem)}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => handleAddToCart(storeItem)}
+              className="h-10 w-full rounded-[4px] bg-[#C39150] text-sm font-semibold tracking-[0.12em] text-white shadow-lg shadow-black/10"
+            >
+              Add to Cart
+            </button>
+          )}
+        </div>
+      </div>
+
+      <Link href={`/product/${product.slug}`} className="block">
+        <h3 className="mt-3 font-heading text-[15px] leading-snug text-[#3F2617] md:text-sm">
+          {product.name}
+        </h3>
+        {product.reviewCount ? (
+          <p className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-[#6b4a2e]">
+            <Star className="size-3 fill-[#D4A056] text-[#D4A056]" />
+            <span>{product.rating?.toFixed(1)}</span>
+            <span className="text-[#8b7868]">({product.reviewCount})</span>
+          </p>
+        ) : null}
+        <p className="mt-1 text-sm font-medium text-[#111] md:text-xs md:text-[#c39150]">
+          {formatPrice(product.price)}
+        </p>
+      </Link>
+    </article>
+  )
+}
+
+function CartQuantityControls({
+  quantity,
+  productName,
+  onDecrease,
+  onIncrease,
+  onRemove,
+}: {
+  quantity: number
+  productName: string
+  onDecrease: () => void
+  onIncrease: () => void
+  onRemove: () => void
+}) {
+  return (
+    <div className="grid h-10 grid-cols-[40px_1fr_40px_40px] overflow-hidden rounded-[4px] bg-white text-[#3F2617] shadow-lg shadow-black/10">
+      <button
+        type="button"
+        aria-label={`Decrease ${productName} quantity`}
+        onClick={onDecrease}
+        className="flex items-center justify-center border-r border-[#C39150]/30 text-[#C39150]"
+      >
+        <Minus className="size-4" />
+      </button>
+      <span className="flex items-center justify-center text-xs font-semibold">
+        Qty {quantity}
+      </span>
+      <button
+        type="button"
+        aria-label={`Increase ${productName} quantity`}
+        onClick={onIncrease}
+        className="flex items-center justify-center border-l border-[#C39150]/30 text-[#C39150]"
+      >
+        <Plus className="size-4" />
+      </button>
+      <button
+        type="button"
+        aria-label={`Remove ${productName} from cart`}
+        onClick={onRemove}
+        className="flex items-center justify-center border-l border-[#C39150]/30 text-[#C39150]"
+      >
+        <Trash2 className="size-4" />
+      </button>
+    </div>
   )
 }
 

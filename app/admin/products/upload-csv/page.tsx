@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 type UploadResult = {
   total?: number;
@@ -17,7 +18,7 @@ export default function UploadCSVPage() {
 
   async function handleUpload() {
     if (!file) {
-      alert("Please select CSV file");
+      toast.error("Please select CSV file");
       return;
     }
 
@@ -30,8 +31,28 @@ export default function UploadCSVPage() {
         method: "POST",
         body: formData,
       });
+
+      if (!response.ok) {
+        let errorMsg = `HTTP Error ${response.status}`;
+        try {
+          const errBody = await response.json();
+          errorMsg = errBody?.error || errorMsg;
+        } catch {
+          // not json
+        }
+        throw new Error(errorMsg);
+      }
+
       const data = (await response.json()) as UploadResult;
       setResult(data);
+
+      if (data.failedCount && data.failedCount > 0) {
+        toast.warning(`Uploaded with ${data.failedCount} errors`);
+      } else {
+        toast.success("CSV uploaded successfully!");
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Upload failed");
     } finally {
       setLoading(false);
     }

@@ -119,7 +119,7 @@ function FooterColumn({ title, items }: { title: string; items: FooterLink[] }) 
       <ul className="space-y-3 text-sm text-[#3F2617]/70">
         {items.map((item) => (
           <li key={`${title}-${item.href}-${item.label}`}>
-            <Link href={item.href} className="transition-colors hover:text-[#C18F50]">
+            <Link href={item.href} className="transition-colors font-semibold hover:text-[#C18F50]">
               {item.label}
             </Link>
           </li>

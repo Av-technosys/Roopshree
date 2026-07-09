@@ -35,9 +35,11 @@
   --sidebar-accent-foreground: oklch(0.2046 0 0);
   --sidebar-border: oklch(0.9219 0 0);
   --sidebar-ring: oklch(0.7090 0 0);
-  --font-sans: Poppins, ui-sans-serif, sans-serif, system-ui;
-  --font-serif: Playfair Display, ui-serif, serif;
+  --font-sans: var(--font-poppins);
+  --font-serif: var(--font-playfair);
   --font-mono: Geist Mono, monospace;
+  --font-heading: var(--font-playfair);
+  --font-subheading: var(--font-poppins);
   --radius: 0.4rem;
   --shadow-x: 0px;
   --shadow-y: 1px;
@@ -169,6 +171,28 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-subheading);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+  }
+
+  p,
+  span,
+  small,
+  li,
+  label,
+  button,
+  input,
+  textarea,
+  select {
+    font-family: var(--font-subheading);
   }
 }
 

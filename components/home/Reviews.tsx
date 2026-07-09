@@ -152,11 +152,11 @@ const Reviews = () => {
           <p className="mt-2 text-[0.5rem] font-semibold uppercase tracking-[0.34em] text-black sm:mt-3 sm:text-xs sm:tracking-[0.36em]">
             In Their Words
           </p>
-          <h2 className="mt-3 font-heading text-[1.75rem] leading-none text-black sm:mt-3 sm:text-4xl md:text-5xl">
+          <h2 className="mt-3 font-semibold text-[1.75rem] leading-none text-black sm:mt-3 sm:text-4xl md:text-5xl">
             Loved by Our Customers
           </h2>
           <Divider className="mt-3 hidden w-36 sm:flex" />
-          <p className="mx-auto mt-3 max-w-[20rem] text-[0.68rem] font-medium leading-4 text-black sm:mt-4 sm:max-w-3xl sm:text-sm">
+          <p className="mx-auto mt-3 max-w-[20rem] text-[0.68rem] font-medium leading-4 text-black sm:mt-4 sm:max-w-3xl sm:text-lg">
             Real Stories from women who cherish the grace of Roopshree Bandhej
           </p>
         </div>

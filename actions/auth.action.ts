@@ -16,7 +16,7 @@ import {
   getClearAuthCookiePayload,
 } from '@/lib/auth-cookies'
 import { getUserClaimsFromIdToken } from '@/lib/auth-token'
-import { requireUser } from '@/lib/auth'
+import { requireUser, ADMIN_EMAILS } from '@/lib/auth'
 import { notifyWelcomeEmail } from '@/lib/email-notifications'
 import { syncProfileFromAuthClaimsService } from '@/services/user.service'
 
@@ -24,6 +24,7 @@ type AuthActionResult = {
   ok: boolean
   error?: string
   message?: string
+  isAdmin?: boolean
 }
 
 function getNormalizedEmail(email: string) {
@@ -108,7 +109,9 @@ export async function signInAction({
   try {
     await setAuthCookies(normalizedEmail, password)
 
-    return { ok: true }
+    const isAdmin = ADMIN_EMAILS.includes(normalizedEmail)
+
+    return { ok: true, isAdmin }
   } catch (error) {
     if (hasAuthErrorName(error, 'UserNotConfirmedException')) {
       return { ok: false, error: 'Please verify your account OTP before login' }

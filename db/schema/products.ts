@@ -103,7 +103,7 @@ export const productVariants = pgTable(
     ...timestamps,
   },
   (table) => [
-    uniqueIndex('product_variants_sku_idx').on(table.sku),
+    index('product_variants_sku_idx').on(table.sku),
     index('product_variants_product_id_idx').on(table.productId),
   ],
 )

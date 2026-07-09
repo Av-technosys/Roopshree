@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Edit, Loader2, Trash2 } from "lucide-react";
+import { Copy, Edit, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -25,12 +25,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { deleteProduct } from "@/helper/product/action";
+import { deleteProduct, duplicateProduct } from "@/helper/product/action";
 
 export type ProductRow = {
   id: string;
   name: string;
-  sku: string;
+  slug: string;
   basePrice: number;
   strikeThroughPrice: number | null;
   status: "draft" | "active" | "archived";
@@ -55,6 +55,25 @@ export default function ProductTable({ products }: { products: ProductRow[] }) {
       if (result.success) {
         toast.success(result.message);
         router.refresh();
+        return;
+      }
+
+      toast.error(result.message);
+    });
+  }
+
+  function handleDuplicate(id: string) {
+    startTransition(async () => {
+      const result = await duplicateProduct(id);
+
+      if (result.success) {
+        toast.success(result.message);
+        // Navigate to the new product's edit page so admin can review/modify it
+        if (result.data?.id) {
+          router.push(`/admin/products/${result.data.id}`);
+        } else {
+          router.refresh();
+        }
         return;
       }
 
@@ -95,19 +114,61 @@ export default function ProductTable({ products }: { products: ProductRow[] }) {
                   <span>{product.name}</span>
                 </div>
               </TableCell>
-              <TableCell>{product.sku}</TableCell>
+              <TableCell>{product.slug}</TableCell>
               <TableCell>{formatPrice(product.basePrice)}</TableCell>
               <TableCell>{formatPrice(product.strikeThroughPrice)}</TableCell>
               <TableCell className="capitalize">{product.status}</TableCell>
               <TableCell>{product.isFeatured ? "Yes" : "No"}</TableCell>
               <TableCell>
                 <div className="flex justify-end gap-2">
+                  {/* Edit */}
                   <Button
                     variant="outline"
                     onClick={() => router.push(`/admin/products/${product.id}`)}
+                    disabled={isPending}
                   >
                     <Edit />
                   </Button>
+
+                  {/* Duplicate */}
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" disabled={isPending}>
+                        {isPending ? (
+                          <Loader2 className="animate-spin" />
+                        ) : (
+                          <Copy className="text-blue-500" />
+                        )}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Duplicate this product?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          A copy of &quot;{product.name}&quot; will be created as a{" "}
+                          <strong>Draft</strong>. You will be redirected to the
+                          new product&apos;s edit page to review and publish it.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isPending}>
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          disabled={isPending}
+                          onClick={() => handleDuplicate(product.id)}
+                        >
+                          {isPending ? (
+                            <Loader2 className="animate-spin" />
+                          ) : (
+                            "Duplicate"
+                          )}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+
+                  {/* Delete */}
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="outline" disabled={isPending}>

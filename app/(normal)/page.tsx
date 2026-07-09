@@ -13,16 +13,17 @@ import {
 } from "@/services/product.service"
 
 const Page = async () => {
-  const [categories, newArrivals, trendingProducts] = await Promise.all([
+  const [categories, newArrivals, trendingProducts, featuredProducts] = await Promise.all([
     getCatalogCategories(5),
     getRecommendedProducts(5),
     getFeaturedProducts(5),
+    getFeaturedProducts(8),
   ])
 
   return (
     <main className="flex-1">
       <HeroSection />
-      <HomeShowcaseSection />
+      <HomeShowcaseSection products={featuredProducts} />
       <CategorySection categories={categories} />
       <Newarrival products={newArrivals} />
       <Trending products={trendingProducts} />

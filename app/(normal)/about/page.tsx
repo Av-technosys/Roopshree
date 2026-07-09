@@ -13,7 +13,7 @@ const AboutPage = () => {
       <HeritageSection />
       <StorySection />
       <MissionSection />
-      <QualityHighlights />
+     
       <GallerySection />
       <AboutCta />
     </main>

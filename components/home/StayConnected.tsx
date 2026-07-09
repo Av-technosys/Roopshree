@@ -80,7 +80,7 @@ const StayConnected = () => {
         <p className="mt-3 text-[0.72rem] font-semibold uppercase tracking-[0.34em] text-[#3f2617] sm:text-sm">
           Stay Connected
         </p>
-        <h2 className="mt-3 font-heading text-[2.2rem] leading-none text-[#3f2617] sm:text-5xl lg:text-6xl">
+        <h2 className="mt-3 font-semibold text-[2.2rem] leading-none text-[#3f2617] sm:text-5xl lg:text-6xl">
           Follow Roopshree
         </h2>
 
@@ -90,26 +90,13 @@ const StayConnected = () => {
           <span className="h-px flex-1 bg-linear-to-l from-transparent to-[#c39150]" />
         </div>
 
-        <p className="mx-auto mt-4 max-w-[19rem] text-[0.82rem] font-medium leading-[1.65] text-[#6b625d] sm:max-w-3xl sm:text-base">
+        <p className="mx-auto mt-4 max-w-[19rem] text-[0.82rem] font-medium leading-[1.65] text-[#6b625d] sm:max-w-3xl sm:text-lg">
           get inspired by our latest collections, styling ideas, and behind the
           scenes moments. Follow us on social media and be part of the Roopshree
           family.
         </p>
 
-        <div className="mt-4 flex items-center justify-center gap-4 text-[#3f2617] sm:gap-5">
-          <span className="text-xl font-bold leading-none sm:hidden">f</span>
-          <span className="text-xl font-medium leading-none sm:hidden">𝕏</span>
-          <InstagramMark className="size-5 sm:size-7" />
-          <MailMark className="size-6 sm:size-8" />
-          <span className="hidden h-9 w-px bg-[#3F2617]/45 sm:block" />
-          <p className="hidden font-heading text-xl text-[#3f2617] sm:block">
-            @roopshreebandhej
-          </p>
-        </div>
-        <p className="mt-3 font-heading text-base text-[#3f2617] sm:hidden">
-          @roopshreebandhej
-        </p>
-
+       
         <div className="scrollbar-hidden mx-auto mt-9 flex max-w-5xl snap-x gap-2 overflow-x-auto px-[calc(50%-9.5rem)] sm:grid sm:grid-cols-4 sm:overflow-visible sm:px-0">
           {socialImages.map((item) => (
             <div

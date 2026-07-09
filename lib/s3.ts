@@ -48,6 +48,16 @@ export function getS3ObjectPreviewUrl(key: string) {
   const publicBaseUrl =
     process.env.S3_PUBLIC_BASE_URL ?? process.env.NEXT_PUBLIC_S3_BASE_URL
 
+  const s3Hostname = `https://${getS3BucketName()}.s3.${getS3Region()}.amazonaws.com/`
+
+  if (key.startsWith('http://') || key.startsWith('https://')) {
+    if (publicBaseUrl && key.startsWith(s3Hostname)) {
+      return key.replace(s3Hostname, `${publicBaseUrl.replace(/\/$/, '')}/`)
+    }
+    return key;
+  }
+
+
   if (publicBaseUrl) {
     return `${publicBaseUrl.replace(/\/$/, '')}/${key}`
   }
@@ -72,3 +82,37 @@ export async function createS3ImageUploadUrl({
 
   return getSignedUrl(s3Client, command, { expiresIn })
 }
+
+export async function uploadImageFromUrlToS3(imageUrl: string, folder = 'products') {
+  if (!imageUrl) return null;
+
+  try {
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image from ${imageUrl}: ${response.statusText}`);
+    }
+
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const uniqueId = crypto.randomUUID();
+    const extension = contentType.split('/')[1] || 'jpg';
+    const key = `${folder}/${new Date().getFullYear()}/${uniqueId}.${extension}`;
+
+    const command = new PutObjectCommand({
+      Bucket: getS3BucketName(),
+      Key: key,
+      ContentType: contentType,
+      Body: buffer,
+    });
+
+    await s3Client.send(command);
+
+    return key;
+  } catch (error) {
+    console.error(`Error uploading image from URL (${imageUrl}):`, error);
+    return null;
+  }
+}
+

@@ -167,33 +167,33 @@ export default function ProductForm({ product }: ProductFormProps) {
   const [variants, setVariants] = useState<VariantRow[]>(
     product?.productVariantRes?.length
       ? product.productVariantRes.map((variant) => ({
-          id: variant.id,
-          sku: variant.sku,
-          title: variant.title,
-          price: rupees(variant.price),
-          strikeThroughPrice: rupees(variant.strikeThroughPrice),
-          stockQuantity: String(variant.stockQuantity),
-          size: variant.size ?? "",
-          color: variant.color ?? "",
-          fabric: variant.fabric ?? "",
-          banner: (() => {
-            const variantMedia = mediaByVariant.get(variant.id) ?? [];
-            const bannerKey = variant.bannerImage ?? variantMedia[0]?.key ?? "";
+        id: variant.id,
+        sku: variant.sku,
+        title: variant.title,
+        price: rupees(variant.price),
+        strikeThroughPrice: rupees(variant.strikeThroughPrice),
+        stockQuantity: String(variant.stockQuantity),
+        size: variant.size ?? "",
+        color: variant.color ?? "",
+        fabric: variant.fabric ?? "",
+        banner: (() => {
+          const variantMedia = mediaByVariant.get(variant.id) ?? [];
+          const bannerKey = variant.bannerImage ?? variantMedia[0]?.key ?? "";
 
-            if (!bannerKey) return null;
+          if (!bannerKey) return null;
 
-            return {
-              key: bannerKey,
-              previewUrl:
-                variantMedia.find((item) => item.key === bannerKey)?.previewUrl ??
-                variantMedia[0]?.previewUrl ??
-                bannerKey,
-            };
-          })(),
-          gallery: (mediaByVariant.get(variant.id) ?? []).slice(1),
-          isDefault: variant.isDefault,
-          isActive: variant.isActive,
-        }))
+          return {
+            key: bannerKey,
+            previewUrl:
+              variantMedia.find((item) => item.key === bannerKey)?.previewUrl ??
+              variantMedia[0]?.previewUrl ??
+              bannerKey,
+          };
+        })(),
+        gallery: (mediaByVariant.get(variant.id) ?? []).slice(1),
+        isDefault: variant.isDefault,
+        isActive: variant.isActive,
+      }))
       : [{ ...emptyVariant, isDefault: true }],
   );
 
@@ -209,6 +209,13 @@ export default function ProductForm({ product }: ProductFormProps) {
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    const validVariants = variants.filter((variant) => variant.sku && variant.title);
+
+    if (validVariants.length === 0) {
+      toast.error("At least one variant must have a SKU and Title filled in.");
+      return;
+    }
+
     const payload = {
       name,
       sku,
@@ -221,15 +228,13 @@ export default function ProductForm({ product }: ProductFormProps) {
       categoryIds,
       attributes: attributes.filter((item) => item.name && item.value),
       filters: filters.filter((item) => item.name && item.value),
-      variants: variants
-        .filter((variant) => variant.sku && variant.title)
-        .map((variant) => ({
-          ...variant,
-          banner: variant.banner?.key ?? "",
-          gallery: variant.gallery
-            .filter((item) => item.key)
-            .map((item) => ({ key: item.key })),
-        })),
+      variants: validVariants.map((variant) => ({
+        ...variant,
+        banner: variant.banner?.key ?? "",
+        gallery: variant.gallery
+          .filter((item) => item.key)
+          .map((item) => ({ key: item.key })),
+      })),
     };
 
     startTransition(async () => {
@@ -251,28 +256,35 @@ export default function ProductForm({ product }: ProductFormProps) {
   async function handleVariantMediaUpload(
     variantIndex: number,
     target: "banner" | "gallery",
-    file?: File,
+    files?: FileList | null,
   ) {
-    if (!file) return;
-
-    const localPreviewUrl = URL.createObjectURL(file);
+    if (!files || files.length === 0) return;
 
     try {
-      const { fileKey } = await upload(file, "products");
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const localPreviewUrl = URL.createObjectURL(file);
+        try {
+          const { fileKey } = await upload(file, "products");
+          return { key: fileKey, previewUrl: localPreviewUrl };
+        } catch (error) {
+          URL.revokeObjectURL(localPreviewUrl);
+          throw error;
+        }
+      });
+
+      const uploadedMediaItems = await Promise.all(uploadPromises);
+
       setVariants((currentVariants) =>
         currentVariants.map((variant, index) => {
           if (index !== variantIndex) return variant;
 
-          const mediaItem = { key: fileKey, previewUrl: localPreviewUrl };
-
           return target === "banner"
-            ? { ...variant, banner: mediaItem }
-            : { ...variant, gallery: [...variant.gallery, mediaItem] };
+            ? { ...variant, banner: uploadedMediaItems[0] }
+            : { ...variant, gallery: [...variant.gallery, ...uploadedMediaItems] };
         }),
       );
-      toast.success("Media uploaded");
+      toast.success(target === "banner" ? "Banner uploaded" : `${uploadedMediaItems.length} images uploaded to gallery`);
     } catch (error) {
-      URL.revokeObjectURL(localPreviewUrl);
       toast.error(error instanceof Error ? error.message : "Media upload failed");
     }
   }
@@ -300,55 +312,34 @@ export default function ProductForm({ product }: ProductFormProps) {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
         <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Product</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2">
-              <Field label="Name">
-                <Input value={name} onChange={(event) => setName(event.target.value)} required />
-              </Field>
-              <Field label="SKU">
-                <Input value={sku} onChange={(event) => setSku(event.target.value)} required />
-              </Field>
-              <Field label="Base price">
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={price}
-                  onChange={(event) => setPrice(event.target.value)}
-                  required
-                />
-              </Field>
-              <Field label="Strike-through price">
-                <Input
-                  type="number"
-                  min={price ? Number(price) + 0.01 : 0}
-                  step="0.01"
-                  value={strikeThroughPrice}
-                  onChange={(event) => setStrikeThroughPrice(event.target.value)}
-                />
-              </Field>
-              <Field label="Short description" className="md:col-span-2">
-                <Textarea
-                  value={shortDescription}
-                  onChange={(event) => setShortDescription(event.target.value)}
-                />
-              </Field>
-              <Field label="Description" className="md:col-span-2">
-                <Textarea
-                  value={description}
-                  onChange={(event) => setDescription(event.target.value)}
-                  className="min-h-32"
-                />
-              </Field>
-            </CardContent>
-          </Card>
+
 
           <DynamicRows
             title="Variants"
-            onAdd={() => setVariants([...variants, { ...emptyVariant }])}
+            onAdd={() => {
+              const first = variants[0];
+              const replicated: VariantRow =
+                first && (first.sku || first.title || first.price || first.size || first.color || first.fabric)
+                  ? {
+                      ...emptyVariant,
+                      // Copy common fields from the first variant
+                      price: first.price,
+                      strikeThroughPrice: first.strikeThroughPrice,
+                      size: first.size,
+                      color: first.color,
+                      fabric: first.fabric,
+                      stockQuantity: first.stockQuantity,
+                      isActive: first.isActive,
+                      // Replicate sku and title too; reset only media/isDefault
+                      sku: first.sku,
+                      title: first.title,
+                      banner: null,
+                      gallery: [],
+                      isDefault: false,
+                    }
+                  : { ...emptyVariant };
+              setVariants([...variants, replicated]);
+            }}
           >
             {variants.map((variant, index) => (
               <div key={index} className="grid gap-3 border-b pb-4 last:border-b-0 md:grid-cols-3">
@@ -427,7 +418,7 @@ export default function ProductForm({ product }: ProductFormProps) {
                         hidden
                         accept="image/*"
                         onChange={(event) =>
-                          handleVariantMediaUpload(index, "banner", event.target.files?.[0])
+                          handleVariantMediaUpload(index, "banner", event.target.files)
                         }
                       />
                     </label>
@@ -442,9 +433,10 @@ export default function ProductForm({ product }: ProductFormProps) {
                         <input
                           type="file"
                           hidden
+                          multiple
                           accept="image/*"
                           onChange={(event) =>
-                            handleVariantMediaUpload(index, "gallery", event.target.files?.[0])
+                            handleVariantMediaUpload(index, "gallery", event.target.files)
                           }
                         />
                       </label>
@@ -521,7 +513,54 @@ export default function ProductForm({ product }: ProductFormProps) {
                 </div>
               </div>
             ))}
+
           </DynamicRows>
+
+          <Card>
+            <CardHeader>
+              {/* <CardTitle>Product</CardTitle> */}
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-2">
+              <Field label="Name">
+                <Input value={name} onChange={(event) => setName(event.target.value)} required />
+              </Field>
+              {/* <Field label="SKU">
+                <Input value={sku} onChange={(event) => setSku(event.target.value)} required />
+              </Field>
+              <Field label="Base price">
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={price}
+                  onChange={(event) => setPrice(event.target.value)}
+                  required
+                />
+              </Field>
+              <Field label="Strike-through price">
+                <Input
+                  type="number"
+                  min={price ? Number(price) + 0.01 : 0}
+                  step="0.01"
+                  value={strikeThroughPrice}
+                  onChange={(event) => setStrikeThroughPrice(event.target.value)}
+                />
+              </Field> */}
+              <Field label="Short description" className="md:col-span-2">
+                <Textarea
+                  value={shortDescription}
+                  onChange={(event) => setShortDescription(event.target.value)}
+                />
+              </Field>
+              <Field label="Description" className="md:col-span-2">
+                <Textarea
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                  className="min-h-32"
+                />
+              </Field>
+            </CardContent>
+          </Card>
 
           <KeyValueRows
             title="Attributes"

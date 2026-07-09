@@ -244,6 +244,7 @@ export async function getProductDetailsBySlug(slug: string) {
     name: product.name,
     sku: defaultVariant?.sku ?? product.sku,
     description: product.description ?? product.shortDescription ?? '',
+    short_description: product.shortDescription ?? '',
     price,
     strikeThroughPrice: strikeThroughPrice || null,
     variants: variants.map((variant) => ({

@@ -42,7 +42,7 @@ export async function requireUser() {
   const user = await getCurrentUser()
 
   if (!user) {
-    throw new Error('Unauthorized')
+    redirect('/auth');
   }
 
   return user

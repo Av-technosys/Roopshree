@@ -1,68 +1,64 @@
-"use client"
+"use client";
 
-import { type FormEvent, useState, useTransition } from "react"
-import { useRouter } from "next/navigation"
-import { Eye, EyeOff } from "lucide-react"
+import { type FormEvent, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 import {
   DashboardCard,
   DashboardPageTitle,
   Field,
   PrimaryAction,
-} from "@/components/dashboard/DashboardPrimitives"
-import { useToast } from "@/components/common/ToastProvider"
-import { changePasswordAction } from "@/actions/auth.action"
-import { updateProfile } from "@/helper/user/action"
-import type { ProfileView } from "@/services/user.service"
+} from "@/components/dashboard/DashboardPrimitives";
+import { useToast } from "@/components/common/ToastProvider";
+import { changePasswordAction } from "@/actions/auth.action";
+import { updateProfile } from "@/helper/user/action";
+import type { ProfileView } from "@/services/user.service";
 
-export function ProfileSettings({
-  profile,
-}: {
-  profile: ProfileView | null
-}) {
-  const router = useRouter()
-  const { showToast } = useToast()
-  const [isPending, startTransition] = useTransition()
-  const [isPasswordPending, startPasswordTransition] = useTransition()
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
-  const [showNewPassword, setShowNewPassword] = useState(false)
+export function ProfileSettings({ profile }: { profile: ProfileView | null }) {
+  const router = useRouter();
+  const { showToast } = useToast();
+  const [isPending, startTransition] = useTransition();
+  const [isPasswordPending, startPasswordTransition] = useTransition();
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+    event.preventDefault();
 
-    const formData = new FormData(event.currentTarget)
+    const formData = new FormData(event.currentTarget);
 
     startTransition(async () => {
       const result = await updateProfile({
         fullName: formData.get("fullName"),
         phone: formData.get("phone"),
-      })
+      });
 
       showToast({
         title: result.message,
         tone: result.success ? "success" : "error",
-      })
+      });
 
       if (result.success) {
-        router.refresh()
+        router.refresh();
       }
-    })
+    });
   }
 
   function handlePasswordSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+    event.preventDefault();
 
-    const form = event.currentTarget
-    const formData = new FormData(form)
-    const currentPassword = String(formData.get("currentPassword") ?? "")
-    const newPassword = String(formData.get("newPassword") ?? "")
-    const confirmPassword = String(formData.get("confirmPassword") ?? "")
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const currentPassword = String(formData.get("currentPassword") ?? "");
+    const newPassword = String(formData.get("newPassword") ?? "");
+    const confirmPassword = String(formData.get("confirmPassword") ?? "");
 
     if (newPassword !== confirmPassword) {
       showToast({
         title: "New password and confirmation do not match",
         tone: "error",
-      })
-      return
+      });
+      return;
     }
 
     startPasswordTransition(async () => {
@@ -70,18 +66,18 @@ export function ProfileSettings({
         currentPassword,
         newPassword,
         confirmPassword,
-      })
+      });
 
       showToast({
         title: result.message ?? result.error ?? "Unable to update password",
         tone: result.ok ? "success" : "error",
-      })
+      });
 
       if (result.ok) {
-        form.reset()
-        router.refresh()
+        form.reset();
+        router.refresh();
       }
-    })
+    });
   }
 
   return (
@@ -102,7 +98,7 @@ export function ProfileSettings({
                 required
               />
               <Field
-                label="Mobile Number (e.g. 9876543210)"
+                label="Mobile Number"
                 name="phone"
                 defaultValue={profile?.phone}
                 required
@@ -160,7 +156,7 @@ export function ProfileSettings({
           </form>
         </DashboardCard>
 
-        <DashboardCard className="p-5 sm:p-6">
+        {/* <DashboardCard className="p-5 sm:p-6">
           <h2 className="font-heading text-xl font-medium text-red-500">
             Delete Account
           </h2>
@@ -174,10 +170,10 @@ export function ProfileSettings({
           >
             Request Account Deletion
           </button>
-        </DashboardCard>
+        </DashboardCard> */}
       </div>
     </div>
-  )
+  );
 }
 
 function PasswordField({
@@ -186,10 +182,10 @@ function PasswordField({
   showPassword,
   onToggleShowPassword,
 }: {
-  label: string
-  name: string
-  showPassword: boolean
-  onToggleShowPassword: () => void
+  label: string;
+  name: string;
+  showPassword: boolean;
+  onToggleShowPassword: () => void;
 }) {
   return (
     <label className="block min-w-0 text-xs text-[#777]">
@@ -215,5 +211,5 @@ function PasswordField({
         </button>
       </span>
     </label>
-  )
+  );
 }

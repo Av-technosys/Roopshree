@@ -1,16 +1,16 @@
-import { Star, ThumbsUp, UserRound } from "lucide-react"
-import type { ProductDetailView } from "@/components/product/ProductDetails"
+import { Star, ThumbsUp, UserRound } from "lucide-react";
+import type { ProductDetailView } from "@/components/product/ProductDetails";
 
 type ProductDescriptionReviewsProps = {
-  product: ProductDetailView
-}
+  product: ProductDetailView;
+};
 
 const Stars = ({
   rating = 5,
   className = "size-5",
 }: {
-  rating?: number
-  className?: string
+  rating?: number;
+  className?: string;
 }) => (
   <span className="inline-flex items-center gap-0.5 text-[#f5b940]">
     {Array.from({ length: 5 }).map((_, index) => (
@@ -23,30 +23,30 @@ const Stars = ({
       />
     ))}
   </span>
-)
+);
 
 function formatDate(value: string) {
-  const date = new Date(value)
+  const date = new Date(value);
 
-  if (Number.isNaN(date.getTime())) return ""
+  if (Number.isNaN(date.getTime())) return "";
 
   return date.toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
     year: "numeric",
-  })
+  });
 }
 
 const ProductDescriptionReviews = ({
   product,
 }: ProductDescriptionReviewsProps) => {
-  const specs = product.attributes.filter((item) => item.name && item.value)
-  const averageRating = Number(product.reviewSummary.averageRating.toFixed(1))
-  const reviewCount = product.reviewSummary.reviewCount
+  const specs = product.attributes.filter((item) => item.name && item.value);
+  const averageRating = Number(product.reviewSummary.averageRating.toFixed(1));
+  const reviewCount = product.reviewSummary.reviewCount;
 
   return (
     <section className="bg-white py-8 md:py-12">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-8 border border-[#F1E1CD] bg-[#fbf8f4] px-5 py-7 md:grid-cols-[1.2fr_0.9fr] md:px-8 lg:px-12">
           <div>
             <h2 className="font-heading text-2xl text-black md:text-3xl">
@@ -54,7 +54,7 @@ const ProductDescriptionReviews = ({
             </h2>
 
             {product.description ? (
-              <div className="mt-4 max-w-3xl text-sm leading-6 text-black whitespace-pre-wrap">
+              <div className="mt-4 max-w-3xl text-xs leading-6 text-gray-600 whitespace-pre-wrap">
                 {product.description}
               </div>
             ) : null}
@@ -162,7 +162,7 @@ const ProductDescriptionReviews = ({
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default ProductDescriptionReviews
+export default ProductDescriptionReviews;

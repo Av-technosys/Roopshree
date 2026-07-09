@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import Link from "next/link"
-import { Heart, ShoppingCart } from "lucide-react"
+import Image from "next/image";
+import Link from "next/link";
+import { Heart, ShoppingCart } from "lucide-react";
 
-import { DashboardPageTitle } from "@/components/dashboard/DashboardPrimitives"
-import { formatPrice } from "@/components/global/const"
-import { Button } from "@/components/ui/button"
-import { useAddToCart } from "@/hooks/useAddToCart"
-import { useWishlist } from "@/hooks/useWishlist"
-import { useWishlistStore } from "@/store/wishlistStore"
+import { DashboardPageTitle } from "@/components/dashboard/DashboardPrimitives";
+import { formatPrice } from "@/components/global/const";
+import { Button } from "@/components/ui/button";
+import { useAddToCart } from "@/hooks/useAddToCart";
+import { useWishlist } from "@/hooks/useWishlist";
+import { useWishlistStore } from "@/store/wishlistStore";
 
 export function WishlistPage() {
-  const wishlistProducts = useWishlistStore((state) => state.items)
-  const { handleAddToCart } = useAddToCart()
-  const { handleRemoveWishlist } = useWishlist()
+  const wishlistProducts = useWishlistStore((state) => state.items);
+  const { handleAddToCart } = useAddToCart();
+  const { handleRemoveWishlist } = useWishlist();
 
   return (
     <div>
@@ -22,8 +22,8 @@ export function WishlistPage() {
       {wishlistProducts.length > 0 ? (
         <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ">
           {wishlistProducts.map((product) => (
-            <article key={product.productId} className="relative min-w-0 border p-4">
-              <Link href="/shop" className="group block">
+            <div key={product.productId} className="relative flex flex-col min-w-0 border">
+              <Link href="/shop" className="group block flex-1">
                 <div className="relative aspect-[0.82] overflow-hidden bg-[#ead8c4]">
                   <Image
                     src={product.image}
@@ -33,12 +33,14 @@ export function WishlistPage() {
                     className="object-cover object-top transition duration-500 group-hover:scale-[1.04]"
                   />
                 </div>
-                <h2 className="mt-3 font-heading text-sm font-medium text-[#2d180f]">
-                  {product.title}
-                </h2>
-                <p className="mt-1 text-xs font-medium text-[#C39150]">
-                  {formatPrice(product.price)}
-                </p>
+                <div className=" p-4">
+                  <h2 className="font-heading text-sm font-medium text-[#2d180f]">
+                    {product.title}
+                  </h2>
+                  <p className="mt-1 text-xs font-medium text-[#C39150]">
+                    {formatPrice(product.price)}
+                  </p>
+                </div>
               </Link>
               <button
                 type="button"
@@ -48,13 +50,13 @@ export function WishlistPage() {
               >
                 <Heart className="size-4" fill="currentColor" />
               </button>
-              <div className="mt-3 grid gap-2">
+              <div className="mt-auto grid gap-2 px-4 pb-4">
                 <Button
                   type="button"
                   size="sm"
                   onClick={() => {
-                    handleAddToCart(product)
-                    handleRemoveWishlist(product)
+                    handleAddToCart(product);
+                    handleRemoveWishlist(product);
                   }}
                   className="bg-[#3F2617] text-white hover:bg-[#2d180f]"
                 >
@@ -62,7 +64,7 @@ export function WishlistPage() {
                   Move to cart
                 </Button>
               </div>
-            </article>
+            </div>
           ))}
         </div>
       ) : (
@@ -71,5 +73,5 @@ export function WishlistPage() {
         </p>
       )}
     </div>
-  )
+  );
 }

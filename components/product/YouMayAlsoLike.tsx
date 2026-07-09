@@ -1,19 +1,19 @@
-import Image from "next/image"
-import Link from "next/link"
+import Image from "next/image";
+import Link from "next/link";
 
-import { formatPrice } from "@/components/global/const"
-import { getRecommendedProducts } from "@/services/product.service"
+import { formatPrice } from "@/components/global/const";
+import { getRecommendedProducts } from "@/services/product.service";
 
 const YouMayAlsoLike = async () => {
-  const items = await getRecommendedProducts(5)
+  const items = await getRecommendedProducts(5);
 
   if (items.length === 0) {
-    return null
+    return null;
   }
 
   return (
     <section className="bg-white pb-16 md:pb-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <h2 className="font-heading text-xl font-semibold text-black">
           You May Also Like
         </h2>
@@ -44,14 +44,14 @@ const YouMayAlsoLike = async () => {
                 {product.name}
               </h3>
               <p className="mt-2 text-sm font-medium text-[#c39150]">
-                  {formatPrice(product.price)}
+                {formatPrice(product.price)}
               </p>
             </Link>
           ))}
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default YouMayAlsoLike
+export default YouMayAlsoLike;

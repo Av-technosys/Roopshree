@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { createPortal } from "react-dom"
-import { AnimatePresence, motion } from "framer-motion"
-import { ChevronRight, Menu, X } from "lucide-react"
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { createPortal } from "react-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronRight, Menu, X } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar"
-import type { ProfileView } from "@/services/user.service"
+import { Button } from "@/components/ui/button";
+import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
+import type { ProfileView } from "@/services/user.service";
 
 const sectionLabels: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -19,29 +19,29 @@ const sectionLabels: Record<string, string> = {
   "/dashboard/wishlist": "Wishlist",
   "/dashboard/reviews": "Reviews & Ratings",
   "/dashboard/notifications": "Notification",
-}
+};
 
 export function DashboardShell({
   children,
   profile,
 }: {
-  children: React.ReactNode
-  profile: ProfileView | null
+  children: React.ReactNode;
+  profile: ProfileView | null;
 }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const pathname = usePathname()
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const pathname = usePathname();
   const activeSection =
     Object.entries(sectionLabels)
       .filter(([href]) => pathname === href || pathname.startsWith(`${href}/`))
-      .sort((a, b) => b[0].length - a[0].length)[0]?.[1] ?? "Dashboard"
+      .sort((a, b) => b[0].length - a[0].length)[0]?.[1] ?? "Dashboard";
 
   useEffect(() => {
-    document.body.style.overflow = isSidebarOpen ? "hidden" : ""
+    document.body.style.overflow = isSidebarOpen ? "hidden" : "";
 
     return () => {
-      document.body.style.overflow = ""
-    }
-  }, [isSidebarOpen])
+      document.body.style.overflow = "";
+    };
+  }, [isSidebarOpen]);
 
   const mobileSidebar = (
     <AnimatePresence>
@@ -87,7 +87,7 @@ export function DashboardShell({
         </>
       ) : null}
     </AnimatePresence>
-  )
+  );
 
   return (
     <main className="flex-1 bg-[#f8f0e6] pt-16 text-[#2d180f]">
@@ -100,7 +100,10 @@ export function DashboardShell({
             Home
           </Link>
           <ChevronRight className="size-3" />
-          <Link href="/auth" className="transition-colors hover:text-[#C39150]">
+          <Link
+            href="/dashboard"
+            className="transition-colors hover:text-[#C39150]"
+          >
             Account
           </Link>
           <ChevronRight className="size-3" />
@@ -133,5 +136,5 @@ export function DashboardShell({
         ? createPortal(mobileSidebar, document.body)
         : null}
     </main>
-  )
+  );
 }

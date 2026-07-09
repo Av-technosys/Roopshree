@@ -1,10 +1,10 @@
-import Link from "next/link"
-import { ArrowRight } from "lucide-react"
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
-import { overviewStats } from "@/components/dashboard/dashboard-data"
-import { OrderCard } from "@/components/dashboard/OrderCard"
-import type { AddressView } from "@/services/address.service"
-import type { DashboardOrderCardView } from "@/services/order.service"
+import { overviewStats } from "@/components/dashboard/dashboard-data";
+import { OrderCard } from "@/components/dashboard/OrderCard";
+import type { AddressView } from "@/services/address.service";
+import type { DashboardOrderCardView } from "@/services/order.service";
 
 export function DashboardOverview({
   addresses,
@@ -13,11 +13,11 @@ export function DashboardOverview({
   wishlistCount,
   reviewCount,
 }: {
-  addresses: AddressView[]
-  orders: DashboardOrderCardView[]
-  orderCount: number
-  wishlistCount: number
-  reviewCount: number
+  addresses: AddressView[];
+  orders: DashboardOrderCardView[];
+  orderCount: number;
+  wishlistCount: number;
+  reviewCount: number;
 }) {
   const stats = overviewStats.map((stat) =>
     stat.label === "Addresses"
@@ -29,10 +29,10 @@ export function DashboardOverview({
           : stat.label === "Reviews"
             ? { ...stat, value: String(reviewCount) }
             : stat,
-  )
+  );
   const defaultAddress =
-    addresses.find((address) => address.isDefault) ?? addresses[0] ?? null
-
+    addresses.find((address) => address.isDefault) ?? addresses[0] ?? null;
+  console.log(stats);
   return (
     <div>
       <h1 className="hidden font-heading text-2xl font-semibold text-black lg:block">
@@ -41,7 +41,7 @@ export function DashboardOverview({
 
       <section className="mt-0 grid gap-4 sm:grid-cols-2 xl:grid-cols-4 lg:mt-5">
         {stats.map((stat) => {
-          const Icon = stat.icon
+          const Icon = stat.icon;
 
           return (
             <Link
@@ -60,7 +60,7 @@ export function DashboardOverview({
                 {stat.label}
               </p>
             </Link>
-          )
+          );
         })}
       </section>
 
@@ -91,7 +91,7 @@ export function DashboardOverview({
         <DefaultAddressCard address={defaultAddress} />
       </div>
     </div>
-  )
+  );
 }
 
 function DefaultAddressCard({ address }: { address: AddressView | null }) {
@@ -99,7 +99,7 @@ function DefaultAddressCard({ address }: { address: AddressView | null }) {
     ? [address.line1, address.postalCode, address.city, address.state]
         .filter(Boolean)
         .join(", ")
-    : ""
+    : "";
 
   return (
     <aside className="h-fit bg-[#432414] p-4 text-white shadow-sm">
@@ -130,5 +130,5 @@ function DefaultAddressCard({ address }: { address: AddressView | null }) {
         </p>
       )}
     </aside>
-  )
+  );
 }

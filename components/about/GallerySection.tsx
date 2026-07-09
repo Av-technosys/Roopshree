@@ -15,18 +15,18 @@ const GallerySection = () => {
           elegance and refined luxury.
         </p>
 
-        <div className="scrollbar-hidden mt-9 flex snap-x gap-2 overflow-x-auto sm:grid sm:grid-cols-5 sm:overflow-visible">
+        <div className="scrollbar-hidden mt-9 flex snap-x gap-4 overflow-x-auto sm:grid sm:grid-cols-5 sm:gap-4 sm:overflow-visible">
           {galleryItems.map((item, index) => (
             <div
               key={`${item.src}-${index}`}
-              className="relative aspect-[1.03/1] w-64 shrink-0 snap-center overflow-hidden border-[5px] border-[#f3e6d5] bg-[#eadac6] sm:w-auto"
+              className="relative aspect-[4/5] w-64 shrink-0 snap-center overflow-hidden border-[5px] border-[#f3e6d5] bg-[#eadac6] sm:w-auto"
             >
               <Image
                 src={item.src}
                 alt={item.alt}
                 fill
                 sizes="(min-width: 640px) 20vw, 256px"
-                className={`object-cover ${item.className}`}
+                className={`object-contain ${item.className}`}
               />
             </div>
           ))}

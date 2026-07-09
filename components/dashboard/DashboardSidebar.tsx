@@ -74,11 +74,11 @@ export function DashboardSidebar({
             router.push(signOutItem.href)
             router.refresh()
           }}
-          className="flex h-12 items-center gap-3 px-5 text-sm font-medium text-red-500 transition-colors hover:bg-red-50"
+          className="flex h-12 w-full text-left items-center gap-3 px-5 text-sm font-medium text-red-500 transition-colors hover:bg-red-50"
         >
-          <SignOutIcon className="size-4" />
+          <SignOutIcon className="size-4 shrink-0" />
           <span className="min-w-0 flex-1 truncate">{signOutItem.label}</span>
-          <ChevronRight className="size-4 opacity-70" />
+          <ChevronRight className="size-4 shrink-0 opacity-70" />
         </button>
       </nav>
     </aside>

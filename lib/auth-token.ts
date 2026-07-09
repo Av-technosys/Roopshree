@@ -3,6 +3,7 @@ export const authCookieNames = {
   idToken: 'rs_id_token',
   refreshToken: 'rs_refresh_token',
   email: 'rs_auth_email',
+  username: 'rs_auth_username',
   role: 'rs_auth_role',
 } as const
 
@@ -13,6 +14,7 @@ type CognitoClaims = {
   name?: string
   phone_number?: string
   sub?: string
+  'cognito:username'?: string
   'custom:role'?: string
   'cognito:groups'?: string[]
 }
@@ -56,5 +58,12 @@ export function getUserClaimsFromIdToken(idToken: string) {
     name: claims?.name,
     phone: claims?.phone_number,
     sub: claims?.sub,
+    username: claims?.['cognito:username'],
   }
+}
+
+export function getRefreshUsernameFromIdToken(idToken: string, fallbackEmail: string) {
+  const claims = decodeJwtPayload<CognitoClaims>(idToken)
+
+  return claims?.['cognito:username'] ?? claims?.sub ?? fallbackEmail
 }

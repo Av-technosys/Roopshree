@@ -16,7 +16,6 @@ const quickLinks: FooterLink[] = [
   { label: "About", href: "/about" },
   { label: "Shop", href: "/shop" },
   { label: "Contact Us", href: "/contact" },
-  { label: "Enquiry", href: "/contact" },
   { label: "Blogs", href: "/blogs" },
 ];
 const customerServices: FooterLink[] = [

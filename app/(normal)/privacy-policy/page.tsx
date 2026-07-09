@@ -1,3 +1,14 @@
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Our Privacy Policy | Roopshree",
+  description:
+    "Read Roopshree's Privacy Policy to understand how we collect, use, and protect your personal information while you shop on our website.",
+  alternates: {
+    canonical: "https://roopshreebandhej.com/privacy-policy",
+  },
+};
+
 export default function PrivacyPolicy() {
   return (
     <main className="flex-1 bg-white pb-20 pt-24 md:pt-32">

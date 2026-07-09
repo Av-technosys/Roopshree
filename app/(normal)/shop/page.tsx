@@ -7,6 +7,7 @@ import {
   getCatalogFilterOptions,
   getCatalogProductPage,
 } from "@/services/product.service";
+import { Metadata } from "next";
 
 function getParamValue(value?: string | string[]) {
   return Array.isArray(value) ? value[0] : value;
@@ -26,8 +27,19 @@ function getParamList(value?: string | string[]) {
 function getPriceInPaise(value?: string | string[]) {
   const price = Number(getParamValue(value));
 
-  return Number.isFinite(price) && price > 0 ? Math.round(price * 100) : undefined;
+  return Number.isFinite(price) && price > 0
+    ? Math.round(price * 100)
+    : undefined;
 }
+
+export const metadata: Metadata = {
+  title: "Shop Authentic Bandhani Sarees & Dupattas Online | Roopshree",
+  description:
+    "Browse Roopshree's full collection of Bandhej sarees & dupattas, Gajji silk, zardozi work & gota-patti designs. Handcrafted pieces for weddings & festive wear.",
+  alternates: {
+    canonical: "https://roopshreebandhej.com/shop",
+  },
+};
 
 const page = async ({
   searchParams,
@@ -38,18 +50,17 @@ const page = async ({
   const filterOptions = await getCatalogFilterOptions();
   const currentPage = Number(getParamValue(params?.page) ?? 1);
   const pageSize = 12;
-  const customFilters = filterOptions.customGroups.reduce<Record<string, string[]>>(
-    (filters, group) => {
-      const values = getParamList(params?.[`filter_${group.paramKey}`]);
+  const customFilters = filterOptions.customGroups.reduce<
+    Record<string, string[]>
+  >((filters, group) => {
+    const values = getParamList(params?.[`filter_${group.paramKey}`]);
 
-      if (values.length > 0) {
-        filters[group.title] = values;
-      }
+    if (values.length > 0) {
+      filters[group.title] = values;
+    }
 
-      return filters;
-    },
-    {},
-  );
+    return filters;
+  }, {});
   const [{ items, total }, categories] = await Promise.all([
     getCatalogProductPage({
       limit: pageSize,
@@ -69,7 +80,10 @@ const page = async ({
         getParamValue(params?.sort) === "newest" ||
         getParamValue(params?.sort) === "price-low" ||
         getParamValue(params?.sort) === "price-high"
-          ? (getParamValue(params?.sort) as "newest" | "price-low" | "price-high")
+          ? (getParamValue(params?.sort) as
+              | "newest"
+              | "price-low"
+              | "price-high")
           : "featured",
     }),
     getCatalogCategories(8),

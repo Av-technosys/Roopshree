@@ -6,6 +6,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { signInAction } from "@/actions/auth.action";
 import { useToast } from "@/components/common/ToastProvider";
+import Link from "next/link";
 
 export default function Login({
   onCreateAccount,
@@ -34,7 +35,10 @@ export default function Login({
     setIsSubmitting(false);
 
     if (!response.ok) {
-      showToast({ title: response.error ?? "Invalid email or password", tone: "error" });
+      showToast({
+        title: response.error ?? "Invalid email or password",
+        tone: "error",
+      });
       setError(response.error ?? "Invalid email or password");
       return;
     }
@@ -55,7 +59,7 @@ export default function Login({
 
         <section className="relative flex min-h-screen w-full items-center justify-center lg:px-8 xl:px-16 2xl:px-24">
           <div className="relative w-full max-w-[360px] px-0 py-0 sm:max-w-[420px] lg:w-[min(630px,calc(50vw-64px))] lg:max-w-none lg:bg-white/45 lg:px-7 lg:py-8 xl:py-9">
-            <div className="mb-4 flex justify-center">
+            <Link href="/" className="mb-4 flex justify-center">
               <Image
                 src="/logo.svg"
                 alt="Roop Shree"
@@ -64,7 +68,7 @@ export default function Login({
                 priority
                 className="h-auto w-[92px] lg:w-[clamp(112px,8vw,140px)]"
               />
-            </div>
+            </Link>
 
             <div className="mb-6 text-center lg:mb-7 xl:mb-8">
               <h1 className="font-playfairDisplay text-[22px] leading-tight text-[#3b2418] lg:text-[clamp(28px,2vw,32px)] lg:font-semibold">
@@ -75,7 +79,10 @@ export default function Login({
               </p>
             </div>
 
-            <form className="space-y-3 lg:space-y-5 xl:space-y-6" onSubmit={handleLogin}>
+            <form
+              className="space-y-3 lg:space-y-5 xl:space-y-6"
+              onSubmit={handleLogin}
+            >
               <InputBox
                 icon={<Mail size={18} />}
                 placeholder="Email Address"
@@ -89,13 +96,19 @@ export default function Login({
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={setPassword}
-                rightIcon={showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                rightIcon={
+                  showPassword ? <EyeOff size={18} /> : <Eye size={18} />
+                }
                 onRightIconClick={() => setShowPassword((current) => !current)}
-                rightIconLabel={showPassword ? "Hide password" : "Show password"}
+                rightIconLabel={
+                  showPassword ? "Hide password" : "Show password"
+                }
               />
 
               {error && (
-                <p className="text-xs font-medium text-red-600 lg:text-sm">{error}</p>
+                <p className="text-xs font-medium text-red-600 lg:text-sm">
+                  {error}
+                </p>
               )}
 
               <div className="text-right">

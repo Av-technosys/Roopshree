@@ -1,11 +1,11 @@
-import Image from "next/image"
-import Link from "next/link"
+import Image from "next/image";
+import Link from "next/link";
 
-import { ContactEnquiryForm } from "@/components/contact/ContactEnquiryForm"
-import Hero from "@/components/contact/Hero"
-import { Button } from "@/components/ui/button"
+import { ContactEnquiryForm } from "@/components/contact/ContactEnquiryForm";
+import Hero from "@/components/contact/Hero";
+import { Button } from "@/components/ui/button";
 
-type TablerIconName = "map-pin" | "phone" | "brand-whatsapp" | "mail"
+type TablerIconName = "map-pin" | "phone" | "brand-whatsapp" | "mail";
 
 const contactItems = [
   {
@@ -16,23 +16,27 @@ const contactItems = [
   {
     title: "Phone",
     body: "+91-9783841066",
+    link: "tel:9783841066",
     icon: "phone",
   },
   {
     title: "WhatsApp",
     body: "Chat on WhatsApp\n+91-9529888006",
+    link: "https://wa.me/919529888006?text=Hi",
     icon: "brand-whatsapp",
   },
   {
     title: "Email",
     body: "Adityagarwal23@gmail.com\nWe reply within 24 hrs",
+    link: "mailto:Adityagarwal23@gmail.com",
     icon: "mail",
   },
 ] satisfies {
-  title: string
-  body: string
-  icon: TablerIconName
-}[]
+  title: string;
+  body: string;
+  icon: TablerIconName;
+  link?: string;
+}[];
 
 function contact() {
   return (
@@ -59,11 +63,13 @@ function contact() {
                   <h2 className="mt-5 font-heading text-lg font-semibold md:text-xl">
                     {item.title}
                   </h2>
-                  <p className="mt-3 whitespace-pre-line text-xs leading-5 text-[#22140f] md:text-sm">
-                    {item.body}
-                  </p>
+                  <Link href={item.link ?? "#"}>
+                    <p className="mt-3 whitespace-pre-line text-xs leading-5 text-[#22140f] md:text-sm">
+                      {item.body}
+                    </p>
+                  </Link>
                 </div>
-              )
+              );
             })}
           </div>
 
@@ -140,7 +146,7 @@ function contact() {
         </div>
       </section>
     </div>
-  )
+  );
 }
 
 function TablerIcon({
@@ -148,9 +154,9 @@ function TablerIcon({
   className,
   strokeWidth = 2,
 }: {
-  name: TablerIconName
-  className?: string
-  strokeWidth?: number
+  name: TablerIconName;
+  className?: string;
+  strokeWidth?: number;
 }) {
   return (
     <svg
@@ -187,7 +193,7 @@ function TablerIcon({
         </>
       ) : null}
     </svg>
-  )
+  );
 }
 
 function SectionEyebrow() {
@@ -196,7 +202,7 @@ function SectionEyebrow() {
       <span className="size-2.5 rotate-45 bg-[#C39150]" />
       <span className="h-px w-28 bg-linear-to-r from-[#C39150] to-transparent" />
     </div>
-  )
+  );
 }
 
-export default contact
+export default contact;

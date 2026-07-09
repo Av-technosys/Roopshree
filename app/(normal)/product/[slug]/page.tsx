@@ -1,15 +1,9 @@
-import ProductDetails from "@/components/product/ProductDetails"
-import ProductDescriptionReviews from "@/components/product/ProductDescriptionReviews"
-import YouMayAlsoLike from "@/components/product/YouMayAlsoLike"
-import { getProductDetailsBySlug } from "@/services/product.service"
-import {
-  BadgeCheck,
-  Leaf,
-  LockKeyhole,
-  Truck,
-} from "lucide-react"
-import { notFound } from "next/navigation"
-
+import ProductDetails from "@/components/product/ProductDetails";
+import ProductDescriptionReviews from "@/components/product/ProductDescriptionReviews";
+import YouMayAlsoLike from "@/components/product/YouMayAlsoLike";
+import { getProductDetailsBySlug } from "@/services/product.service";
+import { BadgeCheck, Leaf, LockKeyhole, Truck } from "lucide-react";
+import { notFound } from "next/navigation";
 
 const benefits = [
   {
@@ -32,27 +26,21 @@ const benefits = [
     title: "Secure Payment",
     description: "Fast & Secure",
   },
-]
+];
 
-
-const Page = async ({
-  params,
-}: {
-  params: Promise<{ slug: string }>
-}) => {
-  const { slug } = await params
-  const product = await getProductDetailsBySlug(slug)
+const Page = async ({ params }: { params: Promise<{ slug: string }> }) => {
+  const { slug } = await params;
+  const product = await getProductDetailsBySlug(slug);
   if (!product) {
-    notFound()
+    notFound();
   }
 
   return (
     <div>
-
       <ProductDetails product={product} />
 
       <section className="bg-white py-14 md:pb-10">
-        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl px-5 sm:px-6 lg:px-8">
           <div className="mt-5 grid gap-x-8 gap-y-8 rounded-[4px] border border-[#ead8c5] bg-[#fcf8f1] px-8 py-8 sm:grid-cols-2 lg:grid-cols-4 lg:px-12">
             {benefits.map(({ icon: Icon, title, description }) => (
               <div
@@ -76,11 +64,8 @@ const Page = async ({
 
       <ProductDescriptionReviews product={product} />
       <YouMayAlsoLike />
-
-
-
     </div>
-  )
-}
+  );
+};
 
-export default Page
+export default Page;

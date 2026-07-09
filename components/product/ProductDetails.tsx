@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { useMemo, useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useMemo, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -12,115 +12,130 @@ import {
   Plus,
   Share2,
   Trash2,
-} from "lucide-react"
+} from "lucide-react";
 
-import { formatPrice } from "@/components/global/const"
-import { Button } from "@/components/ui/button"
-import { useAddToCart } from "@/hooks/useAddToCart"
-import { useWishlist } from "@/hooks/useWishlist"
-import { useCartStore } from "@/store/cartStore"
-import { useWishlistStore } from "@/store/wishlistStore"
-import type { CartItemInput } from "@/store/cartTypes"
+import { formatPrice } from "@/components/global/const";
+import { Button } from "@/components/ui/button";
+import { useAddToCart } from "@/hooks/useAddToCart";
+import { useWishlist } from "@/hooks/useWishlist";
+import { useCartStore } from "@/store/cartStore";
+import { useWishlistStore } from "@/store/wishlistStore";
+import type { CartItemInput } from "@/store/cartTypes";
+import { useToast } from "@/components/common/ToastProvider";
 
 export type ProductDetailView = {
-  id: string
-  slug: string
-  name: string
-  sku: string
-  description: string
-  short_description: string
-  price: number
-  strikeThroughPrice: number | null
+  id: string;
+  slug: string;
+  name: string;
+  sku: string;
+  description: string;
+  short_description: string;
+  price: number;
+  strikeThroughPrice: number | null;
   variants: {
-    id: string
-    title: string
-    sku: string
-    price: number
-    strikeThroughPrice: number | null
-    stockQuantity: number
-    color: string | null
-    fabric: string | null
-    size: string | null
-    isDefault: boolean
-    rating: number
-    reviewCount: number
-    image: string
-  }[]
+    id: string;
+    title: string;
+    sku: string;
+    price: number;
+    strikeThroughPrice: number | null;
+    stockQuantity: number;
+    color: string | null;
+    fabric: string | null;
+    size: string | null;
+    isDefault: boolean;
+    rating: number;
+    reviewCount: number;
+    image: string;
+  }[];
   media: {
-    id: string
-    src: string
-    alt: string
-    variantId: string
-    isPrimary: boolean
-  }[]
+    id: string;
+    src: string;
+    alt: string;
+    variantId: string;
+    isPrimary: boolean;
+  }[];
   attributes: {
-    id: string
-    name: string
-    value: string
-  }[]
+    id: string;
+    name: string;
+    value: string;
+  }[];
   reviews: {
-    id: string
-    rating: number
-    title: string
-    message: string
-    reviewerName: string
-    createdAt: string
-  }[]
+    id: string;
+    rating: number;
+    title: string;
+    message: string;
+    reviewerName: string;
+    createdAt: string;
+  }[];
   reviewSummary: {
-    averageRating: number
-    reviewCount: number
+    averageRating: number;
+    reviewCount: number;
     ratingRows: {
-      rating: number
-      percent: number
-    }[]
-  }
-}
+      rating: number;
+      percent: number;
+    }[];
+  };
+};
 
-const breadcrumbs = ["Home", "Categories", "Products", "Product Details"]
+const breadcrumbs = [
+  {
+    title: "Home",
+    link: "/",
+  },
+  {
+    title: "Products",
+    link: "/shop",
+  },
+  {
+    title: "Product Details",
+    link: "#",
+  },
+];
 
 const ProductDetails = ({ product }: { product: ProductDetailView }) => {
-  const router = useRouter()
+  const router = useRouter();
+  const { showToast } = useToast();
   const {
     handleAddToCart,
     handleDecreaseCartItem,
     handleIncreaseCartItem,
     handleRemoveCartItem,
-  } = useAddToCart()
-  const { handleToggleWishlist } = useWishlist()
+  } = useAddToCart();
+  const { handleToggleWishlist } = useWishlist();
   const defaultVariant =
     product.variants.find((variant) => variant.isDefault) ??
     product.variants[0] ??
-    null
+    null;
   const [selectedVariantId, setSelectedVariantId] = useState(
-    defaultVariant?.id ?? ""
-  )
-  const [selectedMediaId, setSelectedMediaId] = useState<string | null>(null)
+    defaultVariant?.id ?? "",
+  );
+  const [selectedMediaId, setSelectedMediaId] = useState<string | null>(null);
   const selectedVariant =
     product.variants.find((variant) => variant.id === selectedVariantId) ??
-    defaultVariant
+    defaultVariant;
   const selectedMedia =
     product.media.find((item) => item.id === selectedMediaId) ??
     product.media.find((item) => item.variantId === selectedVariant?.id) ??
     product.media.find(
-      (item) => item.variantId === defaultVariant?.id && item.isPrimary
+      (item) => item.variantId === defaultVariant?.id && item.isPrimary,
     ) ??
     product.media[0] ??
-    null
+    null;
   const selectedVariantMedia = product.media.filter(
-    (item) => item.variantId === selectedVariant?.id
-  )
+    (item) => item.variantId === selectedVariant?.id,
+  );
   const galleryMedia = selectedVariantMedia.length
     ? selectedVariantMedia
-    : product.media.filter((item) => item.variantId === defaultVariant?.id)
-  const displayedImage = selectedMedia?.src ?? selectedVariant?.image ?? ""
-  const displayedAlt = selectedMedia?.alt ?? product.name
-  const price = selectedVariant?.price ?? product.price
+    : product.media.filter((item) => item.variantId === defaultVariant?.id);
+  const displayedImage = selectedMedia?.src ?? selectedVariant?.image ?? "";
+  const displayedAlt = selectedMedia?.alt ?? product.name;
+  const price = selectedVariant?.price ?? product.price;
   const strikeThroughPrice =
-    selectedVariant?.strikeThroughPrice ?? product.strikeThroughPrice
+    selectedVariant?.strikeThroughPrice ?? product.strikeThroughPrice;
   const discount =
     strikeThroughPrice && strikeThroughPrice > price
       ? Math.round(((strikeThroughPrice - price) / strikeThroughPrice) * 100)
-      : null
+      : null;
   const variantAttributes = useMemo(
     () =>
       [
@@ -134,8 +149,8 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
           ? { name: "Size", value: selectedVariant.size }
           : null,
       ].filter(Boolean) as { name: string; value: string }[],
-    [selectedVariant]
-  )
+    [selectedVariant],
+  );
   const cartItem: CartItemInput = {
     productId: `${product.slug}:${selectedVariant?.id ?? "default"}`,
     dbProductId: product.id,
@@ -147,29 +162,32 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
     colour: selectedVariant?.color ?? undefined,
     imageClass: "object-top",
     attributes: variantAttributes.length ? variantAttributes : undefined,
-  }
-  const cartQuantity = useCartStore(
-    (state) =>
-      state.getItemQuantity(
-        cartItem.productId,
-        cartItem.attributes,
-        cartItem.variantId
-      )
-  )
-  const isInCart = cartQuantity > 0
+  };
+  const cartQuantity = useCartStore((state) =>
+    state.getItemQuantity(
+      cartItem.productId,
+      cartItem.attributes,
+      cartItem.variantId,
+    ),
+  );
+  const isInCart = cartQuantity > 0;
   const isWishlisted = useWishlistStore((state) =>
-    state.hasItem(cartItem.productId, cartItem.dbProductId)
-  )
+    state.hasItem(cartItem.productId, cartItem.dbProductId),
+  );
 
   return (
     <section className="bg-white pb-14 pt-24 text-[#111] md:pt-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <nav className="mb-6 flex flex-wrap items-center gap-2 text-[0.68rem] font-semibold text-black">
-          {breadcrumbs.map((item, index) => (
-            <span key={item} className="inline-flex items-center gap-2">
-              {index === 0 ? <Link href="/">Home</Link> : item}
+          {breadcrumbs.map(({ title, link }, index) => (
+            <Link
+              href={link}
+              key={link}
+              className="inline-flex items-center gap-2"
+            >
+              {title}
               <span className="text-[#3f2617]">&gt;</span>
-            </span>
+            </Link>
           ))}
         </nav>
 
@@ -208,10 +226,11 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
                       key={image.id}
                       type="button"
                       onClick={() => setSelectedMediaId(image.id)}
-                      className={`relative aspect-[0.78] overflow-hidden border transition ${selectedMedia?.id === image.id
+                      className={`relative aspect-[0.78] overflow-hidden border transition ${
+                        selectedMedia?.id === image.id
                           ? "border-[#c39150]"
                           : "border-transparent"
-                        }`}
+                      }`}
                       aria-label="View product image"
                     >
                       <Image
@@ -240,29 +259,111 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
             <h1 className="max-w-2xl font-heading text-[2rem] leading-[1.18] text-black md:text-[2.45rem]">
               {product.name}
             </h1>
-            <p className="mt-5 text-xs font-semibold uppercase text-black">
-              SKU: {selectedVariant?.sku ?? product.sku}
-            </p>
+
+            {product.short_description ? (
+              <p className="mt-7 line-clamp-2 text-sm leading-5 text-gray-600 whitespace-pre-wrap">
+                {product.short_description}
+              </p>
+            ) : null}
 
             <div className="mt-5 flex flex-wrap items-baseline gap-4">
               <p className="text-3xl font-bold text-black md:text-4xl">
                 {formatPrice(price)}
               </p>
-              {strikeThroughPrice ? (
+              {price ? (
                 <p className="text-xl text-[#5f5a55] line-through">
-                  {formatPrice(strikeThroughPrice)}
+                  {formatPrice(price + 500)}
                 </p>
               ) : null}
-              {discount ? (
-                <p className="text-xl text-[#c39150]">({discount}% OFF)</p>
+              {price ? (
+                <p className="text-xl text-[#c39150]">
+                  ( {((500 / price) * 100).toFixed(0)}% OFF)
+                </p>
               ) : null}
             </div>
 
-            {product.short_description ? (
-              <p className="mt-7 max-w-[35rem] text-sm leading-5 text-black whitespace-pre-wrap">
-                {product.short_description}
-              </p>
+            <div className=" mt-6 flex gap-4">
+              <Button
+                variant="outline"
+                onClick={() => handleToggleWishlist(cartItem)}
+                className=" rounded-full  border-[#d8b278] bg-white text-sm font-medium text-[#3f2617] hover:bg-[#fbf3ea]"
+              >
+                <Heart
+                  className="size-4 text-[#c39150]"
+                  fill={isWishlisted ? "currentColor" : "none"}
+                />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  showToast({
+                    title: "Link copied to clipboard",
+                    tone: "success",
+                  });
+                }}
+                className=" rounded-full border-[#d8b278] bg-white text-sm font-medium text-[#3f2617] hover:bg-[#fbf3ea]"
+              >
+                <Share2 className="size-4 text-[#c39150]" />
+              </Button>
+            </div>
+
+            {variantAttributes.length > 0 ? (
+              <div className="mt-6 grid gap-3">
+                {variantAttributes.map((attribute) => (
+                  <div
+                    key={`${attribute.name}-${attribute.value}`}
+                    className="flex items-center gap-2 text-sm"
+                  >
+                    <span className="text-xs font-semibold uppercase text-black">
+                      {attribute.name}
+                    </span>{" "}
+                    {":"}
+                    <span className="text-right text-[#3f2617]">
+                      {attribute.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
             ) : null}
+
+            <div className="mt-6 grid grid-cols-2 gap-2">
+              {isInCart ? (
+                <ProductQuantityControls
+                  quantity={cartQuantity}
+                  onDecrease={() => handleDecreaseCartItem(cartItem)}
+                  onIncrease={() => handleIncreaseCartItem(cartItem)}
+                  onRemove={() => handleRemoveCartItem(cartItem)}
+                />
+              ) : (
+                <Button
+                  onClick={() => handleAddToCart(cartItem)}
+                  disabled={selectedVariant?.stockQuantity === 0}
+                  className="h-12 rounded-none   text-sm font-semibold   disabled:opacity-60"
+                >
+                  {selectedVariant?.stockQuantity === 0
+                    ? "Out of stock"
+                    : "Add to cart"}
+                </Button>
+              )}
+              <Button
+                disabled={selectedVariant?.stockQuantity === 0}
+                onClick={() => {
+                  window.sessionStorage.setItem(
+                    "roopshree-buy-now",
+                    JSON.stringify({
+                      ...cartItem,
+                      quantity: 1,
+                      addedAt: Date.now(),
+                    }),
+                  );
+                  router.push("/checkout?source=buy-now");
+                }}
+                className="h-12 rounded-none bg-[#3f2617] text-sm font-semibold text-white hover:bg-[#3f2617]/90 disabled:opacity-60"
+              >
+                Buy Now
+              </Button>
+            </div>
 
             {product.variants.length > 0 ? (
               <div className="mt-7">
@@ -275,13 +376,14 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
                       key={variant.id}
                       type="button"
                       onClick={() => {
-                        setSelectedVariantId(variant.id)
-                        setSelectedMediaId(null)
+                        setSelectedVariantId(variant.id);
+                        setSelectedMediaId(null);
                       }}
-                      className={`overflow-hidden rounded-[3px] border bg-white text-left transition ${selectedVariant?.id === variant.id
+                      className={`overflow-hidden rounded-[3px] border bg-white text-left transition ${
+                        selectedVariant?.id === variant.id
                           ? "border-[#c39150] shadow-sm"
                           : "border-[#d8b278] hover:border-[#c39150]"
-                        }`}
+                      }`}
                     >
                       <span className="relative block aspect-[0.78] bg-[#f8efe6]">
                         {variant.image ? (
@@ -302,95 +404,12 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
                 </div>
               </div>
             ) : null}
-
-            {variantAttributes.length > 0 ? (
-              <div className="mt-6 grid gap-3">
-                {variantAttributes.map((attribute) => (
-                  <div
-                    key={`${attribute.name}-${attribute.value}`}
-                    className="flex min-h-11 items-center justify-between gap-4 border border-[#d8b278] px-4 text-sm"
-                  >
-                    <span className="text-xs font-medium uppercase text-black">
-                      {attribute.name}
-                    </span>
-                    <span className="text-right font-medium text-[#3f2617]">
-                      {attribute.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-
-            <div className="mt-6 grid gap-2">
-              {isInCart ? (
-                <ProductQuantityControls
-                  quantity={cartQuantity}
-                  onDecrease={() =>
-                    handleDecreaseCartItem(cartItem)
-                  }
-                  onIncrease={() =>
-                    handleIncreaseCartItem(cartItem)
-                  }
-                  onRemove={() =>
-                    handleRemoveCartItem(cartItem)
-                  }
-                />
-              ) : (
-                <Button
-                  onClick={() => handleAddToCart(cartItem)}
-                  disabled={selectedVariant?.stockQuantity === 0}
-                  className="h-12 rounded-none bg-[#c39150] text-sm font-semibold text-white hover:bg-[#3f2617] disabled:opacity-60"
-                >
-                  {selectedVariant?.stockQuantity === 0
-                    ? "Out of stock"
-                    : "Add to cart"}
-                </Button>
-              )}
-              <Button
-                disabled={selectedVariant?.stockQuantity === 0}
-                onClick={() => {
-                  window.sessionStorage.setItem(
-                    "roopshree-buy-now",
-                    JSON.stringify({
-                      ...cartItem,
-                      quantity: 1,
-                      addedAt: Date.now(),
-                    }),
-                  )
-                  router.push("/checkout?source=buy-now")
-                }}
-                className="h-12 rounded-none bg-[#3f2617] text-sm font-semibold text-white hover:bg-[#c39150] disabled:opacity-60"
-              >
-                Buy Now
-              </Button>
-            </div>
-
-            <div className="mt-6 grid grid-cols-2 gap-4">
-              <Button
-                variant="outline"
-                onClick={() => handleToggleWishlist(cartItem)}
-                className="h-12 rounded-none border-[#d8b278] bg-white text-sm font-medium text-[#3f2617] hover:bg-[#fbf3ea]"
-              >
-                <Heart
-                  className="size-4 text-[#c39150]"
-                  fill={isWishlisted ? "currentColor" : "none"}
-                />
-                {isWishlisted ? "Remove Wishlist" : "Add to Wishlist"}
-              </Button>
-              <Button
-                variant="outline"
-                className="h-12 rounded-none border-[#d8b278] bg-white text-sm font-medium text-[#3f2617] hover:bg-[#fbf3ea]"
-              >
-                <Share2 className="size-4 text-[#c39150]" />
-                Share
-              </Button>
-            </div>
           </div>
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
 function ProductQuantityControls({
   quantity,
@@ -398,10 +417,10 @@ function ProductQuantityControls({
   onIncrease,
   onRemove,
 }: {
-  quantity: number
-  onDecrease: () => void
-  onIncrease: () => void
-  onRemove: () => void
+  quantity: number;
+  onDecrease: () => void;
+  onIncrease: () => void;
+  onRemove: () => void;
 }) {
   return (
     <div className="grid h-12 grid-cols-[52px_1fr_52px_52px] overflow-hidden border border-[#c39150] bg-white text-[#3f2617]">
@@ -414,7 +433,7 @@ function ProductQuantityControls({
         <Minus className="size-4" />
       </button>
       <span className="flex items-center justify-center text-sm font-semibold">
-        Quantity {quantity}
+        {quantity}
       </span>
       <button
         type="button"
@@ -433,7 +452,7 @@ function ProductQuantityControls({
         <Trash2 className="size-4" />
       </button>
     </div>
-  )
+  );
 }
 
-export default ProductDetails
+export default ProductDetails;

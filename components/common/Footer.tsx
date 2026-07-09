@@ -1,15 +1,15 @@
-import Image from "next/image"
-import Link from "next/link"
+import Image from "next/image";
+import Link from "next/link";
 
-import { FooterNewsletterForm } from "@/components/common/FooterNewsletterForm"
-import { Button } from "@/components/ui/button"
-import { getCatalogCategories } from "@/services/product.service"
-import { IconBrandInstagram, IconMail } from "@tabler/icons-react"
+import { FooterNewsletterForm } from "@/components/common/FooterNewsletterForm";
+import { Button } from "@/components/ui/button";
+import { getCatalogCategories } from "@/services/product.service";
+import { IconBrandInstagram, IconMail } from "@tabler/icons-react";
 
 type FooterLink = {
-  label: string
-  href: string
-}
+  label: string;
+  href: string;
+};
 
 const quickLinks: FooterLink[] = [
   { label: "Home", href: "/" },
@@ -18,28 +18,28 @@ const quickLinks: FooterLink[] = [
   { label: "Contact Us", href: "/contact" },
   { label: "Enquiry", href: "/contact" },
   { label: "Blogs", href: "/blogs" },
-]
+];
 const customerServices: FooterLink[] = [
   { label: "Orders", href: "/dashboard" },
-  { label: "Terms & Conditions", href: "/" },
-  { label: "Shipping", href: "/" },
-  { label: "Privacy Policy", href: "/" },
-]
+  { label: "Terms & Conditions", href: "/terms-and-conditions" },
+  { label: "Shipping", href: "/shipping" },
+  { label: "Privacy Policy", href: "/privacy-policy" },
+];
 
 const Footer = async () => {
-  let categories: FooterLink[] = []
+  let categories: FooterLink[] = [];
 
   try {
     categories = (await getCatalogCategories(7)).map((category) => ({
       label: category.name,
       href: category.href,
-    }))
+    }));
   } catch (error) {
-    console.error("Footer categories failed:", error)
+    console.error("Footer categories failed:", error);
   }
 
   return (
-    <footer className="relative overflow-hidden border-t border-[#C39150] bg-[#F1E1CD] text-[#3F2617] md:bg-[#C39150]/15">
+    <footer className="relative overflow-hidden bg-[#F1E1CD] text-[#3F2617] md:bg-[#C39150]/15">
       <Image
         src="/footer-bg.png"
         alt=""
@@ -58,28 +58,32 @@ const Footer = async () => {
               className="object-contain object-left"
             />
           </Link>
-          <p className="max-w-xs text-sm leading-6 text-[#3F2617]/70">
+          <p className="max-w-xs text-xs leading-5 text-[#3F2617]/70">
             Roopshree blends timeless tradition and modern elegance through
             beautifully crafted dupattas designed to add grace, charm, and
             confidence everywhere.
           </p>
           <div className="mt-5 flex gap-3">
-            <Button
-              aria-label="Instagram"
-              size="icon-sm"
-              variant="ghost"
-              className="bg-[#FEEDD0] hover:bg-[#FEEDD0]"
-            >
-              <IconBrandInstagram className="size-6 text-[#3F2617]/70" />
-            </Button>
-            <Button
-              aria-label="Email"
-              size="icon-sm"
-              variant="ghost"
-              className="bg-[#FEEDD0] hover:bg-[#FEEDD0]"
-            >
-              <IconMail className="size-6 text-[#3F2617]/70" />
-            </Button>
+            <Link href={"https://www.instagram.com/Roopshreebandhej"}>
+              <Button
+                aria-label="Instagram"
+                size="icon-sm"
+                variant="ghost"
+                className="bg-[#FEEDD0] hover:bg-[#FEEDD0]"
+              >
+                <IconBrandInstagram className="size-6 text-[#3F2617]/70" />
+              </Button>
+            </Link>
+            <Link href={"mailto:Adityagarwal23@gmail.com"}>
+              <Button
+                aria-label="Email"
+                size="icon-sm"
+                variant="ghost"
+                className="bg-[#FEEDD0] hover:bg-[#FEEDD0]"
+              >
+                <IconMail className="size-6 text-[#3F2617]/70" />
+              </Button>
+            </Link>
           </div>
         </div>
 
@@ -92,7 +96,7 @@ const Footer = async () => {
             Newsletter Subscription
           </h2>
           <FooterNewsletterForm />
-          <p className="mt-5 text-sm leading-6 text-[#3F2617]/70">
+          <p className="mt-5 text-xs leading-5 text-[#3F2617]/70">
             Your feedback helps us grow. Share your thoughts and suggestions
             with us anytime.
           </p>
@@ -109,24 +113,33 @@ const Footer = async () => {
         </div>
       </div>
     </footer>
-  )
-}
+  );
+};
 
-function FooterColumn({ title, items }: { title: string; items: FooterLink[] }) {
+function FooterColumn({
+  title,
+  items,
+}: {
+  title: string;
+  items: FooterLink[];
+}) {
   return (
     <div>
       <h2 className="mb-5 text-xl font-medium text-[#3F2617]">{title}</h2>
       <ul className="space-y-3 text-sm text-[#3F2617]/70">
         {items.map((item) => (
           <li key={`${title}-${item.href}-${item.label}`}>
-            <Link href={item.href} className="transition-colors font-semibold hover:text-[#C18F50]">
+            <Link
+              href={item.href}
+              className="transition-colors font-semibold hover:text-[#C18F50]"
+            >
               {item.label}
             </Link>
           </li>
         ))}
       </ul>
     </div>
-  )
+  );
 }
 
-export default Footer
+export default Footer;

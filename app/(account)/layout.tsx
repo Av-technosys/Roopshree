@@ -1,9 +1,13 @@
-import Header from "@/components/common/Header"
-import { StoreHydrator } from "@/components/global/StoreHydrator"
-import { getCurrentSession } from "@/lib/auth"
+import Header from "@/components/common/Header";
+import { StoreHydrator } from "@/components/global/StoreHydrator";
+import { getCurrentSession } from "@/lib/auth";
 
-export default async function Layout({ children }: { children: React.ReactNode }) {
-  const session = await getCurrentSession()
+export default async function Layout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await getCurrentSession();
 
   return (
     <>
@@ -11,5 +15,5 @@ export default async function Layout({ children }: { children: React.ReactNode }
       <Header isAuthenticated={Boolean(session)} />
       {children}
     </>
-  )
+  );
 }

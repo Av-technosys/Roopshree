@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import Link from "next/link"
-import { Heart, ShoppingCart } from "lucide-react"
+import Image from "next/image";
+import Link from "next/link";
+import { Heart, ShoppingCart } from "lucide-react";
 
-import { formatPrice } from "@/components/global/const"
-import { Button } from "@/components/ui/button"
-import { useAddToCart } from "@/hooks/useAddToCart"
-import { useWishlist } from "@/hooks/useWishlist"
-import { useWishlistStore } from "@/store/wishlistStore"
+import { formatPrice } from "@/components/global/const";
+import { Button } from "@/components/ui/button";
+import { useAddToCart } from "@/hooks/useAddToCart";
+import { useWishlist } from "@/hooks/useWishlist";
+import { useWishlistStore } from "@/store/wishlistStore";
 
 export function WishlistPage() {
-  const wishlistItems = useWishlistStore((state) => state.items)
-  const { handleAddToCart } = useAddToCart()
-  const { handleRemoveWishlist } = useWishlist()
+  const wishlistItems = useWishlistStore((state) => state.items);
+  const { handleAddToCart } = useAddToCart();
+  const { handleRemoveWishlist } = useWishlist();
 
   return (
     <main className="flex-1 bg-white pb-20 pt-24 md:pt-20 ">
@@ -59,8 +59,8 @@ export function WishlistPage() {
                     type="button"
                     size="sm"
                     onClick={() => {
-                      handleAddToCart(item)
-                      handleRemoveWishlist(item)
+                      handleAddToCart(item);
+                      handleRemoveWishlist(item);
                     }}
                     className="bg-[#3F2617] text-white hover:bg-[#2d180f]"
                   >
@@ -78,5 +78,5 @@ export function WishlistPage() {
         )}
       </section>
     </main>
-  )
+  );
 }

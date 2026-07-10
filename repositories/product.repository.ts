@@ -187,9 +187,9 @@ function getProductWhere(query: ProductListQuery) {
   ]
   const variantFilters: (SQL | undefined)[] = [
     activeVariantWhere,
-    query.colors?.length ? inArray(productVariants.color, query.colors) : undefined,
-    query.fabrics?.length ? inArray(productVariants.fabric, query.fabrics) : undefined,
-    query.sizes?.length ? inArray(productVariants.size, query.sizes) : undefined,
+    query.colors?.length ? inArray(sql`lower(${productVariants.color})`, query.colors.map(c => c.toLowerCase())) : undefined,
+    query.fabrics?.length ? inArray(sql`lower(${productVariants.fabric})`, query.fabrics.map(f => f.toLowerCase())) : undefined,
+    query.sizes?.length ? inArray(sql`lower(${productVariants.size})`, query.sizes.map(s => s.toLowerCase())) : undefined,
     query.availability?.length === 1 && query.availability[0] === 'in-stock'
       ? sql`${productVariants.stockQuantity} > 0`
       : undefined,

@@ -1,3 +1,4 @@
+import { createHmac } from 'node:crypto'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const authCookieNames = {
@@ -5,11 +6,15 @@ const authCookieNames = {
   idToken: 'rs_id_token',
   refreshToken: 'rs_refresh_token',
   email: 'rs_auth_email',
+  username: 'rs_auth_username',
   role: 'rs_auth_role',
 } as const
 
 type JwtClaims = {
   exp?: number
+  email?: string
+  sub?: string
+  'cognito:username'?: string
   'custom:role'?: string
   'cognito:groups'?: string[]
 }
@@ -85,31 +90,20 @@ function getRoleFromIdToken(idToken: string) {
   return 'user'
 }
 
-async function generateSecretHash(username: string) {
-  const encoder = new TextEncoder()
+function generateSecretHash(username: string) {
   const clientId = getRequiredEnv('COGNITO_CLIENT_ID')
   const clientSecret = getRequiredEnv('COGNITO_CLIENT_SECRET')
-  const key = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(clientSecret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign'],
-  )
-  const signature = await crypto.subtle.sign(
-    'HMAC',
-    key,
-    encoder.encode(`${username}${clientId}`),
-  )
 
-  return btoa(String.fromCharCode(...new Uint8Array(signature)))
+  return createHmac('sha256', clientSecret)
+    .update(`${username}${clientId}`)
+    .digest('base64')
 }
 
 async function refreshCognitoSession({
-  email,
+  username,
   refreshToken,
 }: {
-  email: string
+  username: string
   refreshToken: string
 }) {
   const region = getRequiredEnv('AWS_REGION')
@@ -127,16 +121,16 @@ async function refreshCognitoSession({
         AuthFlow: 'REFRESH_TOKEN_AUTH',
         ClientId: clientId,
         AuthParameters: {
-          USERNAME: email,
+          USERNAME: username,
           REFRESH_TOKEN: refreshToken,
-          SECRET_HASH: await generateSecretHash(email),
+          SECRET_HASH: generateSecretHash(username),
         },
       }),
     },
   )
 
   if (!response.ok) {
-    throw new Error('Unable to refresh Cognito session')
+    throw new Error(`Unable to refresh Cognito session (${response.status})`)
   }
 
   const data = (await response.json()) as CognitoRefreshResponse
@@ -156,17 +150,25 @@ async function refreshCognitoSession({
 
 function getAuthCookiePayload({
   email,
+  username,
   accessToken,
   idToken,
   refreshToken,
   expiresIn,
 }: {
   email: string
+  username?: string
   accessToken: string
   idToken: string
   refreshToken: string
   expiresIn: number
 }) {
+  const refreshUsername =
+    username ??
+    decodeJwtPayload<JwtClaims>(idToken)?.['cognito:username'] ??
+    decodeJwtPayload<JwtClaims>(idToken)?.sub ??
+    email
+
   return [
     {
       name: authCookieNames.accessToken,
@@ -186,6 +188,11 @@ function getAuthCookiePayload({
     {
       name: authCookieNames.email,
       value: email,
+      maxAge: refreshTokenMaxAge,
+    },
+    {
+      name: authCookieNames.username,
+      value: refreshUsername,
       maxAge: refreshTokenMaxAge,
     },
     {
@@ -240,13 +247,21 @@ export async function proxy(request: NextRequest) {
   const accessToken = request.cookies.get(authCookieNames.accessToken)?.value
   const idToken = request.cookies.get(authCookieNames.idToken)?.value
 
-  if (!isTokenExpired(accessToken) && !isTokenExpired(idToken)) {
+  const accessTokenExpired = isTokenExpired(accessToken)
+  const idTokenExpired = isTokenExpired(idToken)
+
+  if (!accessTokenExpired && !idTokenExpired) {
     return NextResponse.next()
   }
 
   const email = request.cookies.get(authCookieNames.email)?.value
+  const username =
+    request.cookies.get(authCookieNames.username)?.value ??
+    decodeJwtPayload<JwtClaims>(idToken)?.['cognito:username'] ??
+    decodeJwtPayload<JwtClaims>(idToken)?.sub ??
+    email
 
-  if (!email) {
+  if (!email || !username) {
     clearAuthCookiesFromRequest(request)
     const response = NextResponse.next({
       request: {
@@ -258,9 +273,10 @@ export async function proxy(request: NextRequest) {
   }
 
   try {
-    const tokens = await refreshCognitoSession({ email, refreshToken })
+    const tokens = await refreshCognitoSession({ username, refreshToken })
     const cookies = getAuthCookiePayload({
       email,
+      username,
       accessToken: tokens.accessToken,
       idToken: tokens.idToken,
       refreshToken: tokens.refreshToken,
@@ -278,8 +294,7 @@ export async function proxy(request: NextRequest) {
     applyAuthCookiesToResponse(response, cookies)
 
     return response
-  } catch (error) {
-    console.error('Unable to refresh auth session:', error)
+  } catch {
     clearAuthCookiesFromRequest(request)
     const response = NextResponse.next({
       request: {
@@ -292,5 +307,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 }

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import NewsletterSection from "@/components/shop/Newsletter";
 import HeroSection from "@/components/shop/Hero";
 import ShopFilters from "@/components/shop/ShopFilters";
@@ -107,7 +108,10 @@ const page = async ({
       <section className="max-w-full overflow-x-hidden bg-white py-10 md:py-14">
         <div className="mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8">
           <div className="mb-5 hidden gap-4 text-xs font-medium text-[#111] lg:grid lg:grid-cols-[260px_minmax(0,1fr)]">
-            <p>Home &nbsp;&gt;&nbsp; Shop</p>
+            <p>
+              <Link href="/" className="hover:text-[#C39150]">Home</Link> &nbsp;&gt;&nbsp;{" "}
+              <Link href="/shop" className="hover:text-[#C39150]">Shop</Link>
+            </p>
             <p>All Categories</p>
           </div>
           <div className="grid min-w-0 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">

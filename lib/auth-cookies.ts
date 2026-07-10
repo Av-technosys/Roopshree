@@ -1,5 +1,9 @@
 import { type ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies'
-import { authCookieNames, getRoleFromIdToken } from '@/lib/auth-token'
+import {
+  authCookieNames,
+  getRefreshUsernameFromIdToken,
+  getRoleFromIdToken,
+} from '@/lib/auth-token'
 
 export type CognitoTokenSet = {
   accessToken?: string
@@ -59,6 +63,11 @@ export function getAuthCookiePayload({
     {
       name: authCookieNames.email,
       value: email,
+      options: getAuthCookieOptions(refreshTokenMaxAge),
+    },
+    {
+      name: authCookieNames.username,
+      value: getRefreshUsernameFromIdToken(tokens.idToken, email),
       options: getAuthCookieOptions(refreshTokenMaxAge),
     },
     {

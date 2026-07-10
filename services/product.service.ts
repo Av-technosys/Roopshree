@@ -139,15 +139,23 @@ export async function searchCatalog(term: string) {
 }
 
 function uniqueOptions(values: (string | null | undefined)[]) {
-  return Array.from(
-    new Set(
-      values
-        .map((value) => value?.trim())
-        .filter((value): value is string => Boolean(value)),
-    ),
-  )
-    .sort((a, b) => a.localeCompare(b))
-    .map((value) => ({ label: value, value }))
+  const map = new Map<string, string>()
+
+  for (const v of values) {
+    if (!v || !v.trim()) continue
+    const val = v.trim()
+    const lower = val.toLowerCase()
+    
+    if (!map.has(lower)) {
+      // Create a nice label by capitalizing the first letter
+      const label = lower.charAt(0).toUpperCase() + lower.slice(1)
+      map.set(lower, label)
+    }
+  }
+
+  return Array.from(map.entries())
+    .sort((a, b) => a[1].localeCompare(b[1]))
+    .map(([lower, label]) => ({ label, value: lower }))
 }
 
 function getFilterParamKey(name: string) {

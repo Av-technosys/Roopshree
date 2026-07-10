@@ -116,10 +116,5 @@ export const galleryItems = [
     src: "/gallery/gallery7.webp",
     alt: "Roopshree Bandhej collection 7",
     className: "object-center",
-  },
-  {
-    src: "/gallery/gallery8.webp",
-    alt: "Roopshree Bandhej collection 8",
-    className: "object-center",
-  },
+  }
 ]

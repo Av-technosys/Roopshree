@@ -142,6 +142,33 @@ const ProductDescriptionReviews = ({
                   <div className="mt-5 max-w-3xl text-sm text-black">
                     <h3 className="font-semibold">{review.title}</h3>
                     <p className="mt-1 leading-5">{review.message}</p>
+
+                    {review.media && review.media.length > 0 ? (
+                      <div className="mt-4 flex flex-wrap gap-3">
+                        {review.media.map((mediaItem) => (
+                          <div
+                            key={mediaItem.key}
+                            className="relative size-20 overflow-hidden border border-[#ead8c2] bg-[#fbf8f4]"
+                          >
+                            {mediaItem.contentType.startsWith("video/") ? (
+                              <video
+                                src={mediaItem.url}
+                                className="size-full object-cover"
+                                muted
+                                controls
+                              />
+                            ) : (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={mediaItem.url}
+                                alt="Customer review media"
+                                className="size-full object-cover"
+                              />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
 
                   <button

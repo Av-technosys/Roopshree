@@ -344,11 +344,11 @@ function FilterPanel({
           selectedValues={selected.category}
           onToggle={(value) => onToggle("category", value)}
         />
-        <ColorFilter
+        {/* <ColorFilter
           items={options.colors}
           selectedValues={selected.color}
           onToggle={(value) => onToggle("color", value)}
-        />
+        /> */}
         <FilterGroup
           title="Fabric"
           items={options.fabrics}
@@ -592,7 +592,7 @@ function FilterHeading({ title }: { title: string }) {
       <h3 className="text-[11px] font-semibold uppercase text-[#c39150]">
         {title}
       </h3>
-      <ChevronDown className="size-3 text-[#c39150]" />
+     
     </div>
   )
 }

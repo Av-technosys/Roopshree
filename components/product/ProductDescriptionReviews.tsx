@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Star, ThumbsUp, UserRound } from "lucide-react";
 import type { ProductDetailView } from "@/components/product/ProductDetails";
 
@@ -158,11 +159,12 @@ const ProductDescriptionReviews = ({
                                 controls
                               />
                             ) : (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
+                              <Image
                                 src={mediaItem.url}
                                 alt="Customer review media"
-                                className="size-full object-cover"
+                                fill
+                                className="object-cover"
+                                unoptimized
                               />
                             )}
                           </div>

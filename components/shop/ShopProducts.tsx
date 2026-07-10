@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
@@ -54,6 +54,19 @@ export default function ShopProducts({
   const totalPages = Math.max(1, Math.ceil(total / pageSize) || 1)
   const pageNumber = Math.min(Math.max(currentPage, 1), totalPages)
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  const scroll = (direction: "left" | "right") => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, clientWidth } = scrollContainerRef.current
+      const scrollAmount = clientWidth * 0.75
+      scrollContainerRef.current.scrollTo({
+        left: direction === "left" ? scrollLeft - scrollAmount : scrollLeft + scrollAmount,
+        behavior: "smooth",
+      })
+    }
+  }
+
   function buildHref(updates: Record<string, string | number | null>) {
     const params = new URLSearchParams(searchParams.toString())
 
@@ -76,12 +89,37 @@ export default function ShopProducts({
         <SortControl sortBy={sortBy} onSortChange={setSortBy} />
       </div>
 
-      <h2 className="mb-4 text-sm font-medium text-[#111] lg:hidden">
-        All Categories
-      </h2>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-sm font-medium text-[#111]">
+          All Categories
+        </h2>
+        {categories.length > 0 && (
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => scroll("left")}
+              className="flex size-8 items-center justify-center rounded-[3px] border border-[#d8a15a] bg-white text-[#3F2617] transition hover:border-[#c39150] hover:text-[#c39150] cursor-pointer"
+              aria-label="Slide Left"
+            >
+              <ChevronLeft className="size-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => scroll("right")}
+              className="flex size-8 items-center justify-center rounded-[3px] border border-[#d8a15a] bg-white text-[#3F2617] transition hover:border-[#c39150] hover:text-[#c39150] cursor-pointer"
+              aria-label="Slide Right"
+            >
+              <ChevronRight className="size-4" />
+            </button>
+          </div>
+        )}
+      </div>
 
       {categories.length > 0 ? (
-        <div className="scrollbar-hidden flex max-w-full gap-6 overflow-x-auto pb-2 lg:gap-8">
+        <div
+          ref={scrollContainerRef}
+          className="scrollbar-hidden flex max-w-full gap-6 overflow-x-auto pb-2 lg:gap-8"
+        >
         {categories.map((category, index) => (
           <Link
             key={`${category.slug ?? category.name}-${index}`}

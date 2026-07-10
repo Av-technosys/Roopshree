@@ -112,7 +112,6 @@ const page = async ({
               <Link href="/" className="hover:text-[#C39150]">Home</Link> &nbsp;&gt;&nbsp;{" "}
               <Link href="/shop" className="hover:text-[#C39150]">Shop</Link>
             </p>
-            <p>All Categories</p>
           </div>
           <div className="grid min-w-0 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
             <ShopFilters options={filterOptions} />

@@ -370,11 +370,12 @@ function ReviewModal({
                       controls
                     />
                   ) : (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={item.url}
                       alt="Review media preview"
-                      className="size-full object-cover"
+                      fill
+                      className="object-cover"
+                      unoptimized
                     />
                   )}
                   <button

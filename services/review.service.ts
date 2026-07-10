@@ -53,7 +53,7 @@ export async function getDashboardReviewData() {
       orderItemId: item.orderItemId,
       productId: item.productId,
       productName: item.productName,
-      image: item.productImage || '/home/new-arrival-model.png',
+      image: item.productImage ? getS3ObjectPreviewUrl(item.productImage) : '/home/new-arrival-model.png',
       variant: item.variantTitle ?? '',
       quantity: item.quantity,
       date: formatDate(item.orderedAt),

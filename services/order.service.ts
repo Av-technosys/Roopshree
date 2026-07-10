@@ -7,6 +7,7 @@ import {
 } from '@/repositories/order.repository'
 import { getCurrentDbUserId } from '@/lib/current-db-user'
 import { getCurrentUser } from '@/lib/auth'
+import { getS3ObjectPreviewUrl } from '@/lib/s3'
 
 const allowedOrderStatuses = ['pending', 'paid', 'shipped', 'delivered', 'cancelled']
 
@@ -68,7 +69,7 @@ function mapOrderCard(row: Awaited<ReturnType<typeof listDashboardOrderRows>>[nu
     product: firstItem?.productName ?? 'Order item',
     variant: firstItem?.variantTitle ?? '',
     quantity: totalQuantity,
-    image: firstItem?.productImage || '/home/new-arrival-model.png',
+    image: firstItem?.productImage ? getS3ObjectPreviewUrl(firstItem.productImage) : '/home/new-arrival-model.png',
   }
 }
 
@@ -154,7 +155,7 @@ export async function getDashboardOrderDetails(orderId: string) {
       quantity: item.quantity,
       price: formatCurrency(item.productPrice),
       total: formatCurrency(item.productPrice * item.quantity),
-      image: item.productImage || '/home/new-arrival-model.png',
+      image: item.productImage ? getS3ObjectPreviewUrl(item.productImage) : '/home/new-arrival-model.png',
     })),
   }
 }

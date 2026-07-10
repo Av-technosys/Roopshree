@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { NEXT_PUBLIC_S3_BASE_URL } from "@/env";
 export default function Details({ id }: { id: string }) {
   const [orderInfo, setOrderInfo] = useState<any>(null);
   const [isPending, startTransition] = useTransition();
@@ -173,7 +174,7 @@ export default function Details({ id }: { id: string }) {
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-4">
                           <Avatar className="h-20 w-20 border-2 border-slate-100">
-                            <AvatarImage src={`${process.env.NEXT_PUBLIC_S3_BASE_URL}/${item.productImage}`} className="object-contain" />
+                            <AvatarImage src={item.productImage?.startsWith("http") ? item.productImage : `${(NEXT_PUBLIC_S3_BASE_URL || "").replace(/\/$/, "")}/${item.productImage?.replace(/^\//, "")}`} className="object-contain" />
                             <AvatarFallback>{item.productName?.slice(0, 1).toUpperCase()}</AvatarFallback>
                           </Avatar>
 

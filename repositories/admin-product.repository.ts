@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { and, asc, count, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm'
+import { and, asc, count, desc, eq, ne, ilike, inArray, or, sql } from 'drizzle-orm'
 import {
   categories,
   mediaAssets,
@@ -347,22 +347,88 @@ export async function insertAdminProduct(
     isFeatured: boolean
   },
 ) {
-  return db.transaction(async (tx) => {
-    const [created] = await tx.insert(products).values(baseValues).returning()
-    const variant = getPrimaryVariant(payload)
+  let attempt = 1
+  const originalSlug = baseValues.slug
+  const originalSku = baseValues.sku
 
-    await replaceProductCategories(tx, created.id, categoryIds)
-    await replaceProductAttributes(
-      tx,
-      created.id,
-      payload.attributes ?? variant.attributes ?? {},
-    )
-    const variants = await replaceProductVariants(tx, created.id, payload.variants ?? [])
-    await replaceProductFilters(tx, created.id, payload.filters ?? [])
-    await replaceProductMedia(tx, created.id, variants)
+  let currentSlug = originalSlug
+  let currentSku = originalSku
 
-    return created
-  })
+  while (true) {
+    try {
+      return await db.transaction(async (tx) => {
+        // First check if slug already exists to prevent hitting constraint unnecessarily
+        const [existingSlug] = await tx
+          .select({ id: products.id })
+          .from(products)
+          .where(eq(products.slug, currentSlug))
+          .limit(1)
+
+        if (existingSlug) {
+          throw new Error('SLUG_EXISTS')
+        }
+
+        // Check if SKU already exists
+        const [existingSku] = await tx
+          .select({ id: products.id })
+          .from(products)
+          .where(eq(products.sku, currentSku))
+          .limit(1)
+
+        if (existingSku) {
+          throw new Error('SKU_EXISTS')
+        }
+
+        const [created] = await tx
+          .insert(products)
+          .values({ ...baseValues, slug: currentSlug, sku: currentSku })
+          .returning()
+
+        const variant = getPrimaryVariant(payload)
+
+        await replaceProductCategories(tx, created.id, categoryIds)
+        await replaceProductAttributes(
+          tx,
+          created.id,
+          payload.attributes ?? variant.attributes ?? {},
+        )
+        const variants = await replaceProductVariants(tx, created.id, payload.variants ?? [])
+        await replaceProductFilters(tx, created.id, payload.filters ?? [])
+        await replaceProductMedia(tx, created.id, variants)
+
+        return created
+      })
+    } catch (error: any) {
+      const isSlugUniqueConstraintViolation =
+        error?.code === '23505' &&
+        (error?.detail?.includes('slug') ||
+          error?.constraint === 'products_slug_idx' ||
+          error?.message?.includes('products_slug_idx'))
+
+      const isSkuUniqueConstraintViolation =
+        error?.code === '23505' &&
+        (error?.detail?.includes('sku') ||
+          error?.constraint === 'products_sku_idx' ||
+          error?.message?.includes('products_sku_idx'))
+
+      const isSlugExistsError = error?.message === 'SLUG_EXISTS'
+      const isSkuExistsError = error?.message === 'SKU_EXISTS'
+
+      if (
+        isSlugExistsError ||
+        isSlugUniqueConstraintViolation ||
+        isSkuExistsError ||
+        isSkuUniqueConstraintViolation
+      ) {
+        attempt++
+        currentSlug = `${originalSlug}-${attempt}`
+        currentSku = `${originalSku}-${attempt}`
+        continue
+      }
+
+      throw error
+    }
+  }
 }
 
 export async function updateAdminProduct(
@@ -382,22 +448,85 @@ export async function updateAdminProduct(
     updatedAt: Date
   },
 ) {
-  return db.transaction(async (tx) => {
-    const [updated] = await tx
-      .update(products)
-      .set(baseValues)
-      .where(eq(products.id, id))
-      .returning()
-    const variant = getPrimaryVariant(payload)
+  let attempt = 1
+  const originalSlug = baseValues.slug
+  const originalSku = baseValues.sku
 
-    await replaceProductCategories(tx, id, categoryIds)
-    await replaceProductAttributes(tx, id, payload.attributes ?? variant.attributes ?? {})
-    const variants = await replaceProductVariants(tx, id, payload.variants ?? [])
-    await replaceProductFilters(tx, id, payload.filters ?? [])
-    await replaceProductMedia(tx, id, variants)
+  let currentSlug = originalSlug
+  let currentSku = originalSku
 
-    return updated
-  })
+  while (true) {
+    try {
+      return await db.transaction(async (tx) => {
+        // Check if slug is taken by any OTHER product
+        const [existingSlug] = await tx
+          .select({ id: products.id })
+          .from(products)
+          .where(and(eq(products.slug, currentSlug), ne(products.id, id)))
+          .limit(1)
+
+        if (existingSlug) {
+          throw new Error('SLUG_EXISTS')
+        }
+
+        // Check if SKU is taken by any OTHER product
+        const [existingSku] = await tx
+          .select({ id: products.id })
+          .from(products)
+          .where(and(eq(products.sku, currentSku), ne(products.id, id)))
+          .limit(1)
+
+        if (existingSku) {
+          throw new Error('SKU_EXISTS')
+        }
+
+        const [updated] = await tx
+          .update(products)
+          .set({ ...baseValues, slug: currentSlug, sku: currentSku })
+          .where(eq(products.id, id))
+          .returning()
+
+        const variant = getPrimaryVariant(payload)
+
+        await replaceProductCategories(tx, id, categoryIds)
+        await replaceProductAttributes(tx, id, payload.attributes ?? variant.attributes ?? {})
+        const variants = await replaceProductVariants(tx, id, payload.variants ?? [])
+        await replaceProductFilters(tx, id, payload.filters ?? [])
+        await replaceProductMedia(tx, id, variants)
+
+        return updated
+      })
+    } catch (error: any) {
+      const isSlugUniqueConstraintViolation =
+        error?.code === '23505' &&
+        (error?.detail?.includes('slug') ||
+          error?.constraint === 'products_slug_idx' ||
+          error?.message?.includes('products_slug_idx'))
+
+      const isSkuUniqueConstraintViolation =
+        error?.code === '23505' &&
+        (error?.detail?.includes('sku') ||
+          error?.constraint === 'products_sku_idx' ||
+          error?.message?.includes('products_sku_idx'))
+
+      const isSlugExistsError = error?.message === 'SLUG_EXISTS'
+      const isSkuExistsError = error?.message === 'SKU_EXISTS'
+
+      if (
+        isSlugExistsError ||
+        isSlugUniqueConstraintViolation ||
+        isSkuExistsError ||
+        isSkuUniqueConstraintViolation
+      ) {
+        attempt++
+        currentSlug = `${originalSlug}-${attempt}`
+        currentSku = `${originalSku}-${attempt}`
+        continue
+      }
+
+      throw error
+    }
+  }
 }
 
 export async function deleteAdminProduct(id: string) {

@@ -63,7 +63,7 @@ const Footer = async () => {
             confidence everywhere.
           </p>
           <div className="mt-5 flex gap-3">
-            <Link href={"https://www.instagram.com/Roopshreebandhej"}>
+            <Link href={"https://www.instagram.com/Roopshreebandhej"} target="_blank">
               <Button
                 aria-label="Instagram"
                 size="icon-sm"

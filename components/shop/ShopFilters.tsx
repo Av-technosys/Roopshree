@@ -344,11 +344,11 @@ function FilterPanel({
           selectedValues={selected.category}
           onToggle={(value) => onToggle("category", value)}
         />
-        <ColorFilter
+        {/* <ColorFilter
           items={options.colors}
           selectedValues={selected.color}
           onToggle={(value) => onToggle("color", value)}
-        />
+        /> */}
         <FilterGroup
           title="Fabric"
           items={options.fabrics}

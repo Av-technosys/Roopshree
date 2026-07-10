@@ -118,7 +118,7 @@ const StayConnected = () => {
           asChild
           className="mt-9 h-12 rounded-[3px] bg-[#C39150] px-9 text-sm font-semibold text-white shadow-none hover:bg-[#3F2617] sm:h-14 sm:min-w-[21rem] sm:px-12 sm:text-xl"
         >
-          <Link href="https://www.instagram.com/" target="_blank">
+          <Link href="https://www.instagram.com/Roopshreebandhej" target="_blank">
             <InstagramMark className="size-5 sm:size-7" />
             Follow us on Instagram
           </Link>

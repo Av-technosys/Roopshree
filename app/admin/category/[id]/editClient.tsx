@@ -2,6 +2,7 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState, useTransition } from "react";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -176,10 +177,12 @@ export default function EditCategory({ categoryInfo }: any) {
                     {!preview ? (
                       <p>Click to upload category image</p>
                     ) : (
-                      <img
+                      <Image
                         src={preview}
                         alt="Category preview"
-                        className="w-full h-full object-contain"
+                        fill
+                        className="object-contain"
+                        unoptimized
                       />
                     )}
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import Image from "next/image";
 import { Check, Eye, Images, Star, X } from "lucide-react";
 
 import { updateReviewStatusAction } from "@/actions/review.action";
@@ -238,20 +239,21 @@ function ReviewRow({
               {review.media.map((item, index) => (
                 <div
                   key={`${item.url}-${index}`}
-                  className="overflow-hidden rounded-md border bg-gray-50"
+                  className="relative aspect-video w-full overflow-hidden rounded-md border bg-gray-50"
                 >
                   {item.contentType.startsWith("video/") ? (
                     <video
                       src={item.url}
                       controls
-                      className="aspect-video w-full bg-black object-contain"
+                      className="size-full bg-black object-contain"
                     />
                   ) : (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={item.url}
                       alt={`Review media ${index + 1}`}
-                      className="aspect-video w-full object-contain"
+                      fill
+                      className="object-contain"
+                      unoptimized
                     />
                   )}
                 </div>

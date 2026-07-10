@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -124,11 +125,10 @@ export default function AddCategoryForm() {
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="flex h-48 w-full items-center justify-center overflow-hidden rounded-xl border-2 border-dashed text-sm text-muted-foreground"
+                  className="relative flex h-48 w-full items-center justify-center overflow-hidden rounded-xl border-2 border-dashed text-sm text-muted-foreground"
                 >
                   {bannerPreview ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={bannerPreview} alt="Category preview" className="size-full object-contain" />
+                    <Image src={bannerPreview} alt="Category preview" fill className="object-contain" unoptimized />
                   ) : uploading ? (
                     "Uploading..."
                   ) : (

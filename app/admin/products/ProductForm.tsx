@@ -2,6 +2,7 @@
 
 import { FormEvent, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -397,13 +398,14 @@ export default function ProductForm({ product }: ProductFormProps) {
                 />
                 <div className="grid gap-3 md:col-span-3">
                   <div className="grid gap-3 md:grid-cols-[6rem_1fr_auto] md:items-center">
-                    <div className="size-24 overflow-hidden rounded-md border bg-muted">
+                    <div className="relative size-24 overflow-hidden rounded-md border bg-muted">
                       {variant.banner ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
+                        <Image
                           src={variant.banner.previewUrl}
                           alt="Variant banner preview"
-                          className="size-full object-cover"
+                          fill
+                          className="object-cover"
+                          unoptimized
                         />
                       ) : null}
                     </div>
@@ -443,12 +445,13 @@ export default function ProductForm({ product }: ProductFormProps) {
                     </div>
                     {variant.gallery.map((item, mediaIndex) => (
                       <div key={`${item.key}-${mediaIndex}`} className="flex items-center gap-3">
-                        <div className="size-16 overflow-hidden rounded-md border bg-muted">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
+                        <div className="relative size-16 overflow-hidden rounded-md border bg-muted">
+                          <Image
                             src={item.previewUrl}
                             alt="Variant gallery preview"
-                            className="size-full object-cover"
+                            fill
+                            className="object-cover"
+                            unoptimized
                           />
                         </div>
                         <span className="min-w-0 flex-1 truncate rounded-md border border-input px-3 py-2 text-sm text-muted-foreground">

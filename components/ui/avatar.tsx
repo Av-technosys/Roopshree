@@ -1,4 +1,5 @@
 import * as React from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 function Avatar({ className, ...props }: React.ComponentProps<"span">) {
@@ -10,9 +11,18 @@ function Avatar({ className, ...props }: React.ComponentProps<"span">) {
   );
 }
 
-function AvatarImage({ className, ...props }: React.ComponentProps<"img">) {
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img alt="" className={cn("aspect-square size-full object-cover", className)} {...props} />;
+function AvatarImage({ className, src, alt, ...props }: React.ComponentProps<"img">) {
+  if (!src) return null;
+  return (
+    <Image
+      src={src}
+      alt={alt || ""}
+      fill
+      className={cn("aspect-square size-full object-cover", className)}
+      unoptimized
+      {...(props as any)}
+    />
+  );
 }
 
 function AvatarFallback({ className, ...props }: React.ComponentProps<"span">) {

@@ -66,6 +66,11 @@ export type ProductDetailView = {
     message: string;
     reviewerName: string;
     createdAt: string;
+    media?: {
+      key: string;
+      url: string;
+      contentType: string;
+    }[];
   }[];
   reviewSummary: {
     averageRating: number;

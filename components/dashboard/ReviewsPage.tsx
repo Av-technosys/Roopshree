@@ -279,16 +279,16 @@ function ReviewModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 px-4 py-8">
-      <div className="w-full max-w-lg bg-white shadow-2xl">
-        <div className="flex items-center justify-between bg-[#fbf3ea] px-6 py-5">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 px-4 py-6 md:py-12">
+      <div className="w-full max-w-lg bg-white shadow-2xl flex flex-col max-h-[90vh]">
+        <div className="flex shrink-0 items-center justify-between bg-[#fbf3ea] px-6 py-5">
           <h2 className="text-xl font-semibold text-[#C39150]">Write a Review</h2>
           <button type="button" aria-label="Close review modal" onClick={onClose}>
             <X className="size-5 text-[#777]" />
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto flex-1">
           <ProductSummary item={item} />
 
           <div className="mt-6 block text-xs text-[#777]">

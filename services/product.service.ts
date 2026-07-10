@@ -20,6 +20,7 @@ import {
 } from '@/repositories/product.repository'
 import { getS3ObjectPreviewUrl } from '@/lib/s3'
 import type { ProductPayload } from '@/validators/product.validator'
+import { listReviewMediaRows } from '@/repositories/review.repository'
 
 export async function createProduct(payload: ProductPayload) {
   const priceInPaise = Math.round(payload.price * 100)
@@ -229,6 +230,9 @@ export async function getProductDetailsBySlug(slug: string) {
     listProductReviews(product.id),
   ])
 
+  const reviewIds = reviews.map((r) => r.id)
+  const reviewMediaRows = await listReviewMediaRows(reviewIds)
+
   const defaultVariant = variants.find((variant) => variant.isDefault) ?? variants[0]
   const price = (defaultVariant?.price ?? product.basePrice) / 100
   const strikeThroughPrice =
@@ -292,14 +296,25 @@ export async function getProductDetailsBySlug(slug: string) {
       name: attribute.name,
       value: attribute.value,
     })),
-    reviews: reviews.map((review) => ({
-      id: review.id,
-      rating: review.rating,
-      title: review.title ?? 'Customer review',
-      message: review.message,
-      reviewerName: review.reviewerName ?? 'Customer',
-      createdAt: review.createdAt.toISOString(),
-    })),
+    reviews: reviews.map((review) => {
+      const reviewMedia = reviewMediaRows
+        .filter((m) => m.reviewId === review.id)
+        .map((m) => ({
+          key: m.key,
+          url: getS3ObjectPreviewUrl(m.key),
+          contentType: m.contentType,
+        }))
+
+      return {
+        id: review.id,
+        rating: review.rating,
+        title: review.title ?? 'Customer review',
+        message: review.message,
+        reviewerName: review.reviewerName ?? 'Customer',
+        createdAt: review.createdAt.toISOString(),
+        media: reviewMedia,
+      }
+    }),
     reviewSummary: {
       averageRating,
       reviewCount,

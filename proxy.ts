@@ -1,5 +1,6 @@
 import { createHmac } from 'node:crypto'
 import { NextResponse, type NextRequest } from 'next/server'
+import { verifyAdminSession, ADMIN_ACCESS_COOKIE_NAME } from '@/lib/admin-access-cookie'
 
 const authCookieNames = {
   accessToken: 'rs_access_token',
@@ -238,72 +239,121 @@ function clearAuthCookiesFromResponse(response: NextResponse) {
 }
 
 export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // 1. Admin API Route Protection
+  if (pathname.startsWith('/api/admin')) {
+    if (pathname === '/api/admin/access') {
+      return NextResponse.next()
+    }
+
+    const adminCookie = request.cookies.get(ADMIN_ACCESS_COOKIE_NAME)?.value
+    if (!verifyAdminSession(adminCookie)) {
+      return Response.json(
+        { success: false, message: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+    return NextResponse.next()
+  }
+
+  // 2. Admin UI Route Protection
+  if (pathname.startsWith('/admin')) {
+    const adminCookie = request.cookies.get(ADMIN_ACCESS_COOKIE_NAME)?.value
+    const hasValidSession = verifyAdminSession(adminCookie)
+
+    if (pathname === '/admin/gate') {
+      if (hasValidSession) {
+        return NextResponse.redirect(new URL('/admin', request.url))
+      }
+      return NextResponse.next()
+    } else {
+      if (!hasValidSession) {
+        return NextResponse.redirect(new URL('/admin/gate', request.url))
+      }
+      return NextResponse.next()
+    }
+  }
+
+  // 3. User Session Refresh & Route Protection
+  const isProtectedRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/checkout')
   const refreshToken = request.cookies.get(authCookieNames.refreshToken)?.value
 
-  if (!refreshToken) {
-    return NextResponse.next()
+  // If on a protected route but no refresh token is present, redirect to /auth
+  if (isProtectedRoute && !refreshToken) {
+    return NextResponse.redirect(
+      new URL(`/auth?callbackUrl=${encodeURIComponent(pathname)}`, request.url)
+    )
   }
 
-  const accessToken = request.cookies.get(authCookieNames.accessToken)?.value
-  const idToken = request.cookies.get(authCookieNames.idToken)?.value
+  // If we have a refresh token, check/refresh if expired
+  if (refreshToken) {
+    const accessToken = request.cookies.get(authCookieNames.accessToken)?.value
+    const idToken = request.cookies.get(authCookieNames.idToken)?.value
 
-  const accessTokenExpired = isTokenExpired(accessToken)
-  const idTokenExpired = isTokenExpired(idToken)
+    const accessTokenExpired = isTokenExpired(accessToken)
+    const idTokenExpired = isTokenExpired(idToken)
 
-  if (!accessTokenExpired && !idTokenExpired) {
-    return NextResponse.next()
+    if (accessTokenExpired || idTokenExpired) {
+      const email = request.cookies.get(authCookieNames.email)?.value
+      const username =
+        request.cookies.get(authCookieNames.username)?.value ??
+        decodeJwtPayload<JwtClaims>(idToken)?.['cognito:username'] ??
+        decodeJwtPayload<JwtClaims>(idToken)?.sub ??
+        email
+
+      if (!email || !username) {
+        if (isProtectedRoute) {
+          const response = NextResponse.redirect(
+            new URL(`/auth?callbackUrl=${encodeURIComponent(pathname)}`, request.url)
+          )
+          clearAuthCookiesFromResponse(response)
+          return response
+        } else {
+          const response = NextResponse.next()
+          clearAuthCookiesFromResponse(response)
+          return response
+        }
+      }
+
+      try {
+        const tokens = await refreshCognitoSession({ username, refreshToken })
+        const cookiesPayload = getAuthCookiePayload({
+          email,
+          username,
+          accessToken: tokens.accessToken,
+          idToken: tokens.idToken,
+          refreshToken: tokens.refreshToken,
+          expiresIn: tokens.expiresIn,
+        })
+
+        applyAuthCookiesToRequest(request, cookiesPayload)
+
+        const response = NextResponse.next({
+          request: {
+            headers: request.headers,
+          },
+        })
+
+        applyAuthCookiesToResponse(response, cookiesPayload)
+        return response
+      } catch {
+        if (isProtectedRoute) {
+          const response = NextResponse.redirect(
+            new URL(`/auth?callbackUrl=${encodeURIComponent(pathname)}`, request.url)
+          )
+          clearAuthCookiesFromResponse(response)
+          return response
+        } else {
+          const response = NextResponse.next()
+          clearAuthCookiesFromResponse(response)
+          return response
+        }
+      }
+    }
   }
 
-  const email = request.cookies.get(authCookieNames.email)?.value
-  const username =
-    request.cookies.get(authCookieNames.username)?.value ??
-    decodeJwtPayload<JwtClaims>(idToken)?.['cognito:username'] ??
-    decodeJwtPayload<JwtClaims>(idToken)?.sub ??
-    email
-
-  if (!email || !username) {
-    clearAuthCookiesFromRequest(request)
-    const response = NextResponse.next({
-      request: {
-        headers: request.headers,
-      },
-    })
-    clearAuthCookiesFromResponse(response)
-    return response
-  }
-
-  try {
-    const tokens = await refreshCognitoSession({ username, refreshToken })
-    const cookies = getAuthCookiePayload({
-      email,
-      username,
-      accessToken: tokens.accessToken,
-      idToken: tokens.idToken,
-      refreshToken: tokens.refreshToken,
-      expiresIn: tokens.expiresIn,
-    })
-
-    applyAuthCookiesToRequest(request, cookies)
-
-    const response = NextResponse.next({
-      request: {
-        headers: request.headers,
-      },
-    })
-
-    applyAuthCookiesToResponse(response, cookies)
-
-    return response
-  } catch {
-    clearAuthCookiesFromRequest(request)
-    const response = NextResponse.next({
-      request: {
-        headers: request.headers,
-      },
-    })
-    clearAuthCookiesFromResponse(response)
-    return response
-  }
+  return NextResponse.next()
 }
 
 export const config = {

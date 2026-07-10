@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ContactEnquiryForm } from "@/components/contact/ContactEnquiryForm";
 import Hero from "@/components/contact/Hero";
 import { Button } from "@/components/ui/button";
+import { Metadata } from "next";
 
 type TablerIconName = "map-pin" | "phone" | "brand-whatsapp" | "mail";
 
@@ -37,6 +38,27 @@ const contactItems = [
   icon: TablerIconName;
   link?: string;
 }[];
+
+export const metadata: Metadata = {
+  title: "Contact Us for Bandhani Sarees, Dupattas & Custom Orders | Roopshree",
+  description:
+    "Get in touch with Roopshree for enquiries about Bandhej sarees, dupattas, custom orders, or bulk requests. Reach us via phone, email, or WhatsApp. Shop now.",
+  alternates: {
+    canonical: "https://roopshreebandhej.com/contact",
+  },
+  openGraph: {
+    title: "Contact Us for Bandhani Sarees, Dupattas & Custom Orders | Roopshree",
+    description: "Get in touch with Roopshree for enquiries about Bandhej sarees, dupattas, custom orders, or bulk requests. Reach us via phone, email, or WhatsApp. Shop now.",
+    url: "https://roopshree-one.vercel.app/contact",
+    type: "website",
+    images: [{ url: "https://roopshree-one.vercel.app/contact/contact_bg.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Contact Us for Bandhani Sarees, Dupattas & Custom Orders | Roopshree",
+    description: "Get in touch with Roopshree for enquiries about Bandhej sarees, dupattas, custom orders, or bulk requests. Reach us via phone, email, or WhatsApp. Shop now.",
+  },
+};
 
 function contact() {
   return (

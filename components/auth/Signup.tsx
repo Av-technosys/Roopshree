@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Eye, EyeOff, Lock, Mail, Phone, User } from "lucide-react";
 import { signUpAction } from "@/actions/auth.action";
 import { useToast } from "@/components/common/ToastProvider";
+import Link from "next/link";
 
 export default function Signup({
   onLogin,
@@ -55,11 +56,17 @@ export default function Signup({
 
     if (!response.ok) {
       setError(response.error ?? "Unable to create account");
-      showToast({ title: response.error ?? "Unable to create account", tone: "error" });
+      showToast({
+        title: response.error ?? "Unable to create account",
+        tone: "error",
+      });
       return;
     }
 
-    showToast({ title: response.message ?? "OTP sent. Please check your inbox.", tone: "success" });
+    showToast({
+      title: response.message ?? "OTP sent. Please check your inbox.",
+      tone: "success",
+    });
     onVerifyOtp?.({ email: normalizedEmail, password });
   }
 
@@ -70,16 +77,16 @@ export default function Signup({
 
         <section className="relative flex min-h-screen w-full items-center justify-center lg:px-8 xl:px-16 2xl:px-24">
           <div className="relative w-full max-w-[360px] px-0 py-0 sm:max-w-[420px] lg:w-[min(630px,calc(50vw-64px))] lg:max-w-none lg:bg-white/45 lg:px-6 lg:py-6 xl:px-7 xl:py-8">
-            <div className="mb-4 flex justify-center">
+            <Link href="/" className="mb-4 flex justify-center">
               <Image
                 src="/logo.svg"
                 alt="Roop Shree"
                 width={150}
                 height={96}
                 priority
-                className="h-auto w-[92px] lg:w-[clamp(104px,7.5vw,132px)]"
+                className="h-auto w-[92px] lg:w-[clamp(112px,8vw,140px)]"
               />
-            </div>
+            </Link>
 
             <div className="mb-6 text-center lg:mb-5 xl:mb-6">
               <h1 className="font-playfairDisplay text-[22px] leading-tight text-[#3b2418] lg:text-[clamp(26px,1.9vw,30px)] lg:font-semibold">
@@ -120,8 +127,12 @@ export default function Signup({
                 icon={<Lock size={18} />}
                 placeholder="Password"
                 type={showPassword ? "text" : "password"}
-                rightIcon={showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                rightIconLabel={showPassword ? "Hide password" : "Show password"}
+                rightIcon={
+                  showPassword ? <EyeOff size={18} /> : <Eye size={18} />
+                }
+                rightIconLabel={
+                  showPassword ? "Hide password" : "Show password"
+                }
                 onRightIconClick={() => setShowPassword((current) => !current)}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}

@@ -1,3 +1,25 @@
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Shipping Policy | Roopshree Bandhej Sarees & Dupattas",
+  description:
+    "Know Roopshree's shipping details – delivery timelines, charges, tracking, and pan-India shipping for our Bandhej sarees and dupattas collection.",
+  alternates: {
+    canonical: "https://roopshreebandhej.com/shipping",
+  },
+  openGraph: {
+    title: "Shipping Policy | Roopshree Bandhej Sarees & Dupattas",
+    description: "Know Roopshree's shipping details – delivery timelines, charges, tracking, and pan-India shipping for our Bandhej sarees and dupattas collection.",
+    url: "https://roopshree-one.vercel.app/shipping",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Shipping Policy | Roopshree Bandhej Sarees & Dupattas",
+    description: "Know Roopshree's shipping details – delivery timelines, charges, tracking, and pan-India shipping for our Bandhej sarees and dupattas collection.",
+  },
+};
+
 export default function ShippingPolicy() {
   return (
     <main className="flex-1 bg-white pb-20 pt-24 md:pt-32">

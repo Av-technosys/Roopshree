@@ -1,3 +1,25 @@
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Terms & Conditions | Roopshree Shopping Policies",
+  description:
+    "Review Roopshree's Terms & Conditions covering orders, payments, shipping, returns, and website usage policies for our Bandhej saree and dupatta collections.",
+  alternates: {
+    canonical: "https://roopshreebandhej.com/terms-and-conditions",
+  },
+  openGraph: {
+    title: "Terms & Conditions | Roopshree Shopping Policies",
+    description: "Review Roopshree's Terms & Conditions covering orders, payments, shipping, returns, and website usage policies for our Bandhej saree and dupatta collections.",
+    url: "https://roopshree-one.vercel.app/terms-and-conditions",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Terms & Conditions | Roopshree Shopping Policies",
+    description: "Review Roopshree's Terms & Conditions covering orders, payments, shipping, returns, and website usage policies for our Bandhej saree and dupatta collections.",
+  },
+};
+
 export default function TermsAndConditions() {
   return (
     <main className="flex-1 bg-white pb-20 pt-24 md:pt-32">

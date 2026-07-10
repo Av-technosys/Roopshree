@@ -4,6 +4,7 @@ import YouMayAlsoLike from "@/components/product/YouMayAlsoLike";
 import { getProductDetailsBySlug } from "@/services/product.service";
 import { BadgeCheck, Leaf, LockKeyhole, Truck } from "lucide-react";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
 
 const benefits = [
   {
@@ -27,6 +28,32 @@ const benefits = [
     description: "Fast & Secure",
   },
 ];
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProductDetailsBySlug(slug);
+
+  if (!product) {
+    return {
+      title: "Product Not Found | Roopshree",
+    };
+  }
+
+  return {
+    title: `${product.name} | Roopshree`,
+    description:
+      product.short_description ||
+      product.description ||
+      `Buy ${product.name} online at Roopshree`,
+    alternates: {
+      canonical: `https://roopshreebandhej.com/product/${slug}`,
+    },
+  };
+}
 
 const Page = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const { slug } = await params;

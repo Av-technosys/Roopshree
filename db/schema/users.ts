@@ -79,3 +79,15 @@ export const customerContacts = pgTable(
     index('customer_contacts_email_idx').on(table.email),
   ],
 )
+
+export const subscriptions = pgTable(
+  'subscriptions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    email: varchar('email', { length: 255 }).notNull().unique(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex('subscriptions_email_idx').on(table.email),
+  ]
+)

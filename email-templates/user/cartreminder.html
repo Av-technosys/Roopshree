@@ -1,32 +1,117 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Cart Reminder</title>
     <style>
-      body { margin: 0; padding: 0; background: #f1dfc9; color: #6f6b68; font-family: Poppins, Arial, sans-serif; }
-      table { border-collapse: collapse; }
-      img { border: 0; display: block; height: auto; line-height: 100%; outline: none; text-decoration: none; }
-      .page { width: 100%; background: #f1dfc9; }
-      .wrap { width: 100%; max-width: 394px; margin: 0 auto; }
-      .shell { padding: 54px 19px 46px; }
-      .card { background: #fffaf3; border-radius: 12px; }
-      .content { padding: 40px 19px 35px; }
-      .logo { width: 120px; margin: 0 auto 30px; }
-      h1 { margin: 0 0 29px; color: #c88a3e; font-family: Georgia, "Times New Roman", serif; font-size: 21px; line-height: 1.25; text-align: center; }
-      p { margin: 0 0 18px; font-size: 13px; line-height: 1.38; }
-      .section-title { margin: 31px 0 14px; color: #c88a3e; font-family: Georgia, "Times New Roman", serif; font-size: 16px; line-height: 1.3; font-weight: 700; }
-      .compact p { margin-bottom: 2px; }
-      .quote { margin: 28px 0 16px; color: #6a6764; font-family: Georgia, "Times New Roman", serif; font-size: 14px; font-style: italic; line-height: 1.35; text-align: center; }
-      .team { margin: 0 0 28px; text-align: center; font-size: 12px; }
-      .help { margin: 0; text-align: center; font-size: 12px; line-height: 1.25; }
-      .help a { color: #ff9d00; text-decoration: none; }
-      .footer { padding: 33px 28px 0; color: #a99f95; text-align: center; }
-      .footer p { margin: 0 0 9px; font-size: 12px; line-height: 1.2; }
+      body {
+        margin: 0;
+        padding: 0;
+        background: #f1dfc9;
+        color: #6f6b68;
+        font-family: Poppins, Arial, sans-serif;
+      }
+      table {
+        border-collapse: collapse;
+      }
+      img {
+        border: 0;
+        display: block;
+        height: auto;
+        line-height: 100%;
+        outline: none;
+        text-decoration: none;
+      }
+      .page {
+        width: 100%;
+        background: #f1dfc9;
+      }
+      .wrap {
+        width: 100%;
+        max-width: 394px;
+        margin: 0 auto;
+      }
+      .shell {
+        padding: 54px 19px 46px;
+      }
+      .card {
+        background: #fffaf3;
+        border-radius: 12px;
+      }
+      .content {
+        padding: 40px 19px 35px;
+      }
+      .logo {
+        width: 120px;
+        margin: 0 auto 30px;
+      }
+      h1 {
+        margin: 0 0 29px;
+        color: #c88a3e;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 21px;
+        line-height: 1.25;
+        text-align: center;
+      }
+      p {
+        margin: 0 0 18px;
+        font-size: 13px;
+        line-height: 1.38;
+      }
+      .section-title {
+        margin: 31px 0 14px;
+        color: #c88a3e;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 16px;
+        line-height: 1.3;
+        font-weight: 700;
+      }
+      .compact p {
+        margin-bottom: 2px;
+      }
+      .quote {
+        margin: 28px 0 16px;
+        color: #6a6764;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 14px;
+        font-style: italic;
+        line-height: 1.35;
+        text-align: center;
+      }
+      .team {
+        margin: 0 0 28px;
+        text-align: center;
+        font-size: 12px;
+      }
+      .help {
+        margin: 0;
+        text-align: center;
+        font-size: 12px;
+        line-height: 1.25;
+      }
+      .help a {
+        color: #ff9d00;
+        text-decoration: none;
+      }
+      .footer {
+        padding: 33px 28px 0;
+        color: #a99f95;
+        text-align: center;
+      }
+      .footer p {
+        margin: 0 0 9px;
+        font-size: 12px;
+        line-height: 1.2;
+      }
       @media screen and (min-width: 520px) {
-        .wrap { max-width: 430px; }
-        .content { padding-left: 32px; padding-right: 32px; }
+        .wrap {
+          max-width: 430px;
+        }
+        .content {
+          padding-left: 32px;
+          padding-right: 32px;
+        }
       }
     </style>
   </head>
@@ -40,39 +125,77 @@
                 <table role="presentation" class="card" width="100%">
                   <tr>
                     <td class="content">
-                      <img class="logo" src="{{logoUrl}}" alt="Roop Shree">
+                      <img class="logo" src="{{logoUrl}}" alt="Roop Shree" />
                       <h1>Cart Reminder</h1>
                       <p>Hi {{Customer First Name}},</p>
-                      <p>Your Roopshree Bandhej order has been successfully delivered.</p>
-                      <p>We hope your handcrafted pieces reached you safely and add elegance and tradition to your wardrobe beautifully.</p>
+                      <p>
+                        Your Roopshree Bandhej order has been successfully
+                        delivered.
+                      </p>
+                      <p>
+                        We hope your handcrafted pieces reached you safely and
+                        add elegance and tradition to your wardrobe beautifully.
+                      </p>
                       <p class="section-title">Your Cart Is Waiting</p>
                       <p>Items: {{Product Names}}</p>
                       <p class="section-title">Why Complete Your Purchase?</p>
-                      <p>At Roopshree Bandhej, every collection is inspired by Rajasthan&rsquo;s rich heritage and crafted to bring together tradition, comfort, and modern elegance.</p>
+                      <p>
+                        At Roopshree Bandhej, every collection is inspired by
+                        Rajasthan&rsquo;s rich heritage and crafted to bring
+                        together tradition, comfort, and modern elegance.
+                      </p>
                       <p>Here&rsquo;s what makes our collection special:</p>
                       <div class="compact">
                         <p>&bull; Authentic Bandhej-inspired artistry</p>
-                        <p>&bull; Premium-quality fabrics with elegant detailing</p>
-                        <p>&bull; Graceful ethnic styles for festive and everyday wear</p>
-                        <p>&bull; A perfect blend of heritage and contemporary fashion</p>
+                        <p>
+                          &bull; Premium-quality fabrics with elegant detailing
+                        </p>
+                        <p>
+                          &bull; Graceful ethnic styles for festive and everyday
+                          wear
+                        </p>
+                        <p>
+                          &bull; A perfect blend of heritage and contemporary
+                          fashion
+                        </p>
                       </div>
                       <p class="section-title">Delivery Information</p>
                       <div class="compact">
                         <p>&bull; Fast and secure shipping across India</p>
-                        <p>&bull; Estimated delivery within 3&ndash;7 business days</p>
-                        <p>&bull; Carefully packed and quality-checked products</p>
+                        <p>
+                          &bull; Estimated delivery within 3&ndash;7 business
+                          days
+                        </p>
+                        <p>
+                          &bull; Carefully packed and quality-checked products
+                        </p>
                       </div>
                       <p class="section-title">Don&rsquo;t Miss Out</p>
-                      <p>Your selected items may go out of stock soon. Complete Your Order: {{Checkout Link}}</p>
-                      <p class="quote">&ldquo;Tradition never fades when elegance is timeless.&rdquo;</p>
+                      <p>
+                        Your selected items may go out of stock soon. Complete
+                        Your Order: {{Checkout Link}}
+                      </p>
+                      <p class="quote">
+                        &ldquo;Tradition never fades when elegance is
+                        timeless.&rdquo;
+                      </p>
                       <p class="team">~ Team Roopshree Bandhej</p>
-                      <p class="help">Need Help ?<br>If you have any questions about your order, feel free to reach out: <a href="mailto:support@Morze.com">support@Morze.com</a></p>
+                      <p class="help">
+                        Need Help ?<br />If you have any questions about your
+                        order, feel free to reach out:
+                        <a href="mailto:Adityagarwal23@gmail.com"
+                          >Adityagarwal23@gmail.com</a
+                        >
+                      </p>
                     </td>
                   </tr>
                 </table>
                 <div class="footer">
-                  <p>Note: Your saved cart won't stay forever &mdash; complete your order before your favorite pieces are gone.</p>
-                  <p>&copy; 2026&nbsp; Morzze. All rights reserved.</p>
+                  <p>
+                    Note: Your saved cart won't stay forever &mdash; complete
+                    your order before your favorite pieces are gone.
+                  </p>
+                  <p>&copy; 2026&nbsp; Roopshreeree. All rights reserved.</p>
                 </div>
               </td>
             </tr>

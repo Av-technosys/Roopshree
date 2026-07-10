@@ -171,13 +171,13 @@ const ProductDescriptionReviews = ({
                     ) : null}
                   </div>
 
-                  <button
+                  {/* <button
                     type="button"
                     className="mt-4 inline-flex items-center gap-2 text-sm text-black"
                   >
                     <ThumbsUp className="size-4" />
                     Helpful
-                  </button>
+                  </button> */}
                 </article>
               ))}
             </div>

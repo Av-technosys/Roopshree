@@ -12,6 +12,7 @@ import {
   MessageSquare,
   Code,
   IndianRupee,
+  Mail,
 } from "lucide-react";
 
 const navItems = [
@@ -23,6 +24,7 @@ const navItems = [
   { label: "User", href: "/admin/users", icon: User },
   { label: "Review", href: "/admin/reviews", icon: MessageSquare },
   { label: "Payment", href: "/admin/payment", icon: IndianRupee },
+  { label: "Subscriptions", href: "/admin/subscriptions", icon: Mail },
 
 
   // {

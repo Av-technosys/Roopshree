@@ -1,25 +1,25 @@
-import Image from "next/image"
-import Link from "next/link"
+import Image from "next/image";
+import Link from "next/link";
 import {
   CalendarDays,
   LinkIcon,
   Mail,
   MessageCircle,
   UserRound,
-} from "lucide-react"
+} from "lucide-react";
 
-import { BlogCard } from "@/components/blog/BlogListingPage"
-import { NewsletterSignupForm } from "@/components/common/NewsletterSignupForm"
-import type { BlogView } from "@/services/blog.service"
+import { BlogCard } from "@/components/blog/BlogListingPage";
+import { NewsletterSignupForm } from "@/components/common/NewsletterSignupForm";
+import type { BlogView } from "@/services/blog.service";
 
 export function BlogDetailPage({
   post,
   relatedPosts,
   morePosts,
 }: {
-  post: BlogView
-  relatedPosts: BlogView[]
-  morePosts: BlogView[]
+  post: BlogView;
+  relatedPosts: BlogView[];
+  morePosts: BlogView[];
 }) {
   return (
     <main className="flex-1 bg-white pt-16">
@@ -90,20 +90,6 @@ export function BlogDetailPage({
                 ))}
               </div>
             ) : null}
-
-            <div className="mt-7 flex flex-wrap items-center gap-3 text-xs text-[#3F2617]/70">
-              <span>Share this article:</span>
-              {[LinkIcon, Mail, MessageCircle].map((Icon, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  aria-label="Share article"
-                  className="flex size-8 items-center justify-center rounded-full bg-[#C39150] text-white transition hover:bg-[#3F2617]"
-                >
-                  <Icon className="size-4" />
-                </button>
-              ))}
-            </div>
           </div>
 
           <aside className="space-y-6">
@@ -135,7 +121,7 @@ export function BlogDetailPage({
         </section>
       ) : null}
     </main>
-  )
+  );
 }
 
 function AuthorCard({ post }: { post: BlogView }) {
@@ -158,12 +144,12 @@ function AuthorCard({ post }: { post: BlogView }) {
         evolving language of handcrafted Indian occasion wear.
       </p>
     </section>
-  )
+  );
 }
 
 function RelatedArticles({ posts }: { posts: BlogView[] }) {
   if (posts.length === 0) {
-    return null
+    return null;
   }
 
   return (
@@ -203,7 +189,7 @@ function RelatedArticles({ posts }: { posts: BlogView[] }) {
         ))}
       </div>
     </section>
-  )
+  );
 }
 
 function BlogSignup() {
@@ -224,5 +210,5 @@ function BlogSignup() {
         />
       </div>
     </section>
-  )
+  );
 }

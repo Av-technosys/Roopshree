@@ -1,4 +1,4 @@
-import { customerContacts } from '@/db/schema/users'
+import { customerContacts, subscriptions } from '@/db/schema/users'
 import { db } from '@/lib/db'
 import type {
   EnquiryContactPayload,
@@ -6,6 +6,12 @@ import type {
 } from '@/validators/customer-contact.validator'
 
 export async function createNewsletterContact(payload: NewsletterContactPayload) {
+  // Add to the new dedicated subscriptions table
+  await db
+    .insert(subscriptions)
+    .values({ email: payload.email })
+    .onConflictDoNothing()
+
   const [contact] = await db
     .insert(customerContacts)
     .values({

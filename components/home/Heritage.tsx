@@ -1,8 +1,8 @@
-import Image from "next/image"
-import Link from "next/link"
-import { ArrowRight } from "lucide-react"
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
 const stats = [
   {
@@ -17,7 +17,7 @@ const stats = [
     value: "50K+",
     label: "Happy Customers",
   },
-]
+];
 
 const Divider = () => (
   <div className="flex w-64 items-center justify-start gap-3 text-[#c39150]">
@@ -25,7 +25,7 @@ const Divider = () => (
     <span className="size-2.5 shrink-0 rotate-45 bg-[#C39150]" />
     <span className="h-px w-[9.5rem] bg-linear-to-r from-[#c39150] via-[#c39150]/70 to-transparent" />
   </div>
-)
+);
 
 const Heritage = () => {
   return (
@@ -54,19 +54,19 @@ const Heritage = () => {
             Weaving Stories of Tradition
           </h2>
           <p className="mt-3 font-heading text-[1.35rem] italic leading-none text-[#c39150] sm:text-3xl">
-            Crafted Since 1985
+            Crafted Since 1980
           </p>
 
           <div className="mt-5">
             <Divider />
           </div>
 
-          <div className="mt-7 max-w-[36rem] space-y-5 text-[0.72rem] font-medium leading-[1.55] text-black sm:text-sm lg:text-base">
+          <div className="mt-7 max-w-[36rem] space-y-5 text-[0.72rem] font-medium leading-[1.55] text-gray-800 sm:text-sm lg:text-base">
             <p>
-              Roopshree Bandhej celebrates the timeless art of Bandhani, where
-              every knot tells a story passed down through generations.
-              Handcrafted by master artisans, our pieces honor a heritage rooted
-              in Rajasthan&apos;s royal legacy.
+              Roopshree celebrates the timeless art of Bandhani, where every
+              knot tells a story passed down through generations. Handcrafted by
+              master artisans, our pieces honor a heritage rooted in
+              Rajasthan&apos;s royal legacy.
             </p>
             <p>
               We preserve tradition while embracing contemporary elegance,
@@ -113,7 +113,7 @@ const Heritage = () => {
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default Heritage
+export default Heritage;

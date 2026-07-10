@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { ArrowRight } from "lucide-react"
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 22 },
   visible: { opacity: 1, y: 0 },
-}
+};
 
 const HeroSection = () => {
   return (
@@ -57,8 +57,8 @@ const HeroSection = () => {
             className="-ml-[0.1em] text-[2.65rem] font-playfairDisplay  leading-[0.9] text-[#3F2617] sm:text-5xl md:text-6xl lg:text-7xl"
           >
             BANDHEJ
-            <span className="block text-[#C18F50] sm:text-5xl md:text-6xl lg:text-8xl">
-              SAREES
+            <span className="block text-[#C18F50] sm:text-5xl md:text-6xl lg:text-6xl">
+              Sarees and dupatas
             </span>
           </motion.h1>
 
@@ -105,7 +105,7 @@ const HeroSection = () => {
         </motion.div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default HeroSection
+export default HeroSection;

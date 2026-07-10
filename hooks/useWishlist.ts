@@ -85,10 +85,10 @@ export function useWishlist() {
       }
 
       await syncWishlistFromDb()
-      showToast({
-        title: shouldBeWishlisted ? "Added to wishlist" : "Removed from wishlist",
-        tone: "success",
-      })
+      // showToast({
+      //   title: shouldBeWishlisted ? "Added to wishlist" : "Removed from wishlist",
+      //   tone: "success",
+      // })
       return true
     } catch (error) {
       console.error(error)
@@ -141,7 +141,7 @@ export function useWishlist() {
       }
 
       await syncWishlistFromDb()
-      showToast({ title: "Removed from wishlist", tone: "success" })
+      // showToast({ title: "Removed from wishlist", tone: "success" })
       return true
     } catch (error) {
       console.error(error)

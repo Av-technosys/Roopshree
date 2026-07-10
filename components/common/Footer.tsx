@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FooterNewsletterForm } from "@/components/common/FooterNewsletterForm";
 import { Button } from "@/components/ui/button";
 import { getCatalogCategories } from "@/services/product.service";
-import { IconBrandInstagram, IconMail } from "@tabler/icons-react";
+import { IconBrandFacebook, IconBrandInstagram, IconMail } from "@tabler/icons-react";
 
 type FooterLink = {
   label: string;
@@ -63,6 +63,16 @@ const Footer = async () => {
             confidence everywhere.
           </p>
           <div className="mt-5 flex gap-3">
+            <Link href={"https://www.facebook.com/profile.php?id=100090309849419"} target="_blank">
+              <Button
+                aria-label="Facebook"
+                size="icon-sm"
+                variant="ghost"
+                className="bg-[#FEEDD0] hover:bg-[#FEEDD0]"
+              >
+                <IconBrandFacebook className="size-6 text-[#3F2617]/70" />
+              </Button>
+            </Link>
             <Link href={"https://www.instagram.com/Roopshreebandhej"} target="_blank">
               <Button
                 aria-label="Instagram"

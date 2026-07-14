@@ -23,6 +23,7 @@ const customerServices: FooterLink[] = [
   { label: "Terms & Conditions", href: "/terms-and-conditions" },
   { label: "Shipping", href: "/shipping" },
   { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Returns & Refunds", href: "/returns-policy" },
 ];
 
 const Footer = async () => {

@@ -3,38 +3,37 @@ import Link from "next/link";
 import { PolicySidebar } from "@/components/common/PolicySidebar";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions | Roopshree Shopping Policies",
+  title: "Returns & Refund Policy | Roopshree Shopping Policies",
   description:
-    "Review Roopshree's Terms & Conditions covering orders, payments, shipping, returns, and website usage policies for our Bandhej saree and dupatta collections.",
+    "Read Roopshree's Orders, Returns & Refund Policy covering return conditions, non-returnable items, processing timelines, and exchanges.",
   alternates: {
-    canonical: "https://roopshreebandhej.com/terms-and-conditions",
+    canonical: "https://roopshreebandhej.com/returns-policy",
   },
   openGraph: {
-    title: "Terms & Conditions | Roopshree Shopping Policies",
-    description: "Review Roopshree's Terms & Conditions covering orders, payments, shipping, returns, and website usage policies for our Bandhej saree and dupatta collections.",
-    url: "https://roopshree-one.vercel.app/terms-and-conditions",
+    title: "Returns & Refund Policy | Roopshree Shopping Policies",
+    description: "Read Roopshree's Orders, Returns & Refund Policy covering return conditions, non-returnable items, processing timelines, and exchanges.",
+    url: "https://roopshree-one.vercel.app/returns-policy",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "Terms & Conditions | Roopshree Shopping Policies",
-    description: "Review Roopshree's Terms & Conditions covering orders, payments, shipping, returns, and website usage policies for our Bandhej saree and dupatta collections.",
+    title: "Returns & Refund Policy | Roopshree Shopping Policies",
+    description: "Read Roopshree's Orders, Returns & Refund Policy covering return conditions, non-returnable items, processing timelines, and exchanges.",
   },
 };
 
 const sidebarItems = [
-  { id: "about-us", label: "1. About Us" },
-  { id: "product-info", label: "2. Product Information" },
-  { id: "pricing", label: "3. Pricing" },
-  { id: "order-acceptance", label: "4. Order Acceptance" },
-  { id: "intellectual-property", label: "5. Intellectual Property" },
-  { id: "user-responsibilities", label: "6. User Responsibilities" },
-  { id: "limitation-of-liability", label: "7. Limitation of Liability" },
-  { id: "governing-law", label: "8. Governing Law" },
+  { id: "placing-an-order", label: "Placing an Order" },
+  { id: "order-cancellation", label: "Order Cancellation" },
+  { id: "returns", label: "Returns" },
+  { id: "return-conditions", label: "Return Conditions" },
+  { id: "non-returnable-products", label: "Non-Returnable Products" },
+  { id: "refunds", label: "Refunds" },
+  { id: "exchange", label: "Exchange" },
   { id: "contact-us", label: "Contact Us" },
 ];
 
-export default function TermsAndConditions() {
+export default function ReturnsPolicy() {
   return (
     <main className="flex-1 bg-white">
       {/* Premium Hero Header */}
@@ -44,7 +43,7 @@ export default function TermsAndConditions() {
             Roop Shree Policies
           </p>
           <h1 className="mt-3 font-heading text-4xl font-semibold text-[#3F2617] md:text-5xl lg:text-6xl">
-            Terms & Conditions
+            Returns & Refund Policy
           </h1>
           <div className="mt-4 flex items-center justify-center gap-2 text-[#C39150]">
             <span className="size-1.5 rotate-45 bg-[#C39150]" />
@@ -54,7 +53,7 @@ export default function TermsAndConditions() {
             <span className="size-1.5 rotate-45 bg-[#C39150]" />
           </div>
           <p className="mt-5 text-sm text-[#3F2617]/70">
-            Welcome to Roop Shree. Please read our Terms & Conditions carefully.
+            Learn about placing orders, cancellation rules, eligible return conditions, refunds, and exchanges.
           </p>
         </div>
       </div>
@@ -69,149 +68,151 @@ export default function TermsAndConditions() {
           {/* Right Column - Policy Content */}
           <div className="space-y-12 text-[#3F2617]/80 text-sm leading-relaxed md:text-base lg:space-y-16">
             
-            <section className="bg-[#FDF9F4]/40 border border-[#C39150]/10 rounded-lg p-5 md:p-6">
+            <section id="placing-an-order" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="size-2 rotate-45 bg-[#C39150]" />
+                <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
+                  Placing an Order
+                </h2>
+              </div>
               <p>
-                <strong>Welcome to Roop Shree.</strong> By accessing our website or placing an order, you agree to comply with the following Terms & Conditions. Please read them carefully before using our website.
+                After placing an order, customers will receive an order confirmation via email, SMS, or WhatsApp.
               </p>
             </section>
 
-            <section id="about-us" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+            <section id="order-cancellation" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
               <div className="flex items-center gap-2 mb-4">
                 <span className="size-2 rotate-45 bg-[#C39150]" />
                 <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
-                  1. About Us
-                </h2>
-              </div>
-              <p className="mt-2">
-                Roop Shree is engaged in manufacturing and trading authentic Rajasthani Bandhej products, including Peela Chunri, Dupattas, Sarees, Lehengas, and handcrafted traditional textiles.
-              </p>
-            </section>
-
-            <section id="product-info" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="size-2 rotate-45 bg-[#C39150]" />
-                <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
-                  2. Product Information
+                  Order Cancellation
                 </h2>
               </div>
               <ul className="list-none space-y-3">
                 <li className="flex items-start gap-2">
                   <span className="text-[#C39150] mt-1.5">•</span>
-                  <span>We strive to display products as accurately as possible.</span>
+                  <span>Orders may be cancelled before dispatch by contacting our customer support.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-[#C39150] mt-1.5">•</span>
-                  <span>Due to different screen settings, slight variations in color may occur.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#C39150] mt-1.5">•</span>
-                  <span>As many of our products are handcrafted, slight irregularities in dyeing, weaving, embroidery, zari work, or handwork are natural and should not be considered defects.</span>
+                  <span>Once dispatched, cancellation requests cannot be accepted.</span>
                 </li>
               </ul>
             </section>
 
-            <section id="pricing" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+            <section id="returns" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
               <div className="flex items-center gap-2 mb-4">
                 <span className="size-2 rotate-45 bg-[#C39150]" />
                 <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
-                  3. Pricing
-                </h2>
-              </div>
-              <ul className="list-none space-y-3">
-                <li className="flex items-start gap-2">
-                  <span className="text-[#C39150] mt-1.5">•</span>
-                  <span>All prices are in Indian Rupees (INR).</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#C39150] mt-1.5">•</span>
-                  <span>Prices are subject to change without prior notice.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#C39150] mt-1.5">•</span>
-                  <span>Applicable taxes, if any, will be charged at checkout.</span>
-                </li>
-              </ul>
-            </section>
-
-            <section id="order-acceptance" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="size-2 rotate-45 bg-[#C39150]" />
-                <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
-                  4. Order Acceptance
+                  Returns
                 </h2>
               </div>
               <p className="mb-3">
-                Roop Shree reserves the right to accept, reject, or cancel any order due to:
+                As our products include handcrafted, traditional, and textile items, returns are accepted only in the following situations:
               </p>
               <ul className="list-none space-y-3 pl-4">
                 <li className="flex items-start gap-2">
-                  <span className="text-[#C39150] mt-1.5">•</span>
-                  <span>Product unavailability</span>
+                  <span className="text-red-500 mt-1.5">•</span>
+                  <span>Wrong product received</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#C39150] mt-1.5">•</span>
-                  <span>Pricing errors</span>
+                  <span className="text-red-500 mt-1.5">•</span>
+                  <span>Damaged product received</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#C39150] mt-1.5">•</span>
-                  <span>Payment issues</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#C39150] mt-1.5">•</span>
-                  <span>Suspected fraudulent transactions</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#C39150] mt-1.5">•</span>
-                  <span>Incorrect customer information</span>
+                  <span className="text-red-500 mt-1.5">•</span>
+                  <span>Manufacturing defect</span>
                 </li>
               </ul>
             </section>
 
-            <section id="intellectual-property" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+            <section id="return-conditions" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
               <div className="flex items-center gap-2 mb-4">
                 <span className="size-2 rotate-45 bg-[#C39150]" />
                 <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
-                  5. Intellectual Property
+                  Return Conditions
                 </h2>
               </div>
-              <p>
-                All website content including images, logos, product descriptions, videos, graphics, and designs belongs to Roop Shree and may not be copied, reproduced, or used without written permission.
-              </p>
+              <ul className="list-none space-y-3">
+                <li className="flex items-start gap-2 bg-yellow-50/50 border border-yellow-200/50 rounded p-3">
+                  <span className="text-[#C39150] font-semibold">Important:</span>
+                  <span>Return request must be raised within <strong>48 hours</strong> of delivery.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>The product must be unused, unwashed, and in its original packaging with all tags intact.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Clear photos or videos may be required for verification.</span>
+                </li>
+              </ul>
             </section>
 
-            <section id="user-responsibilities" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+            <section id="non-returnable-products" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
               <div className="flex items-center gap-2 mb-4">
                 <span className="size-2 rotate-45 bg-[#C39150]" />
                 <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
-                  6. User Responsibilities
+                  Non-Returnable Products
                 </h2>
               </div>
-              <p>
-                Customers agree not to misuse the website, attempt unauthorized access, or engage in fraudulent activities.
-              </p>
+              <p className="mb-3">Returns will not be accepted for:</p>
+              <ul className="list-none space-y-3 pl-4">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Customized or personalized products</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Used or washed products</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Products damaged after delivery</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Slight colour variations due to photography or screen settings</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Natural variations in handcrafted products</span>
+                </li>
+              </ul>
             </section>
 
-            <section id="limitation-of-liability" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+            <section id="refunds" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
               <div className="flex items-center gap-2 mb-4">
                 <span className="size-2 rotate-45 bg-[#C39150]" />
                 <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
-                  7. Limitation of Liability
+                  Refunds
                 </h2>
               </div>
-              <p>
-                Roop Shree shall not be liable for indirect or consequential damages arising from the use of our products or website.
-              </p>
+              <p className="mb-3">After inspection and approval:</p>
+              <ul className="list-none space-y-3 pl-4">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Refunds will be processed within <strong>5–7 business days</strong>.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Refunds will be made to the original payment method.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Shipping charges are generally non-refundable unless the error is from our side.</span>
+                </li>
+              </ul>
             </section>
 
-            <section id="governing-law" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+            <section id="exchange" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
               <div className="flex items-center gap-2 mb-4">
                 <span className="size-2 rotate-45 bg-[#C39150]" />
                 <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
-                  8. Governing Law
+                  Exchange
                 </h2>
               </div>
               <p>
-                These Terms & Conditions shall be governed by the laws of India. Any disputes shall be subject to the jurisdiction of the competent courts in Rajasthan.
+                Exchange requests are subject to product availability.
               </p>
             </section>
 

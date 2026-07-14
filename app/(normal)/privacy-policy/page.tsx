@@ -1,4 +1,6 @@
 import { Metadata } from "next";
+import Link from "next/link";
+import { PolicySidebar } from "@/components/common/PolicySidebar";
 
 export const metadata: Metadata = {
   title: "Our Privacy Policy | Roopshree",
@@ -20,203 +22,308 @@ export const metadata: Metadata = {
   },
 };
 
+const sidebarItems = [
+  { id: "your-privacy-matters", label: "Your Privacy Matters" },
+  { id: "information-we-collect", label: "Information We Collect" },
+  { id: "how-we-use-your-information", label: "How We Use Your Information" },
+  { id: "data-security", label: "Data Security" },
+  { id: "third-party-services", label: "Third-Party Services" },
+  { id: "cookies", label: "Cookies" },
+  { id: "your-rights", label: "Your Rights" },
+  { id: "changes", label: "Changes" },
+  { id: "contact-us", label: "Contact Us" },
+];
+
 export default function PrivacyPolicy() {
   return (
-    <main className="flex-1 bg-white pb-20 pt-24 md:pt-32">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <h1 className="font-heading text-3xl font-semibold text-[#3F2617] md:text-4xl">
-          Privacy Policy
-        </h1>
-
-        <div className="mt-8 space-y-8 text-sm leading-relaxed text-[#3F2617]/80 md:text-base">
-          <p>
-            <strong>Effective Date:</strong> January 17, 2025
+    <main className="flex-1 bg-white">
+      {/* Premium Hero Header */}
+      <div className="bg-gradient-to-b from-[#FDF9F4] to-white border-b border-[#C39150]/15 pb-12 pt-28 md:pb-20 md:pt-36">
+        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+          <p className="text-xs font-semibold uppercase tracking-widest text-[#C39150] md:text-sm">
+            Roop Shree Policies
           </p>
-
-          <p>
-            Roopshree Bandhej ("Roopshree", "we", "our", or "us") respects your
-            privacy and is committed to protecting your personal information.
-            This Privacy Policy explains how we collect, use, disclose, and
-            safeguard your information when you visit our website or purchase
-            products from us.
+          <h1 className="mt-3 font-heading text-4xl font-semibold text-[#3F2617] md:text-5xl lg:text-6xl">
+            Privacy Policy
+          </h1>
+          <div className="mt-4 flex items-center justify-center gap-2 text-[#C39150]">
+            <span className="size-1.5 rotate-45 bg-[#C39150]" />
+            <span className="h-px w-12 bg-[#C39150]/30" />
+            <span className="size-2.5 rotate-45 bg-[#C39150]" />
+            <span className="h-px w-12 bg-[#C39150]/30" />
+            <span className="size-1.5 rotate-45 bg-[#C39150]" />
+          </div>
+          <p className="mt-5 text-sm text-[#3F2617]/70">
+            Roop Shree values your trust and is committed to protecting your personal information.
           </p>
+        </div>
+      </div>
 
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">
-              Information We Collect
-            </h2>
+      {/* Main Content Layout */}
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-20">
+        <div className="lg:grid lg:grid-cols-[260px_1fr] lg:gap-12 xl:gap-16">
+          
+          {/* Sticky Left Sidebar Navigation */}
+          <PolicySidebar items={sidebarItems} />
 
-            <p className="mt-2">
-              We may collect the following personal information when you use our
-              website:
-            </p>
+          {/* Right Column - Policy Content */}
+          <div className="space-y-12 text-[#3F2617]/80 text-sm leading-relaxed md:text-base lg:space-y-16">
+            
+            <section id="your-privacy-matters" className="scroll-mt-28 bg-[#FDF9F4]/40 border border-[#C39150]/10 rounded-lg p-5 md:p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="size-1.5 rotate-45 bg-[#C39150]" />
+                <h3 className="font-heading text-lg font-semibold text-[#3F2617]">Your Privacy Matters</h3>
+              </div>
+              <p>
+                Roop Shree values your trust and is committed to protecting your personal information. This Privacy Policy outlines how we collect, use, and protect your information when you visit or interact with our website.
+              </p>
+            </section>
 
-            <ul className="mt-3 list-disc space-y-2 pl-6">
-              <li>Full Name</li>
-              <li>Email Address</li>
-              <li>Phone Number</li>
-              <li>Billing and Shipping Address</li>
-              <li>Order and Purchase History</li>
-              <li>
-                Payment Details (processed securely through payment gateways)
-              </li>
-              <li>IP Address, Browser Type, Device Information and Cookies</li>
-            </ul>
-          </section>
+            <section id="information-we-collect" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="size-2 rotate-45 bg-[#C39150]" />
+                <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
+                  Information We Collect
+                </h2>
+              </div>
+              <p className="mb-3">We may collect:</p>
+              <ul className="list-none space-y-3 pl-4">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Name</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Mobile number</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Email address</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Shipping and billing address</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Payment details (processed securely through payment gateways)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Order history</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Device and browser information</span>
+                </li>
+              </ul>
+            </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">
-              How We Use Your Information
-            </h2>
+            <section id="how-we-use-your-information" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="size-2 rotate-45 bg-[#C39150]" />
+                <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
+                  How We Use Your Information
+                </h2>
+              </div>
+              <p className="mb-3">We use your information to:</p>
+              <ul className="list-none space-y-3 pl-4">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Process orders</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Deliver products</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Provide customer support</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Send order updates</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Improve our website and services</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Send promotional offers (only if you choose to receive them)</span>
+                </li>
+              </ul>
+            </section>
 
-            <ul className="mt-3 list-disc space-y-2 pl-6">
-              <li>To process and deliver your orders.</li>
-              <li>To provide customer support.</li>
-              <li>To communicate order confirmations and shipping updates.</li>
-              <li>To improve our website, products, and services.</li>
-              <li>To detect and prevent fraud.</li>
-              <li>To comply with legal obligations.</li>
-              <li>
-                To send promotional offers and updates (only if you opt in).
-              </li>
-            </ul>
-          </section>
+            <section id="data-security" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="size-2 rotate-45 bg-[#C39150]" />
+                <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
+                  Data Security
+                </h2>
+              </div>
+              <p>
+                We use reasonable security measures to protect your information. However, no online transmission is 100% secure.
+              </p>
+            </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">Cookies</h2>
+            <section id="third-party-services" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="size-2 rotate-45 bg-[#C39150]" />
+                <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
+                  Third-Party Services
+                </h2>
+              </div>
+              <p className="mb-3">We may use trusted third-party service providers for:</p>
+              <ul className="list-none space-y-3 pl-4">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Payment processing</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Shipping</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Website analytics</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>SMS and email notifications</span>
+                </li>
+              </ul>
+              <p className="mt-4">
+                These providers receive only the information necessary to perform their services.
+              </p>
+            </section>
 
-            <p className="mt-2">
-              We use cookies to improve your browsing experience, remember your
-              preferences, maintain your shopping cart, and analyze website
-              traffic. You can disable cookies through your browser settings,
-              although some features of the website may not function properly.
-            </p>
-          </section>
+            <section id="cookies" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="size-2 rotate-45 bg-[#C39150]" />
+                <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
+                  Cookies
+                </h2>
+              </div>
+              <p>
+                Our website may use cookies to improve your browsing experience and personalize content.
+              </p>
+            </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">
-              Sharing Your Information
-            </h2>
+            <section id="your-rights" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="size-2 rotate-45 bg-[#C39150]" />
+                <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
+                  Your Rights
+                </h2>
+              </div>
+              <p className="mb-3">You may request to:</p>
+              <ul className="list-none space-y-3 pl-4">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Access your information</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Correct inaccurate information</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Delete your personal information (subject to legal obligations)</span>
+                </li>
+              </ul>
+            </section>
 
-            <p className="mt-2">
-              We do not sell or rent your personal information. Your information
-              may only be shared with trusted third-party service providers such
-              as payment gateways, shipping partners, logistics providers,
-              website hosting providers, or government authorities where
-              required by law.
-            </p>
-          </section>
+            <section id="changes" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="size-2 rotate-45 bg-[#C39150]" />
+                <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
+                  Changes
+                </h2>
+              </div>
+              <p>
+                Roop Shree may update this Privacy Policy at any time. Updated versions will be posted on this page.
+              </p>
+            </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">
-              Payment Security
-            </h2>
+            {/* Premium Contact Details Card */}
+            <section id="contact-us" className="scroll-mt-28">
+              <div className="flex items-center gap-2 mb-6">
+                <span className="size-2 rotate-45 bg-[#C39150]" />
+                <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
+                  Contact Us
+                </h2>
+              </div>
+              <div className="bg-gradient-to-br from-[#FDF9F4] to-white border border-[#C39150]/20 rounded-lg p-6 md:p-8 shadow-sm">
+                <h3 className="font-heading text-lg font-semibold text-[#3F2617] mb-2">
+                  Roop Shree
+                </h3>
+                <p className="text-sm text-[#C39150] mb-6 font-medium">
+                  Manufacturer & Trader of Authentic Rajasthani Bandhej Products
+                </p>
+                
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="flex gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-5 text-[#C39150] shrink-0 mt-0.5"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" /></svg>
+                    <div>
+                      <h4 className="font-semibold text-[#3F2617] text-sm">Address</h4>
+                      <p className="mt-1 text-sm text-[#3F2617]/80">
+                        Inside Tabela Gate,
+                        <br />
+                        Sikar, Rajasthan - 332001, India
+                      </p>
+                    </div>
+                  </div>
 
-            <p className="mt-2">
-              All online payments are securely processed through trusted payment
-              gateway providers. We do not store your complete debit card,
-              credit card, UPI PIN, CVV, or banking credentials on our servers.
-            </p>
-          </section>
+                  <div className="flex gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-5 text-[#C39150] shrink-0 mt-0.5"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2" /></svg>
+                    <div>
+                      <h4 className="font-semibold text-[#3F2617] text-sm">Phone</h4>
+                      <a href="tel:+919783841066" className="mt-1 block text-sm text-[#3F2617]/80 hover:text-[#C39150] transition-colors hover:underline">
+                        +91 97838 41066
+                      </a>
+                    </div>
+                  </div>
 
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">
-              Data Security
-            </h2>
+                  <div className="flex gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-5 text-[#C39150] shrink-0 mt-0.5"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9" /><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1" /></svg>
+                    <div>
+                      <h4 className="font-semibold text-[#3F2617] text-sm">WhatsApp</h4>
+                      <a
+                        href="https://wa.me/919529888006"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 block text-sm text-[#3F2617]/80 hover:text-[#C39150] transition-colors hover:underline"
+                      >
+                        Chat on WhatsApp (+91 95298 88006)
+                      </a>
+                    </div>
+                  </div>
 
-            <p className="mt-2">
-              We implement appropriate technical and organizational measures to
-              safeguard your personal information from unauthorized access,
-              misuse, alteration, or disclosure. However, no method of internet
-              transmission or electronic storage is completely secure.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">
-              Your Rights
-            </h2>
-
-            <p className="mt-2">
-              You may request access, correction, or deletion of your personal
-              information by contacting us. We will process your request in
-              accordance with applicable laws.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">
-              Third-Party Links
-            </h2>
-
-            <p className="mt-2">
-              Our website may contain links to third-party websites. We are not
-              responsible for the privacy practices or content of those
-              websites.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">
-              Changes to This Privacy Policy
-            </h2>
-
-            <p className="mt-2">
-              We reserve the right to update this Privacy Policy at any time.
-              Changes will become effective immediately upon posting on this
-              page.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">Contact Us</h2>
-
-            <div className="mt-4 space-y-5">
-              <div>
-                <h3 className="font-medium text-[#3F2617]">Address</h3>
-                <p className="mt-1">
-                  Roop Shree Inside Tabela Gate,
-                  <br />
-                  Sikar, Rajasthan - 332001, India
+                  <div className="flex gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-5 text-[#C39150] shrink-0 mt-0.5"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10" /><path d="M3 7l9 6l9 -6" /></svg>
+                    <div>
+                      <h4 className="font-semibold text-[#3F2617] text-sm">Email</h4>
+                      <a
+                        href="mailto:Adityagarwal23@gmail.com"
+                        className="mt-1 block text-sm text-[#3F2617]/80 hover:text-[#C39150] transition-colors hover:underline"
+                      >
+                        Adityagarwal23@gmail.com
+                      </a>
+                      <p className="mt-1 text-xs text-[#3F2617]/60">
+                        We typically reply within 24 hours.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <p className="mt-8 pt-6 border-t border-[#C39150]/10 text-xs text-[#3F2617]/60">
+                  Products: Peela Chunri, Bandhej Dupattas, Sarees, Lehengas, Gajji Silk, Gota Patti, Zardozi & Traditional Rajasthani Textiles. For any queries regarding orders, returns, shipping, or privacy, please contact us.
                 </p>
               </div>
+            </section>
 
-              <div>
-                <h3 className="font-medium text-[#3F2617]">Phone</h3>
-                <a
-                  href="tel:+919783841066"
-                  className="transition hover:text-[#3F2617] hover:underline"
-                >
-                  +91 97838 41066
-                </a>
-              </div>
-
-              <div>
-                <h3 className="font-medium text-[#3F2617]">WhatsApp</h3>
-                <a
-                  href="https://wa.me/919529888006"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition hover:text-[#3F2617] hover:underline"
-                >
-                  Chat on WhatsApp (+91 95298 88006)
-                </a>
-              </div>
-
-              <div>
-                <h3 className="font-medium text-[#3F2617]">Email</h3>
-                <a
-                  href="mailto:Adityagarwal23@gmail.com"
-                  className="transition hover:text-[#3F2617] hover:underline"
-                >
-                  Adityagarwal23@gmail.com
-                </a>
-                <p className="mt-1 text-sm">
-                  We typically reply within 24 hours.
-                </p>
-              </div>
-            </div>
-          </section>
+          </div>
         </div>
       </div>
     </main>

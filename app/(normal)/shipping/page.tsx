@@ -1,4 +1,6 @@
 import { Metadata } from "next";
+import Link from "next/link";
+import { PolicySidebar } from "@/components/common/PolicySidebar";
 
 export const metadata: Metadata = {
   title: "Shipping Policy | Roopshree Bandhej Sarees & Dupattas",
@@ -20,176 +22,234 @@ export const metadata: Metadata = {
   },
 };
 
+const sidebarItems = [
+  { id: "order-processing", label: "Order Processing" },
+  { id: "delivery-time", label: "Delivery Time" },
+  { id: "shipping-charges", label: "Shipping Charges" },
+  { id: "courier-partners", label: "Courier Partners" },
+  { id: "order-tracking", label: "Order Tracking" },
+  { id: "delivery-attempts", label: "Delivery Attempts" },
+  { id: "contact-us", label: "Contact Us" },
+];
+
 export default function ShippingPolicy() {
   return (
-    <main className="flex-1 bg-white pb-20 pt-24 md:pt-32">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <h1 className="font-heading text-3xl font-semibold text-[#3F2617] md:text-4xl">
-          Shipping Policy
-        </h1>
-
-        <div className="mt-8 space-y-8 text-sm leading-relaxed text-[#3F2617]/80 md:text-base">
-          <p>
-            <strong>Effective Date:</strong> January 17, 2025
+    <main className="flex-1 bg-white">
+      {/* Premium Hero Header */}
+      <div className="bg-gradient-to-b from-[#FDF9F4] to-white border-b border-[#C39150]/15 pb-12 pt-28 md:pb-20 md:pt-36">
+        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+          <p className="text-xs font-semibold uppercase tracking-widest text-[#C39150] md:text-sm">
+            Roop Shree Policies
           </p>
-
-          <p>
-            At Roopshree Bandhej, we are committed to delivering your orders
-            safely and on time. This Shipping Policy explains how we process,
-            ship, and deliver your orders.
+          <h1 className="mt-3 font-heading text-4xl font-semibold text-[#3F2617] md:text-5xl lg:text-6xl">
+            Shipping Policy
+          </h1>
+          <div className="mt-4 flex items-center justify-center gap-2 text-[#C39150]">
+            <span className="size-1.5 rotate-45 bg-[#C39150]" />
+            <span className="h-px w-12 bg-[#C39150]/30" />
+            <span className="size-2.5 rotate-45 bg-[#C39150]" />
+            <span className="h-px w-12 bg-[#C39150]/30" />
+            <span className="size-1.5 rotate-45 bg-[#C39150]" />
+          </div>
+          <p className="mt-5 text-sm text-[#3F2617]/70">
+            Read about our order processing, shipping rates, delivery timelines, and courier partners.
           </p>
+        </div>
+      </div>
 
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">
-              1. Order Processing
-            </h2>
+      {/* Main Content Layout */}
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-20">
+        <div className="lg:grid lg:grid-cols-[260px_1fr] lg:gap-12 xl:gap-16">
+          
+          {/* Sticky Left Sidebar Navigation */}
+          <PolicySidebar items={sidebarItems} />
 
-            <p className="mt-2">
-              Orders are usually processed within{" "}
-              <strong>1–3 business days</strong> after successful payment
-              confirmation. Orders placed on weekends or public holidays will be
-              processed on the next business day.
-            </p>
-          </section>
+          {/* Right Column - Policy Content */}
+          <div className="space-y-12 text-[#3F2617]/80 text-sm leading-relaxed md:text-base lg:space-y-16">
+            
+            <section id="order-processing" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="size-2 rotate-45 bg-[#C39150]" />
+                <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
+                  Order Processing
+                </h2>
+              </div>
+              <ul className="list-none space-y-3">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Standard orders are processed within <strong>2–4 business days</strong>.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Orders placed on Sundays or public holidays will be processed on the next working day.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Customized, handcrafted, made-to-order, or bulk orders may require additional processing time. Customers will be informed accordingly.</span>
+                </li>
+              </ul>
+            </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">
-              2. Shipping Coverage
-            </h2>
+            <section id="delivery-time" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="size-2 rotate-45 bg-[#C39150]" />
+                <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
+                  Delivery Time
+                </h2>
+              </div>
+              <p className="mb-3">Estimated delivery within India:</p>
+              <ul className="list-none space-y-3 pl-4">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span><strong>Metro Cities:</strong> 3–7 business days</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span><strong>Other Cities:</strong> 5–10 business days</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span><strong>Remote Locations:</strong> 7–14 business days</span>
+                </li>
+              </ul>
+              <p className="mt-4 text-[#3F2617]/70 text-xs italic">
+                * Delivery timelines are estimates and may vary due to courier operations, weather conditions, festivals, or unforeseen circumstances.
+              </p>
+            </section>
 
-            <p className="mt-2">
-              We currently ship across India through reliable courier partners.
-              International shipping may be available for selected locations and
-              will be communicated at the time of purchase.
-            </p>
-          </section>
+            <section id="shipping-charges" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="size-2 rotate-45 bg-[#C39150]" />
+                <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
+                  Shipping Charges
+                </h2>
+              </div>
+              <ul className="list-none space-y-3">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Shipping charges (if applicable) are calculated during checkout.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C39150] mt-1.5">•</span>
+                  <span>Promotional free shipping offers will be displayed on the website whenever available.</span>
+                </li>
+              </ul>
+            </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">
-              3. Estimated Delivery Time
-            </h2>
+            <section id="courier-partners" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="size-2 rotate-45 bg-[#C39150]" />
+                <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
+                  Courier Partners
+                </h2>
+              </div>
+              <p>
+                We ship through reliable courier partners to ensure safe delivery.
+              </p>
+            </section>
 
-            <ul className="mt-3 list-disc space-y-2 pl-6">
-              <li>Metro Cities: 3–5 business days</li>
-              <li>Other Cities & Towns: 5–8 business days</li>
-              <li>Remote Areas: 7–10 business days</li>
-            </ul>
+            <section id="order-tracking" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="size-2 rotate-45 bg-[#C39150]" />
+                <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
+                  Order Tracking
+                </h2>
+              </div>
+              <p>
+                Customers will receive tracking details via SMS, email, or WhatsApp once the order is dispatched.
+              </p>
+            </section>
 
-            <p className="mt-3">
-              Delivery timelines are estimates and may vary due to weather,
-              courier delays, festivals, or unforeseen circumstances.
-            </p>
-          </section>
+            <section id="delivery-attempts" className="scroll-mt-28 border-b border-[#C39150]/10 pb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="size-2 rotate-45 bg-[#C39150]" />
+                <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
+                  Delivery Attempts
+                </h2>
+              </div>
+              <p>
+                Courier partners generally make multiple delivery attempts. If the shipment is returned due to incorrect address or customer unavailability, additional shipping charges may apply for re-dispatch.
+              </p>
+            </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">
-              4. Shipping Charges
-            </h2>
+            {/* Premium Contact Details Card */}
+            <section id="contact-us" className="scroll-mt-28">
+              <div className="flex items-center gap-2 mb-6">
+                <span className="size-2 rotate-45 bg-[#C39150]" />
+                <h2 className="font-heading text-xl font-semibold text-[#3F2617] md:text-2xl">
+                  Contact Us
+                </h2>
+              </div>
+              <div className="bg-gradient-to-br from-[#FDF9F4] to-white border border-[#C39150]/20 rounded-lg p-6 md:p-8 shadow-sm">
+                <h3 className="font-heading text-lg font-semibold text-[#3F2617] mb-2">
+                  Roop Shree
+                </h3>
+                <p className="text-sm text-[#C39150] mb-6 font-medium">
+                  Manufacturer & Trader of Authentic Rajasthani Bandhej Products
+                </p>
+                
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="flex gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-5 text-[#C39150] shrink-0 mt-0.5"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0" /></svg>
+                    <div>
+                      <h4 className="font-semibold text-[#3F2617] text-sm">Address</h4>
+                      <p className="mt-1 text-sm text-[#3F2617]/80">
+                        Inside Tabela Gate,
+                        <br />
+                        Sikar, Rajasthan - 332001, India
+                      </p>
+                    </div>
+                  </div>
 
-            <p className="mt-2">
-              Shipping charges, if applicable, are displayed during checkout
-              before payment. Promotional offers such as free shipping may be
-              available on selected orders.
-            </p>
-          </section>
+                  <div className="flex gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-5 text-[#C39150] shrink-0 mt-0.5"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2" /></svg>
+                    <div>
+                      <h4 className="font-semibold text-[#3F2617] text-sm">Phone</h4>
+                      <a href="tel:+919783841066" className="mt-1 block text-sm text-[#3F2617]/80 hover:text-[#C39150] transition-colors hover:underline">
+                        +91 97838 41066
+                      </a>
+                    </div>
+                  </div>
 
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">
-              5. Order Tracking
-            </h2>
+                  <div className="flex gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-5 text-[#C39150] shrink-0 mt-0.5"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9" /><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1" /></svg>
+                    <div>
+                      <h4 className="font-semibold text-[#3F2617] text-sm">WhatsApp</h4>
+                      <a
+                        href="https://wa.me/919529888006"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 block text-sm text-[#3F2617]/80 hover:text-[#C39150] transition-colors hover:underline"
+                      >
+                        Chat on WhatsApp (+91 95298 88006)
+                      </a>
+                    </div>
+                  </div>
 
-            <p className="mt-2">
-              Once your order has been shipped, you will receive a confirmation
-              via email or SMS containing the tracking details, allowing you to
-              monitor your shipment.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">
-              6. Delivery Attempts
-            </h2>
-
-            <p className="mt-2">
-              Our courier partners will make multiple delivery attempts. If the
-              package cannot be delivered due to an incorrect address,
-              unavailability of the recipient, or refusal to accept the parcel,
-              the order may be returned to us.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">
-              7. Damaged or Missing Packages
-            </h2>
-
-            <p className="mt-2">
-              If your package arrives damaged, tampered with, or if any item is
-              missing, please contact us within <strong>48 hours</strong> of
-              delivery with your order number and photographs of the package.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">
-              8. Address Accuracy
-            </h2>
-
-            <p className="mt-2">
-              Customers are responsible for providing accurate shipping details.
-              We are not responsible for delays or failed deliveries resulting
-              from incorrect or incomplete addresses.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-[#3F2617]">
-              9. Contact Us
-            </h2>
-
-            <div className="mt-4 space-y-5">
-              <div>
-                <h3 className="font-medium text-[#3F2617]">Address</h3>
-                <p className="mt-1">
-                  Roop Shree Inside Tabela Gate,
-                  <br />
-                  Sikar, Rajasthan - 332001, India
+                  <div className="flex gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-5 text-[#C39150] shrink-0 mt-0.5"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10" /><path d="M3 7l9 6l9 -6" /></svg>
+                    <div>
+                      <h4 className="font-semibold text-[#3F2617] text-sm">Email</h4>
+                      <a
+                        href="mailto:Adityagarwal23@gmail.com"
+                        className="mt-1 block text-sm text-[#3F2617]/80 hover:text-[#C39150] transition-colors hover:underline"
+                      >
+                        Adityagarwal23@gmail.com
+                      </a>
+                      <p className="mt-1 text-xs text-[#3F2617]/60">
+                        We typically reply within 24 hours.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <p className="mt-8 pt-6 border-t border-[#C39150]/10 text-xs text-[#3F2617]/60">
+                  Products: Peela Chunri, Bandhej Dupattas, Sarees, Lehengas, Gajji Silk, Gota Patti, Zardozi & Traditional Rajasthani Textiles. For any queries regarding orders, returns, shipping, or privacy, please contact us.
                 </p>
               </div>
+            </section>
 
-              <div>
-                <h3 className="font-medium text-[#3F2617]">Phone</h3>
-                <a href="tel:+919783841066" className="hover:underline">
-                  +91 97838 41066
-                </a>
-              </div>
-
-              <div>
-                <h3 className="font-medium text-[#3F2617]">WhatsApp</h3>
-                <a
-                  href="https://wa.me/919529888006"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline"
-                >
-                  Chat on WhatsApp (+91 95298 88006)
-                </a>
-              </div>
-
-              <div>
-                <h3 className="font-medium text-[#3F2617]">Email</h3>
-                <a
-                  href="mailto:Adityagarwal23@gmail.com"
-                  className="hover:underline"
-                >
-                  Adityagarwal23@gmail.com
-                </a>
-                <p className="mt-1 text-sm">
-                  We typically reply within 24 hours.
-                </p>
-              </div>
-            </div>
-          </section>
+          </div>
         </div>
       </div>
     </main>

@@ -14,12 +14,12 @@ type FooterLink = {
 const quickLinks: FooterLink[] = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
-  { label: "Shop Sarees", href: "/shop" },
+  { label: "Shop", href: "/shop" },
   { label: "Contact Us", href: "/contact" },
   { label: "Blogs", href: "/blogs" },
 ];
 const customerServices: FooterLink[] = [
-  { label: "Orders", href: "/dashboard" },
+  { label: "Orders", href: "/dashboard/orders" },
   { label: "Terms & Conditions", href: "/terms-and-conditions" },
   { label: "Shipping", href: "/shipping" },
   { label: "Privacy Policy", href: "/privacy-policy" },
@@ -116,9 +116,13 @@ const Footer = async () => {
       <div className="relative border-t border-[#C39150] bg-[#FAEBD8]">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-5 text-xs text-[#3F2617]/70 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <p>© 2026 Roopshree. All rights reserved.</p>
+
           <p>
             Designed & Developed by{" "}
-            <span className="font-semibold text-[#3F2617]">AV Technosys</span>
+            <Link href="https://www.avtechnosys.com" target="_blank" className="font-semibold text-[#3F2617]">
+
+              AV Technosys
+            </Link>
           </p>
         </div>
       </div>

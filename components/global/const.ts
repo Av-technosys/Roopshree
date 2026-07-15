@@ -125,7 +125,7 @@ export function getCartSummary(items: CartSummaryItem[]) {
     0
   )
   const shipping = 0
-  const gst = Math.round(subtotal * 0.18)
+  const gst = 0
 
   return {
     subtotal,

@@ -15,7 +15,7 @@ const MissionSection = () => {
 
       <div className="relative mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h2 className="font-semibold text-2xl leading-tight sm:text-5xl">
+        <h2 className="font-heading text-3xl leading-tight sm:text-4xl lg:text-5xl text-[#17110d]">
             Mission and craft philosophy
           </h2>
           <p className="mx-auto mt-2 max-w-[34rem] text-[0.62rem] font-medium leading-4 sm:text-lg">

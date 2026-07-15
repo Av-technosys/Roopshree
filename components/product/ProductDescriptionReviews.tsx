@@ -17,9 +17,8 @@ const Stars = ({
     {Array.from({ length: 5 }).map((_, index) => (
       <Star
         key={index}
-        className={`${className} ${
-          index < Math.round(rating) ? "fill-current" : ""
-        }`}
+        className={`${className} ${index < Math.round(rating) ? "fill-current" : ""
+          }`}
         strokeWidth={1.2}
       />
     ))}
@@ -41,9 +40,21 @@ function formatDate(value: string) {
 const ProductDescriptionReviews = ({
   product,
 }: ProductDescriptionReviewsProps) => {
+
   const specs = product.attributes.filter((item) => item.name && item.value);
   const averageRating = Number(product.reviewSummary.averageRating.toFixed(1));
   const reviewCount = product.reviewSummary.reviewCount;
+
+  const description = product.description
+    .replace(/\r\n/g, "\n")
+    .replace(/[“”]/g, "")
+    .replace(/\n{2,}/g, "\n")
+    .trim();
+
+  const sections = description
+    .split(/\n(?=[A-Za-z].*?:)|(?=\b\d+\.)/)
+    .map((item) => item.trim())
+    .filter(Boolean);
 
   return (
     <section className="bg-white py-8 md:py-12">
@@ -54,11 +65,12 @@ const ProductDescriptionReviews = ({
               Description
             </h2>
 
-            {product.description ? (
-              <div className="mt-4 max-w-3xl text-xs leading-6 text-gray-600 whitespace-pre-wrap">
-                {product.description}
-              </div>
-            ) : null}
+
+            {sections.map((section, index) => (
+              <p key={index} className="mt-4 max-w-3xl text-xs leading-6 text-gray-600 whitespace-pre-wrap font-sans">
+                {section}
+              </p>
+            ))}
 
             {specs.length > 0 ? (
               <div className="mt-6 border border-[#ead8c2] text-sm font-medium text-black md:text-base">

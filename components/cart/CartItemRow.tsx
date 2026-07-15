@@ -98,7 +98,7 @@ export function CartItemRow({ item }: { item: CartItem }) {
         onClick={() => {
           handleToggleWishlist(wishlistItem)
           handleRemoveCartItem(item)
-          router.push("/wishlist")
+          router.push("/dashboard/wishlist")
         }}
         className="text-left text-[11px] font-medium text-[#C39150] transition hover:text-[#3F2617] md:col-start-4 md:col-end-6 md:justify-self-end md:whitespace-nowrap md:text-right"
       >

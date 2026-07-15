@@ -27,11 +27,6 @@ export function CheckoutSummary({
           />
         ))}
         <SummaryLine label="Subtotal" value={formatPrice(summary.subtotal)} />
-        <SummaryLine
-          label="Shipping"
-          value={summary.shipping === 0 ? "Free" : formatPrice(summary.shipping)}
-        />
-        <SummaryLine label="GST" value={formatPrice(summary.gst)} />
       </div>
       <div className="mt-7 border-t border-white/35 pt-4 text-xs md:mt-24">
         <SummaryLine label="Total" value={formatPrice(summary.total)} strong />

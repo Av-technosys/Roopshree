@@ -97,7 +97,7 @@ const HeroSection = () => {
             >
               <Link href="/shop">
                 <span className="md:hidden">Explore Collection</span>
-                <span className="hidden md:inline">Shop Sarees</span>
+                <span className="hidden md:inline">Shop </span>
                 <ArrowRight className="size-4" />
               </Link>
             </Button>

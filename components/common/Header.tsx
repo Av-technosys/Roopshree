@@ -18,7 +18,7 @@ type SearchResults = Awaited<ReturnType<typeof searchCatalogAction>>;
 
 const navLinks = [
   { label: "Home", href: "/" },
-  { label: "Shop Sarees", href: "/shop" },
+  { label: "Shop", href: "/shop" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
   { label: "Blogs", href: "/blogs" },

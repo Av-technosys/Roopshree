@@ -150,7 +150,6 @@ export function BlogCard({ post }: { post: BlogView }) {
             {post.date}
           </span>
         </div>
-        <p className="mt-1 text-[11px] text-[#3F2617]/55">{post.readTime}</p>
       </Link>
     </article>
   )

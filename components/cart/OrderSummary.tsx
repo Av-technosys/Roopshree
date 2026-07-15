@@ -18,8 +18,6 @@ export function OrderSummary({
       <h2 className="font-heading text-lg font-semibold">Order Summary</h2>
       <div className="mt-7 space-y-3.5 text-[11px]">
         <SummaryLine label="Subtotal" value={formatPrice(subtotal)} />
-        <SummaryLine label="Shipping" value={shipping === 0 ? "Free" : formatPrice(shipping)} />
-        <SummaryLine label="GST (18%)" value={formatPrice(gst)} />
       </div>
       <div className="mt-6 border-t border-white/15 pt-5 text-[11px]">
         <SummaryLine label="Total" value={formatPrice(total)} strong />

@@ -99,7 +99,7 @@ const page = async ({
               | "price-high")
           : "featured",
     }),
-    getCatalogCategories(8),
+    getCatalogCategories(20),
   ]);
 
   return (

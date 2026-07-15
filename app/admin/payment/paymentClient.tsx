@@ -11,13 +11,6 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import PaymentTable, { type PaymentRow } from "./paymentTable";
 
 const paymentStatusOptions = [
@@ -54,18 +47,21 @@ export default function PaymentClient({
   }, [debouncedSearch, updateQuery]);
 
   return (
-    <div className="w-full p-1">
-      <Card>
-        <CardHeader>
-          <CardTitle>Purchase Payments</CardTitle>
-          <CardDescription>
+    <div className="space-y-6 p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">Purchase Payments</h1>
+          <p className="text-sm text-gray-500 mt-1">
             Payments recorded when customers complete checkout.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </p>
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-md border bg-white">
+        <div className="p-6 space-y-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="w-full max-w-xl">
-              <InputGroup className="flex items-center rounded-full bg-white py-2 shadow-none">
+              <InputGroup className="flex items-center rounded-full bg-white py-2 shadow-none border border-gray-200">
                 <InputGroupAddon>
                   <Search className="text-gray-500" />
                 </InputGroupAddon>
@@ -98,8 +94,8 @@ export default function PaymentClient({
             <PaymentTable page={currentPage} rows={rows} pageSize={pageSize} />
           </div>
           <ProductPagination currentPage={currentPage} totalPages={total} />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

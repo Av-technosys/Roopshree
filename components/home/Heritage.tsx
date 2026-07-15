@@ -54,7 +54,7 @@ const Heritage = () => {
             Weaving Stories of Tradition
           </h2>
           <p className="mt-3 font-heading text-[1.35rem] italic leading-none text-[#c39150] sm:text-3xl">
-            Crafted Since 1980
+            Crafted Since 1985
           </p>
 
           <div className="mt-5">

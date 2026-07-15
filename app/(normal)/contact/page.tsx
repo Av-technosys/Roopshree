@@ -5,6 +5,7 @@ import { ContactEnquiryForm } from "@/components/contact/ContactEnquiryForm";
 import Hero from "@/components/contact/Hero";
 import { Button } from "@/components/ui/button";
 import { Metadata } from "next";
+import { getCatalogCategories } from "@/services/product.service";
 
 type TablerIconName = "map-pin" | "phone" | "brand-whatsapp" | "mail";
 
@@ -60,7 +61,21 @@ export const metadata: Metadata = {
   },
 };
 
-function contact() {
+async function contact() {
+  let categoryNames = ["Bandhej Sarees", "Bandhej Dupattas"];
+  try {
+    const categoriesData = await getCatalogCategories(100);
+    if (categoriesData && categoriesData.length > 0) {
+      categoryNames = categoriesData.map((c) => c.name);
+    }
+  } catch (error) {
+    console.error("Failed to load contact categories:", error);
+  }
+  
+  if (!categoryNames.includes("Custom Order")) {
+    categoryNames.push("Custom Order");
+  }
+
   return (
     <div className="bg-white">
       <Hero />
@@ -106,7 +121,7 @@ function contact() {
                 <p>Come experience the art of Bandhej up close.</p>
               </div>
 
-              <ContactEnquiryForm />
+              <ContactEnquiryForm initialCategories={categoryNames} />
             </div>
 
             <div>

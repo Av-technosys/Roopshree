@@ -6,9 +6,11 @@ import { submitEnquiryContactAction } from "@/actions/customer-contact.action"
 import { useToast } from "@/components/common/ToastProvider"
 import { Button } from "@/components/ui/button"
 
-const categories = ["Bandhej Sarees", "Bandhej Dupattas", "Custom Order"]
-
-export function ContactEnquiryForm() {
+export function ContactEnquiryForm({
+  initialCategories = ["Bandhej Sarees", "Bandhej Dupattas", "Custom Order"],
+}: {
+  initialCategories?: string[];
+}) {
   const formRef = useRef<HTMLFormElement>(null)
   const { showToast } = useToast()
   const [isPending, startTransition] = useTransition()
@@ -84,7 +86,7 @@ export function ContactEnquiryForm() {
             <option value="" disabled>
               Select a category
             </option>
-            {categories.map((category) => (
+            {initialCategories.map((category) => (
               <option key={category} value={category}>
                 {category}
               </option>

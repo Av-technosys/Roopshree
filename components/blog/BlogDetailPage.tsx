@@ -69,7 +69,6 @@ export function BlogDetailPage({
                 <CalendarDays className="size-4 text-[#C39150]" />
                 {post.date}
               </span>
-              <span>{post.readTime}</span>
             </div>
 
             <div className="mt-7 space-y-5 text-sm leading-7 text-[#3F2617]/78">

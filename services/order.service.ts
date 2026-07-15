@@ -124,8 +124,6 @@ export async function getDashboardOrderDetails(orderId: string) {
     },
     summary: [
       { label: 'Subtotal', value: formatCurrency(subtotal) },
-      { label: 'Shipping', value: shipping === 0 ? 'Free' : formatCurrency(shipping) },
-      { label: 'GST', value: formatCurrency(gst) },
       { label: 'Total', value: formatCurrency(row.order.totalAmount), strong: true },
     ],
     payment: {

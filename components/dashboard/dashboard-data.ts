@@ -90,9 +90,7 @@ export const addresses = [
 export const orderSummary = [
   { label: "AeroMix Tall Faucet", value: "₹8,500" },
   { label: "Subtotal", value: "₹8,500" },
-  { label: "Shipping", value: "Free" },
-  { label: "GST", value: "₹1,530" },
-  { label: "Total", value: "₹10,030", strong: true },
+  { label: "Total", value: "₹8,500", strong: true },
 ]
 
 export const submittedReview = {

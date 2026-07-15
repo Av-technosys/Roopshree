@@ -50,6 +50,11 @@ export default function Details({ id }: { id: string }) {
     );
   }
 
+  const subtotal = orderInfo?.items?.reduce(
+    (sum: number, item: any) => sum + item.productPrice * item.quantity,
+    0
+  ) || 0;
+
   return (
     <div className="w-full max-w-full mx-auto p-1 space-y-5">
       {/* Top Grid */}
@@ -135,11 +140,7 @@ export default function Details({ id }: { id: string }) {
             <CardContent className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-slate-500">Subtotal</span>
-                <span className="font-semibold">{''}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Shipping</span>
-                <span className="font-semibold">{''}</span>
+                <span className="font-semibold">₹ {subtotal}</span>
               </div>
               <div className="border-t border-slate-100 pt-3 flex justify-between items-center">
                 <span className="font-bold">Total</span>

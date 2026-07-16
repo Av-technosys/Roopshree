@@ -153,5 +153,5 @@ export function useWishlist() {
     }
   }
 
-  return { handleToggleWishlist, handleRemoveWishlist, hasItem }
+  return { handleToggleWishlist, handleRemoveWishlist, hasItem, syncWishlistFromDb }
 }

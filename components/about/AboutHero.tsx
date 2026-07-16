@@ -4,7 +4,7 @@ const AboutHero = () => {
   return (
     <section className="relative isolate mt-16 overflow-hidden bg-[#f4e6d8] md:mt-0 md:min-h-svh">
       <Image
-        src="/about/hero_bg.png"
+        src="/new_banners/image 277.png"
         alt="Roopshree Bandhej about hero"
         fill
         priority
@@ -13,12 +13,12 @@ const AboutHero = () => {
       />
       <div className="relative aspect-[903/1600] overflow-hidden md:hidden">
         <Image
-          src="/about/sm-bg-hero.png"
+          src="/new_banners/image 277.png"
           alt="Roopshree Bandhej about hero"
           fill
           priority
           sizes="100vw"
-          className="object-cover object-top"
+          className="object-cover object-center"
         />
       </div>
       <div className="absolute inset-0 z-[1] bg-white/15 md:hidden" />

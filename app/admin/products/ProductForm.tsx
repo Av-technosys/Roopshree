@@ -34,6 +34,7 @@ type MediaRow = {
 type VariantRow = {
   id?: string;
   sku: string;
+  instagramLink: string;
   title: string;
   price: string;
   strikeThroughPrice: string;
@@ -69,6 +70,7 @@ type ProductDetails = {
   productVariantRes?: Array<{
     id: string;
     sku: string;
+    instagramLink?: string | null;
     title: string;
     price: number;
     strikeThroughPrice?: number | null;
@@ -89,6 +91,7 @@ type ProductFormProps = {
 
 const emptyVariant: VariantRow = {
   sku: "",
+  instagramLink: "",
   title: "",
   price: "",
   strikeThroughPrice: "",
@@ -170,6 +173,7 @@ export default function ProductForm({ product }: ProductFormProps) {
       ? product.productVariantRes.map((variant) => ({
         id: variant.id,
         sku: variant.sku,
+        instagramLink: variant.instagramLink ?? "",
         title: variant.title,
         price: rupees(variant.price),
         strikeThroughPrice: rupees(variant.strikeThroughPrice),
@@ -333,6 +337,7 @@ export default function ProductForm({ product }: ProductFormProps) {
                       isActive: first.isActive,
                       // Replicate sku and title too; reset only media/isDefault
                       sku: first.sku,
+                      instagramLink: first.instagramLink,
                       title: first.title,
                       banner: null,
                       gallery: [],
@@ -353,6 +358,12 @@ export default function ProductForm({ product }: ProductFormProps) {
                   placeholder="Title"
                   value={variant.title}
                   onChange={(event) => updateRow(variants, setVariants, index, { title: event.target.value })}
+                />
+                <Input
+                  type="url"
+                  placeholder="Instagram link"
+                  value={variant.instagramLink}
+                  onChange={(event) => updateRow(variants, setVariants, index, { instagramLink: event.target.value })}
                 />
                 <Input
                   type="number"

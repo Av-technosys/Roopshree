@@ -35,7 +35,7 @@ export function BlogListingPage({
               <Link
                 key={category.id}
                 href={`/blogs?category=${category.slug}`}
-                className={`h-8 rounded-full border px-6 text-xs font-semibold transition ${
+                className={`inline-flex h-8 items-center rounded-full border px-6 text-xs font-semibold transition ${
                   activeCategory === category.slug
                     ? "border-[#C39150] bg-[#C39150] text-white"
                     : "border-transparent text-[#3F2617] hover:border-[#C39150]"
@@ -83,7 +83,7 @@ function BlogHero() {
   return (
     <section className="relative isolate min-h-[460px] overflow-hidden md:min-h-[520px]">
       <Image
-        src="/blog/blog-bg.png"
+        src="/new_banners/image 274.png"
         alt=""
         fill
         priority

@@ -89,6 +89,7 @@ export const productVariants = pgTable(
       .notNull()
       .references(() => products.id, { onDelete: 'cascade' }),
     sku: varchar('sku', { length: 80 }).notNull(),
+    instagramLink: varchar("instagram_link"),
     title: varchar('title', { length: 180 }).notNull(),
     price: integer('price').notNull(),
     strikeThroughPrice: integer('strike_through_price'),

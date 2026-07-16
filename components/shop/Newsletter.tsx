@@ -8,14 +8,14 @@ export default function NewsletterSection() {
     <section className="mt-20 md:mt-28">
       <div className="relative aspect-[393/659] w-full overflow-hidden rounded-[2px] md:aspect-[1527/402] md:min-h-[320px]">
         <Image
-          src="/shop/sm-stayupdated_bg.png"
+          src="/new_banners/image 269.png"
           alt="Roopshree newsletter"
           fill
           sizes="(max-width: 767px) 100vw, 0px"
           className="object-cover md:hidden"
         />
         <Image
-          src="/shop/stayupdated_bg.png"
+          src="/new_banners/image 269.png"
           alt="Roopshree newsletter"
           fill
           sizes="(min-width: 1280px) 1280px, 100vw"

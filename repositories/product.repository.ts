@@ -128,6 +128,7 @@ export type ProductDetailVariantRow = {
   id: string
   title: string
   sku: string
+  instagramLink: string | null
   price: number
   strikeThroughPrice: number | null
   stockQuantity: number
@@ -484,6 +485,7 @@ export async function listProductDetailVariants(
       id: productVariants.id,
       title: productVariants.title,
       sku: productVariants.sku,
+      instagramLink: productVariants.instagramLink,
       price: productVariants.price,
       strikeThroughPrice: productVariants.strikeThroughPrice,
       stockQuantity: productVariants.stockQuantity,

@@ -17,15 +17,36 @@ export function CheckoutSummary({
 }) {
   return (
     <aside className="min-w-0 bg-[#3F2617] px-5 py-6 text-white shadow-sm md:min-h-[318px]">
-      <h2 className="font-heading text-sm font-semibold">Summary</h2>
-      <div className="mt-5 space-y-3 text-[11px]">
+      <h2 className="font-heading text-sm font-semibold border-b border-white/20 pb-3">Summary</h2>
+      
+      {/* Product List */}
+      <div className="mt-5 space-y-4">
         {items.map((item) => (
-          <SummaryLine
+          <div
             key={`${item.productId}-${item.addedAt}`}
-            label={item.title}
-            value={formatPrice(item.price * item.quantity)}
-          />
+            className="flex items-start justify-between gap-4 text-white/80 border-b border-white/10 pb-3"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-white text-xs leading-normal">{item.title}</p>
+              <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-white/60">
+                {item.attributes?.map((attr) => (
+                  <span key={attr.name} className="bg-white/10 px-1.5 py-0.5 rounded-[2px]">
+                    {attr.name}: {attr.value}
+                  </span>
+                ))}
+                <span className="font-semibold text-white/70">Qty: {item.quantity}</span>
+                <span>&times; {formatPrice(item.price)}</span>
+              </div>
+            </div>
+            <span className="shrink-0 font-semibold text-white text-xs align-top pt-0.5">
+              {formatPrice(item.price * item.quantity)}
+            </span>
+          </div>
         ))}
+      </div>
+
+      {/* Totals Section */}
+      <div className="mt-5 space-y-3 text-[11px] pt-2">
         <SummaryLine label="Subtotal" value={formatPrice(summary.subtotal)} />
       </div>
       <div className="mt-7 border-t border-white/35 pt-4 text-xs md:mt-24">

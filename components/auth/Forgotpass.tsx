@@ -24,7 +24,8 @@ export default function Forgotpass({
     setError("");
     setIsSubmitting(true);
 
-    const response = await forgotPasswordAction({ email });
+    const normalizedEmail = email.trim().toLowerCase();
+    const response = await forgotPasswordAction({ email: normalizedEmail });
 
     setIsSubmitting(false);
 
@@ -34,8 +35,11 @@ export default function Forgotpass({
       return;
     }
 
-    showToast({ title: "Password reset OTP sent", tone: "success" });
-    onSendOtp?.(email);
+    showToast({
+      title: response.message ?? "Password reset OTP sent",
+      tone: "success",
+    });
+    onSendOtp?.(normalizedEmail);
   }
 
   return (
@@ -55,7 +59,7 @@ export default function Forgotpass({
             Forgot Password
           </h1>
           <p className="mt-2 text-sm text-[#c9914d] sm:text-base ">
-            Enter your registered email to recieve reset link
+            Enter your registered email to receive a reset OTP
           </p>
         </div>
 

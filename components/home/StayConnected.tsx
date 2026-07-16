@@ -80,7 +80,7 @@ const StayConnected = () => {
         <p className="mt-3 text-[0.72rem] font-semibold uppercase tracking-[0.34em] text-[#3f2617] sm:text-sm">
           Stay Connected
         </p>
-        <h2 className="mt-3 font-semibold text-[2.2rem] leading-none text-[#3f2617] sm:text-5xl lg:text-6xl">
+        <h2 className="mt-3 font-semibold text-2xl leading-tight text-[#3f2617] sm:text-5xl lg:text-6xl">
           Follow Roopshree
         </h2>
 

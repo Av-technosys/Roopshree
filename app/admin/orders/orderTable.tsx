@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Eye } from "lucide-react";
+import { Eye, FileText } from "lucide-react";
+import Link from "next/link";
 import { Select } from "@/components/select";
 import {
   Table,
@@ -39,7 +40,11 @@ const orderStatus = [
   { value: "refunded", label: "Refunded" },
 ];
 
-export default function OrderTable({ page, orders, pageSize }: OrderTableProps) {
+export default function OrderTable({
+  page,
+  orders,
+  pageSize,
+}: OrderTableProps) {
   const startIndex = (page - 1) * pageSize;
   const [isPending, startTransition] = useTransition();
   const [orderRows, setOrderRows] = useState(orders);
@@ -56,14 +61,16 @@ export default function OrderTable({ page, orders, pageSize }: OrderTableProps) 
             <TableHead>Status</TableHead>
             <TableHead>Total Amount</TableHead>
             <TableHead>Address Line 1</TableHead>
-            <TableHead>Address Line 2</TableHead>
             <TableHead className="text-end">Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {orderRows.length ? (
             orderRows.map((order, index) => (
-              <TableRow key={order.id} className={isPending ? "opacity-60" : ""}>
+              <TableRow
+                key={order.id}
+                className={isPending ? "opacity-60" : ""}
+              >
                 <TableCell>{startIndex + index + 1}</TableCell>
                 <TableCell>{order.id}</TableCell>
                 <TableCell>
@@ -75,7 +82,10 @@ export default function OrderTable({ page, orders, pageSize }: OrderTableProps) 
                       selectItems={orderStatus}
                       onValueChange={(value) => {
                         startTransition(async () => {
-                          const result = await updateOrderStatus(order.id, value);
+                          const result = await updateOrderStatus(
+                            order.id,
+                            value,
+                          );
 
                           if (!result.success) {
                             return;
@@ -83,7 +93,9 @@ export default function OrderTable({ page, orders, pageSize }: OrderTableProps) 
 
                           setOrderRows((currentRows) =>
                             currentRows.map((row) =>
-                              row.id === order.id ? { ...row, status: value } : row,
+                              row.id === order.id
+                                ? { ...row, status: value }
+                                : row,
                             ),
                           );
                           router.refresh();
@@ -92,10 +104,18 @@ export default function OrderTable({ page, orders, pageSize }: OrderTableProps) 
                     />
                   </div>
                 </TableCell>
-                <TableCell>₹{(order.totalAmount / 100).toLocaleString("en-IN")}</TableCell>
+                <TableCell>
+                  ₹{(order.totalAmount / 100).toLocaleString("en-IN")}
+                </TableCell>
                 <TableCell>{order.addressLine1}</TableCell>
-                <TableCell>{order.addressLine2 ?? "-"}</TableCell>
                 <TableCell className="text-right">
+                  <Link
+                    href={`${pathname}/${order.id}/invoice`}
+                    className="mr-1 inline-flex items-center justify-center rounded-md p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+                    aria-label="View invoice"
+                  >
+                    <FileText className="size-4" />
+                  </Link>
                   <button
                     type="button"
                     onClick={() => router.push(`${pathname}/${order.id}`)}

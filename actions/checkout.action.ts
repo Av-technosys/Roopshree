@@ -577,7 +577,7 @@ export async function completeRazorpayPayment(input: {
         return { orderId: existingPayment.orderId }
       }
 
-      let orderShipping = checkout.shipping
+      let orderShipping = { ...checkout.shipping }
 
       if (checkout.shipping.addressId) {
         const [address] = await tx
@@ -596,6 +596,49 @@ export async function completeRazorpayPayment(input: {
         }
 
         orderShipping = mapAddressToShipping(address)
+      } else {
+        const [duplicateAddress] = await tx
+          .select()
+          .from(addresses)
+          .where(
+            and(
+              eq(addresses.userId, userId),
+              eq(addresses.phone, checkout.shipping.phone),
+              eq(addresses.line1, checkout.shipping.addressLine1),
+              eq(addresses.postalCode, checkout.shipping.postalCode),
+            ),
+          )
+          .limit(1)
+
+        if (!duplicateAddress) {
+          const [anyAddress] = await tx
+            .select()
+            .from(addresses)
+            .where(eq(addresses.userId, userId))
+            .limit(1)
+
+          const [newSavedAddress] = await tx
+            .insert(addresses)
+            .values({
+              userId,
+              fullName: checkout.shipping.fullName,
+              phone: checkout.shipping.phone,
+              line1: checkout.shipping.addressLine1,
+              line2: checkout.shipping.addressLine2 || null,
+              city: checkout.shipping.city,
+              state: checkout.shipping.state,
+              postalCode: checkout.shipping.postalCode,
+              country: checkout.shipping.country || "India",
+              isDefault: !anyAddress,
+            })
+            .returning({ id: addresses.id })
+
+          if (newSavedAddress) {
+            orderShipping.addressId = newSavedAddress.id
+          }
+        } else {
+          orderShipping.addressId = duplicateAddress.id
+        }
       }
 
       const [order] = await tx

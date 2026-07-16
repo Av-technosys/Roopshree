@@ -3,12 +3,14 @@
 import { cookies } from 'next/headers'
 import {
   authSignIn,
+  cognitoAdminGetUser,
   cognitoChangePassword,
   cognitoConfirmForgotPassword,
   cognitoConfirmSignUp,
   cognitoForgotPassword,
   cognitoResendConfirmationCode,
   cognitoSignUp,
+  cognitoUpdateUserAttribute,
 } from '@/helper/cognito'
 import {
   assertCompleteTokenSet,
@@ -76,6 +78,22 @@ function getDeliveryMessage(
   }
 
   return `OTP sent to ${destination}`
+}
+
+async function ensureCognitoEmailVerifiedForRecovery(email: string) {
+  const response = await cognitoAdminGetUser({ email })
+  const attributes = response.UserAttributes ?? []
+  const accountEmail = attributes.find((attribute) => attribute.Name === 'email')?.Value
+  const emailVerified = attributes.find((attribute) => attribute.Name === 'email_verified')?.Value
+
+  if (accountEmail?.trim().toLowerCase() !== email || emailVerified === 'true') {
+    return
+  }
+
+  await cognitoUpdateUserAttribute({
+    email,
+    userAttribute: [{ Name: 'email_verified', Value: 'true' }],
+  })
 }
 
 async function setAuthCookies(email: string, password: string) {
@@ -246,16 +264,27 @@ export async function forgotPasswordAction({
 }: {
   email: string
 }): Promise<AuthActionResult> {
-  if (!email) {
+  const normalizedEmail = getNormalizedEmail(email)
+
+  if (!normalizedEmail) {
     return { ok: false, error: 'Email is required' }
   }
 
   try {
-    await cognitoForgotPassword({ email })
+    await ensureCognitoEmailVerifiedForRecovery(normalizedEmail)
+    const response = await cognitoForgotPassword({ email: normalizedEmail })
 
-    return { ok: true }
-  } catch {
-    return { ok: false, error: 'Unable to send OTP' }
+    return {
+      ok: true,
+      message: getDeliveryMessage(response.CodeDeliveryDetails, 'Password reset OTP sent. Please check your inbox.'),
+    }
+  } catch (error) {
+    console.error('Unable to send forgot password OTP:', error)
+
+    return {
+      ok: false,
+      error: getAuthErrorMessage(error, 'Unable to send OTP'),
+    }
   }
 }
 
@@ -268,16 +297,27 @@ export async function confirmForgotPasswordAction({
   code: string
   newPassword: string
 }): Promise<AuthActionResult> {
-  if (!email || !code || !newPassword) {
+  const normalizedEmail = getNormalizedEmail(email)
+
+  if (!normalizedEmail || !code || !newPassword) {
     return { ok: false, error: 'Email, OTP and new password are required' }
   }
 
   try {
-    await cognitoConfirmForgotPassword({ email, code, newPassword })
+    await cognitoConfirmForgotPassword({
+      email: normalizedEmail,
+      code,
+      newPassword,
+    })
 
     return { ok: true }
-  } catch {
-    return { ok: false, error: 'Unable to update password' }
+  } catch (error) {
+    console.error('Unable to confirm forgot password:', error)
+
+    return {
+      ok: false,
+      error: getAuthErrorMessage(error, 'Unable to update password'),
+    }
   }
 }
 

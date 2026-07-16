@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,13 +8,20 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Loader2, Upload, User, Tag } from "lucide-react";
-import { createBlog } from "@/helper/blog/action";
+import { createBlog, getBlogCategories } from "@/helper/blog/action";
 import { useRouter } from "next/navigation";
 import RichTextEditor from "@/components/ui/rich-text-editor";
 import { useFileUpload } from "@/helper/upload/client";
 
 export default function BlogForm() {
   const router = useRouter();
+  const [dbCategories, setDbCategories] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    getBlogCategories().then((res) => {
+      setDbCategories(res);
+    });
+  }, []);
   const { upload } = useFileUpload();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -121,15 +128,11 @@ export default function BlogForm() {
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   <option value="">Select category</option>
-                  <option value="Air Taps">Air Taps</option>
-                  <option value="Bathroom Faucet">Bathroom Faucet</option>
-                  <option value="Food Waste Disposers">Food Waste Disposers</option>
-                  <option value="Floor Drainer">Floor Drainer</option>
-                  <option value="Granite Wash Basin">Granite Wash Basin</option>
-                  <option value="Kitchen Accessories">Kitchen Accessories</option>
-                  <option value="Kitchen Faucet">Kitchen Faucet</option>
-                  <option value="Steel Sinks">Steel Sinks</option>
-                  <option value="Towel Warmer">Towel Warmer</option>
+                  {dbCategories.map((cat) => (
+                    <option key={cat.id} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
                 </select>
 
             </div>

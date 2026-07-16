@@ -13,15 +13,15 @@ const Newarrival = ({ products: fetchedProducts }: { products?: Product[] }) => 
     <section className="bg-white">
       <div className="relative isolate overflow-hidden bg-[#f8ead7] md:aspect-[2/1]">
         <Image
-          src="/home/newarrival_bg.png"
+          src="/new_banners/image 280.png"
           alt="Woman styling a red Bandhej dupatta"
           fill
           sizes="100vw"
           priority={false}
-          className="hidden object-contain object-center md:block"
+          className="hidden object-cover object-center md:block"
         />
         <Image
-          src="/home/sm-newarrival_bg.png"
+          src="/new_banners/image 280.png"
           alt="Woman styling a red Bandhej dupatta"
           width={852}
           height={1846}

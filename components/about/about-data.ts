@@ -13,21 +13,23 @@ export const heritageItems = [
     text: "Inspired by Rajasthan's royal culture and timeless textile legacy.",
     image: "/about/rich_rajasthani.png",
   },
-  {
-    title: "Traditional Handcrafting",
-    text: "Each piece is handcrafted by skilled artisans using age-old techniques.",
-    image: "/about/t_handcrafting.png",
-  },
+
   {
     title: "Authentic Bandhej Art",
     text: "Intricate tie-dye patterns created with patience, precision and passion.",
     image: "/about/Authentic.png",
   },
-  {
+    {
+    title: "Traditional Handcrafting",
+    text: "Each piece is handcrafted by skilled artisans using age-old techniques.",
+    image: "/about/t_handcrafting.png",
+  },
+    {
     title: "Timeless Elegance",
     text: "Designs for the modern woman who cherishes tradition with style.",
     image: "/about/timelesselegance.png",
   },
+
 ]
 
 export const missionCards = [

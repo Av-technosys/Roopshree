@@ -15,7 +15,7 @@ const HeroSection = () => {
   return (
     <section className="relative isolate mt-16 overflow-hidden bg-[#f6eadf] md:mt-0 md:min-h-svh">
       <Image
-        src="/contact/contact_bg.png"
+        src="/new_banners/image 276.png"
         alt="Roop Shree Bandhej contact hero"
         fill
         priority
@@ -24,13 +24,13 @@ const HeroSection = () => {
       />
       <div className="md:hidden">
         <Image
-          src="/contact/sm-bg.png"
+          src="/new_banners/image 276.png"
           alt="Roop Shree Bandhej contact hero"
           width={887}
           height={1774}
           priority
           sizes="100vw"
-          className="block h-auto w-full translate-y-10"
+          className="block h-auto w-full"
         />
       </div>
 
@@ -73,7 +73,7 @@ const HeroSection = () => {
             </p>
           </motion.div>
 
-          <motion.div
+          {/* <motion.div
             variants={fadeUp}
             transition={{ duration: 0.55, ease: "easeOut" }}
             className="mt-6 md:hidden"
@@ -84,7 +84,7 @@ const HeroSection = () => {
             >
               <Link href="/contact">Connect With Us</Link>
             </Button>
-          </motion.div>
+          </motion.div> */}
         </motion.div>
       </div>
     </section>

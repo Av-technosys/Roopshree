@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, ShoppingCart } from "lucide-react";
@@ -14,7 +15,11 @@ import { useWishlistStore } from "@/store/wishlistStore";
 export function WishlistPage() {
   const wishlistProducts = useWishlistStore((state) => state.items);
   const { handleAddToCart } = useAddToCart();
-  const { handleRemoveWishlist } = useWishlist();
+  const { handleRemoveWishlist, syncWishlistFromDb } = useWishlist();
+
+  useEffect(() => {
+    syncWishlistFromDb({ force: true });
+  }, []);
 
   return (
     <div>

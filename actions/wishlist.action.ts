@@ -256,6 +256,7 @@ export async function getUserWishlistItems() {
         Boolean(attribute),
       )
 
+ 
       return {
         productId,
         dbProductId: row.productId,

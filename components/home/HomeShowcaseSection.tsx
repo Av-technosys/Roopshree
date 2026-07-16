@@ -19,7 +19,7 @@ const HomeShowcaseSection = ({ products = [] }: HomeShowcaseSectionProps) => {
     <section className="bg-white py-14 md:py-20">
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <div className="text-center text-[#17110d]">
-          <h2 className="font-heading font-semibold text-5xl leading-tight sm:text-5xl pb-10">
+          <h2 className="font-semibold text-2xl leading-tight sm:text-5xl pb-10">
             Featured Products
           </h2>
         </div>

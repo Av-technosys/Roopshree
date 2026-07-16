@@ -91,16 +91,19 @@ export function PrimaryAction({
 export function FilterPill({
   children,
   active = false,
+  onClick,
 }: {
   children: React.ReactNode;
   active?: boolean;
+  onClick?: () => void;
 }) {
   return (
     <button
       type="button"
+      onClick={onClick}
       className={cn(
-        "h-8 rounded-full border border-[#C39150] px-5 text-xs font-medium text-[#C39150]",
-        active && "bg-[#C39150] text-white",
+        "h-8 rounded-full border border-[#C39150] px-5 text-xs font-medium text-[#C39150] cursor-pointer transition-colors hover:bg-[#C39150]/10",
+        active && "bg-[#C39150] text-white hover:bg-[#C39150]",
       )}
     >
       {children}

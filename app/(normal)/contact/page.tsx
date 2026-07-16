@@ -81,7 +81,7 @@ async function contact() {
       <Hero />
       <section className="bg-white px-5 py-14 text-[#3F2617] sm:px-6 md:py-20 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="grid rounded-[2px] border border-[#C39150]/30 bg-[#F7EFE6] px-5 py-8 shadow-sm md:grid-cols-4 md:px-8 md:py-10">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-8 md:gap-y-0 rounded-[2px] border border-[#C39150]/30 bg-[#F7EFE6] px-5 py-8 shadow-sm md:grid-cols-4 md:px-8 md:py-10">
             {contactItems.map((item, index) => {
               return (
                 <div
@@ -113,7 +113,7 @@ async function contact() {
           <div className="mt-20 grid gap-14 lg:grid-cols-2 lg:gap-16 lg:items-start">
             <div>
               <h2 className="font-heading text-4xl font-semibold leading-tight text-[#17110d] md:text-[2.75rem]">
-                Sent Us an Enquiry
+                Send Us an Enquiry
               </h2>
               <SectionEyebrow />
               <div className="mt-8 space-y-2 text-sm leading-5 text-[#3F2617]/75">
@@ -150,7 +150,7 @@ async function contact() {
 
       <section className="relative isolate overflow-hidden bg-[#F7EFE6]">
         <Image
-          src="/contact/whatsapp_bg.png"
+          src="/new_banners/Frame 1984079525.png"
           alt="Red Bandhej fabric with flowers"
           fill
           sizes="100vw"

@@ -113,7 +113,7 @@ function ProductPageSkeleton() {
 
 function BenefitsSection() {
   return (
-    <section className="bg-white py-14 md:pb-10">
+    <section className="bg-white py-6">
       <div className="mx-auto max-w-6xl px-5 sm:px-6 lg:px-8">
         <div className="mt-5 grid gap-x-8 gap-y-8 rounded-[4px] border border-[#ead8c5] bg-[#fcf8f1] px-8 py-8 sm:grid-cols-2 lg:grid-cols-4 lg:px-12">
           {benefits.map(({ icon: Icon, title, description }) => (

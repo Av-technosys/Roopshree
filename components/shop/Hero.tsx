@@ -12,7 +12,7 @@ const HeroSection = () => {
   return (
     <section className="relative isolate mt-16 overflow-hidden bg-[#d6965f] md:mt-0 md:h-auto md:min-h-svh">
       <Image
-        src="/shop/shop_bg.png"
+        src="/new_banners/image 279.png"
         alt="Bandhej saree collection"
         fill
         priority
@@ -21,12 +21,12 @@ const HeroSection = () => {
       />
       <div className="relative aspect-[1023/1450] overflow-hidden md:hidden">
         <Image
-          src="/shop/sm-shop_bg.png"
+          src="/new_banners/image 279.png"
           alt="Bandhej saree collection"
           fill
           priority
           sizes="100vw"
-          className="object-cover object-top"
+          className="object-cover object-center"
         />
       </div>
       <div className="pointer-events-none absolute -bottom-10 -right-10 z-[2] w-[72vw] max-w-[25rem] md:hidden">

@@ -33,7 +33,7 @@ const Heritage = () => {
       <div className="mx-auto grid max-w-7xl items-center gap-9 px-5 sm:px-6 lg:grid-cols-[0.9fr_1fr] lg:gap-16 lg:px-8">
         <div className="order-2 mx-auto w-full max-w-[365px] lg:order-1 lg:max-w-[31rem]">
           <Image
-            src="/home/card_heritage.png"
+            src="/new_banners/image 275.png"
             alt="Artisan tying Bandhej fabric by hand"
             width={365}
             height={482}
@@ -50,7 +50,7 @@ const Heritage = () => {
             <span className="h-px w-20 bg-linear-to-r from-[#3f2617] via-[#c39150]/45 to-transparent sm:w-28" />
           </div>
 
-          <h2 className="mt-4 max-w-[32rem] font-heading text-[2rem] leading-[1.04] text-black sm:text-5xl lg:text-6xl">
+          <h2 className="mt-4 max-w-[32rem] font-semibold text-2xl leading-[1.04] text-black sm:text-5xl lg:text-6xl">
             Weaving Stories of Tradition
           </h2>
           <p className="mt-3 font-heading text-[1.35rem] italic leading-none text-[#c39150] sm:text-3xl">

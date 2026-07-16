@@ -20,12 +20,14 @@ export function OrderCard({
 
   return (
     <article className="overflow-hidden border border-[#e5d2bd] bg-white shadow-sm">
-      <div className="grid gap-3 bg-[#f1dfc7] px-4 py-3 text-xs text-[#C39150] sm:grid-cols-[1fr_0.8fr_0.8fr_auto] sm:items-center">
-        <OrderMeta label="Order ID" value={order.id} />
-        <OrderMeta label="Date" value={order.date} />
-        <OrderMeta label="Total" value={order.total} />
+      <div className="relative bg-[#f1dfc7] px-4 py-3 text-xs text-[#C39150]">
+        <div className="flex flex-wrap gap-x-4 gap-y-2 pr-20 sm:gap-x-8">
+          <OrderMeta label="Order ID" value={order.id} />
+          <OrderMeta label="Date" value={order.date} />
+          <OrderMeta label="Total" value={order.total} />
+        </div>
         <span
-          className={`w-fit rounded-full px-4 py-1 text-[11px] font-medium ${statusClass}`}
+          className={`absolute right-4 top-1/2 -translate-y-1/2 rounded-full px-4 py-1 text-[11px] font-medium ${statusClass}`}
         >
           {order.status}
         </span>

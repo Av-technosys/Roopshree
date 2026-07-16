@@ -14,25 +14,25 @@ const HeritageSection = () => {
           and vibrant hues. Passed down through
         </p>
 
-        <div className="mx-auto mt-12 grid max-w-5xl gap-y-8 sm:grid-cols-2 md:mt-16 lg:grid-cols-4 lg:gap-y-0">
+        <div className="mx-auto mt-12 grid max-w-5xl grid-cols-2 gap-x-3 gap-y-8 md:mt-16 lg:grid-cols-4 lg:gap-y-0">
           {heritageItems.map((item, index) => (
             <article
               key={item.title}
               className="relative px-5 text-center text-[#3f2617]"
             >
-              <div className="mx-auto flex h-14 w-16 items-end justify-center sm:h-16">
+              <div className="mx-auto flex h-14 w-16 items-center justify-center sm:h-16">
                 <Image
                   src={item.image}
                   alt=""
                   width={96}
                   height={96}
-                  className="max-h-16 w-auto object-contain"
+                  className="max-h-full w-auto object-contain"
                 />
               </div>
-              <h3 className="mt-5 font-heading text-base leading-tight text-[#c39150] sm:text-lg">
+              <h3 className="mt-5 font-heading text-base leading-tight text-[#c39150] sm:text-lg min-h-[2.75rem] flex items-center justify-center lg:min-h-0">
                 {item.title}
               </h3>
-              <p className="mx-auto mt-2 max-w-[10.5rem] text-[0.68rem] font-medium leading-[1.35] text-[#3f2617]/75 sm:text-xs">
+              <p className="mx-auto mt-2 max-w-[10.5rem] text-[0.68rem] font-medium leading-[1.35] text-[#3f2617]/75 sm:text-xs min-h-[4rem] flex items-start justify-center lg:min-h-0">
                 {item.text}
               </p>
 

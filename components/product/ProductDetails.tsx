@@ -184,7 +184,7 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
   }
 
   return (
-    <section className="bg-white pb-14 pt-24 text-[#111] md:pt-20">
+    <section className="bg-white pb-6 pt-24 text-[#111] md:pt-20">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <nav className="mb-6 flex flex-wrap items-center gap-2 text-[0.68rem] font-semibold text-black">
           {breadcrumbLinks.map((item, index) => (
@@ -370,44 +370,6 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
               </div>
             ) : null}
 
-            <div className="mt-6 grid grid-cols-2 gap-2">
-              {isInCart ? (
-                <ProductQuantityControls
-                  quantity={cartQuantity}
-                  onDecrease={() => handleDecreaseCartItem(cartItem)}
-                  onIncrease={() => handleIncreaseCartItem(cartItem)}
-                  onRemove={() => handleRemoveCartItem(cartItem)}
-                />
-              ) : (
-                <Button
-                  onClick={() => handleAddToCart(cartItem)}
-                  disabled={selectedVariant?.stockQuantity === 0}
-                  className="h-12 rounded-none   text-sm font-semibold   disabled:opacity-60"
-                >
-                  {selectedVariant?.stockQuantity === 0
-                    ? "Out of stock"
-                    : "Add to cart"}
-                </Button>
-              )}
-              <Button
-                disabled={selectedVariant?.stockQuantity === 0}
-                onClick={() => {
-                  window.sessionStorage.setItem(
-                    "roopshree-buy-now",
-                    JSON.stringify({
-                      ...cartItem,
-                      quantity: 1,
-                      addedAt: Date.now(),
-                    }),
-                  );
-                  router.push("/checkout?source=buy-now");
-                }}
-                className="h-12 rounded-none bg-[#3f2617] text-sm font-semibold text-white hover:bg-[#3f2617]/90 disabled:opacity-60"
-              >
-                Buy Now
-              </Button>
-            </div>
-
             {product.variants.length > 0 ? (
               <div className="mt-7">
                 <p className="text-xs font-bold uppercase text-black">
@@ -447,6 +409,44 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
                 </div>
               </div>
             ) : null}
+
+            <div className="mt-6 grid grid-cols-2 gap-2">
+              {isInCart ? (
+                <ProductQuantityControls
+                  quantity={cartQuantity}
+                  onDecrease={() => handleDecreaseCartItem(cartItem)}
+                  onIncrease={() => handleIncreaseCartItem(cartItem)}
+                  onRemove={() => handleRemoveCartItem(cartItem)}
+                />
+              ) : (
+                <Button
+                  onClick={() => handleAddToCart(cartItem)}
+                  disabled={selectedVariant?.stockQuantity === 0}
+                  className="h-12 rounded-none   text-sm font-semibold   disabled:opacity-60"
+                >
+                  {selectedVariant?.stockQuantity === 0
+                    ? "Out of stock"
+                    : "Add to cart"}
+                </Button>
+              )}
+              <Button
+                disabled={selectedVariant?.stockQuantity === 0}
+                onClick={() => {
+                  window.sessionStorage.setItem(
+                    "roopshree-buy-now",
+                    JSON.stringify({
+                      ...cartItem,
+                      quantity: 1,
+                      addedAt: Date.now(),
+                    }),
+                  );
+                  router.push("/checkout?source=buy-now");
+                }}
+                className="h-12 rounded-none bg-[#3f2617] text-sm font-semibold text-white hover:bg-[#3f2617]/90 disabled:opacity-60"
+              >
+                Buy Now
+              </Button>
+            </div>
           </div>
         </div>
       </div>

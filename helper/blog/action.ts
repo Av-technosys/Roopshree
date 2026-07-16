@@ -7,8 +7,13 @@ import {
   getBlogByIdService,
   getBlogsService,
   updateBlogService,
+  getBlogCategories as getBlogCategoriesService,
 } from "@/services/blog.service";
 import { validateBlogPayload } from "@/validators/blog.validator";
+
+export async function getBlogCategories() {
+  return getBlogCategoriesService();
+}
 
 export async function getBlogs() {
   return getBlogsService();

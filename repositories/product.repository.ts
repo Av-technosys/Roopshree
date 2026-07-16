@@ -128,6 +128,7 @@ export type ProductDetailVariantRow = {
   id: string
   title: string
   sku: string
+  instagramLink: string | null
   price: number
   strikeThroughPrice: number | null
   stockQuantity: number

@@ -9,6 +9,7 @@ import {
   getCatalogProductPage,
 } from "@/services/product.service";
 import { Metadata } from "next";
+import { Suspense } from "react";
 
 function getParamValue(value?: string | string[]) {
   return Array.isArray(value) ? value[0] : value;
@@ -42,7 +43,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Shop Authentic Bandhani Sarees & Dupattas Online | Roopshree",
-    description: "Browse Roopshree's full collection of Bandhej sarees & dupattas, Gajji silk, zardozi work & gota-patti designs. Handcrafted pieces for weddings & festive wear.",
+    description:
+      "Browse Roopshree's full collection of Bandhej sarees & dupattas, Gajji silk, zardozi work & gota-patti designs. Handcrafted pieces for weddings & festive wear.",
     url: "https://roopshree-one.vercel.app/shop",
     type: "website",
     images: [{ url: "https://roopshree-one.vercel.app/shop/shop_bg.png" }],
@@ -50,15 +52,52 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Shop Authentic Bandhani Sarees & Dupattas Online | Roopshree",
-    description: "Browse Roopshree's full collection of Bandhej sarees & dupattas, Gajji silk, zardozi work & gota-patti designs. Handcrafted pieces for weddings & festive wear.",
+    description:
+      "Browse Roopshree's full collection of Bandhej sarees & dupattas, Gajji silk, zardozi work & gota-patti designs. Handcrafted pieces for weddings & festive wear.",
   },
 };
 
-const page = async ({
+type ShopSearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+function ShopCatalogLoader() {
+  return (
+    <div className="grid min-w-0 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+      <aside className="hidden space-y-4 lg:block">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <div
+            key={index}
+            className="h-12 animate-pulse rounded-[4px] bg-[#f4eadf]"
+          />
+        ))}
+      </aside>
+      <section className="min-w-0">
+        <div className="mb-6 flex gap-6 overflow-hidden">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div
+              key={index}
+              className="h-48 w-36 shrink-0 animate-pulse rounded-[4px] bg-[#f4eadf]"
+            />
+          ))}
+        </div>
+        <div className="grid grid-cols-2 gap-x-3 gap-y-7 md:grid-cols-3 md:gap-x-5 md:gap-y-8 xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <div key={index} className="space-y-3">
+              <div className="aspect-[3/4] animate-pulse rounded-[4px] bg-[#f4eadf]" />
+              <div className="h-4 w-3/4 animate-pulse rounded bg-[#f4eadf]" />
+              <div className="h-4 w-1/2 animate-pulse rounded bg-[#f4eadf]" />
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+async function ShopCatalog({
   searchParams,
 }: {
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-}) => {
+  searchParams?: ShopSearchParams;
+}) {
   const params = await searchParams;
   const filterOptions = await getCatalogFilterOptions();
   const currentPage = Number(getParamValue(params?.page) ?? 1);
@@ -103,26 +142,43 @@ const page = async ({
   ]);
 
   return (
+    <div className="grid min-w-0 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+      <ShopFilters options={filterOptions} />
+      <ShopProducts
+        products={items}
+        categories={categories}
+        filterOptions={filterOptions}
+        total={total}
+        currentPage={Math.max(currentPage, 1)}
+      />
+    </div>
+  );
+}
+
+const page = ({
+  searchParams,
+}: {
+  searchParams?: ShopSearchParams;
+}) => {
+  return (
     <main className="flex-1 overflow-x-hidden">
       <HeroSection />
       <section className="max-w-full overflow-x-hidden bg-white py-10 md:py-14">
         <div className="mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8">
           <div className="mb-5 hidden gap-4 text-xs font-medium text-[#111] lg:grid lg:grid-cols-[260px_minmax(0,1fr)]">
             <p>
-              <Link href="/" className="hover:text-[#C39150]">Home</Link> &nbsp;&gt;&nbsp;{" "}
-              <Link href="/shop" className="hover:text-[#C39150]">Shop</Link>
+              <Link href="/" className="hover:text-[#C39150]">
+                Home
+              </Link>{" "}
+              &nbsp;&gt;&nbsp;{" "}
+              <Link href="/shop" className="hover:text-[#C39150]">
+                Shop
+              </Link>
             </p>
           </div>
-          <div className="grid min-w-0 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-            <ShopFilters options={filterOptions} />
-            <ShopProducts
-              products={items}
-              categories={categories}
-              filterOptions={filterOptions}
-              total={total}
-              currentPage={Math.max(currentPage, 1)}
-            />
-          </div>
+          <Suspense fallback={<ShopCatalogLoader />}>
+            <ShopCatalog searchParams={searchParams} />
+          </Suspense>
           <NewsletterSection />
         </div>
       </section>

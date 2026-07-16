@@ -32,7 +32,6 @@ export function DashboardOverview({
   );
   const defaultAddress =
     addresses.find((address) => address.isDefault) ?? addresses[0] ?? null;
-  console.log(stats);
   return (
     <div>
       <h1 className="hidden font-heading text-2xl font-semibold text-black lg:block">

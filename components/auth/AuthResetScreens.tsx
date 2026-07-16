@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { ArrowLeft, Eye, EyeOff, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
+  forgotPasswordAction,
   confirmForgotPasswordAction,
   confirmSignUpAction,
   resendSignUpOtpAction,
@@ -27,6 +28,7 @@ export function ForgotOtpScreen({
       buttonText="Verify OTP"
       onBackToLogin={onBackToLogin}
       onVerifyOtp={onVerifyOtp}
+      onResendOtp={forgotPasswordAction}
     />
   );
 }
@@ -51,6 +53,7 @@ export function SignupOtpScreen({
       buttonText="Verify OTP"
       onBackToLogin={onBackToLogin}
       onVerifyOtp={onVerifyOtp}
+      onResendOtp={resendSignUpOtpAction}
     />
   );
 }
@@ -109,7 +112,7 @@ export function SetNewPasswordScreen({
           Set New Password
         </h1>
         <p className="mt-2 text-xs text-[#c9914d] sm:text-sm">
-          Enter your registered email to recieve reset link
+          Create a new password for your account
         </p>
       </div>
 
@@ -163,6 +166,7 @@ function OtpScreen({
   buttonText,
   onBackToLogin,
   onVerifyOtp,
+  onResendOtp,
 }: {
   email: string;
   password?: string;
@@ -171,6 +175,11 @@ function OtpScreen({
   buttonText: string;
   onBackToLogin?: () => void;
   onVerifyOtp?: (code: string) => void;
+  onResendOtp?: (params: { email: string }) => Promise<{
+    ok: boolean;
+    error?: string;
+    message?: string;
+  }>;
 }) {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
@@ -230,7 +239,11 @@ function OtpScreen({
     setError("");
     setIsResending(true);
 
-    const response = await resendSignUpOtpAction({ email });
+    if (!onResendOtp) {
+      return;
+    }
+
+    const response = await onResendOtp({ email });
 
     setIsResending(false);
 
@@ -290,7 +303,7 @@ function OtpScreen({
           {isSubmitting ? "Verifying..." : buttonText}
         </button>
 
-        {password && (
+        {onResendOtp && (
           <button
             type="button"
             disabled={isResending}

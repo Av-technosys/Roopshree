@@ -56,8 +56,10 @@ function getSubtotal(items: Array<{ productPrice: number; quantity: number }>) {
 }
 
 function mapOrderCard(row: Awaited<ReturnType<typeof listDashboardOrderRows>>[number]) {
-  const firstItem = row.items[0]
   const totalQuantity = row.items.reduce((total, item) => total + item.quantity, 0)
+  const itemCount = row.items.length
+  const itemLabel = itemCount === 1 ? 'item' : 'items'
+  const quantityLabel = totalQuantity === 1 ? 'piece' : 'pieces'
 
   return {
     id: row.order.orderNumber || row.order.id,
@@ -66,10 +68,9 @@ function mapOrderCard(row: Awaited<ReturnType<typeof listDashboardOrderRows>>[nu
     total: formatCurrency(row.order.totalAmount),
     status: getStatusLabel(row.order.status),
     statusTone: getStatusTone(row.order.status),
-    product: firstItem?.productName ?? 'Order item',
-    variant: firstItem?.variantTitle ?? '',
+    itemCount,
     quantity: totalQuantity,
-    image: firstItem?.productImage ? getS3ObjectPreviewUrl(firstItem.productImage) : '/home/new-arrival-model.png',
+    summary: `${itemCount} ${itemLabel} · ${totalQuantity} ${quantityLabel}`,
   }
 }
 

@@ -6,8 +6,10 @@ import {
   getDashboardOrders,
 } from "@/services/order.service"
 import { getDashboardReviewCount } from "@/services/review.service"
+import { DashboardOverviewSkeleton } from "@/components/dashboard/DashboardSkeletons"
+import { Suspense } from "react"
 
-export default async function Page() {
+async function DashboardOverviewContent() {
   const [addresses, orders, orderCount, wishlistCount, reviewCount] = await Promise.all([
     getAddresses(),
     getDashboardOrders(2),
@@ -24,5 +26,13 @@ export default async function Page() {
       wishlistCount={wishlistCount}
       reviewCount={reviewCount}
     />
+  )
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<DashboardOverviewSkeleton />}>
+      <DashboardOverviewContent />
+    </Suspense>
   )
 }

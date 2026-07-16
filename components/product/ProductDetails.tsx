@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { type MouseEvent, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -22,6 +22,7 @@ import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
 import type { CartItemInput } from "@/store/cartTypes";
 import { useToast } from "@/components/common/ToastProvider";
+import { IconBrandInstagram } from "@tabler/icons-react";
 
 export type ProductDetailView = {
   id: string;
@@ -36,6 +37,7 @@ export type ProductDetailView = {
     id: string;
     title: string;
     sku: string;
+    instagramLink: string | null;
     price: number;
     strikeThroughPrice: number | null;
     stockQuantity: number;
@@ -86,7 +88,7 @@ const breadcrumbLinks = [
   { label: "Home", href: "/" },
   { label: "Shop", href: "/shop" },
   { label: "Product Details", href: null },
-]
+];
 
 const ProductDetails = ({ product }: { product: ProductDetailView }) => {
   const router = useRouter();
@@ -106,6 +108,8 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
     defaultVariant?.id ?? "",
   );
   const [selectedMediaId, setSelectedMediaId] = useState<string | null>(null);
+  const [isImageZoomed, setIsImageZoomed] = useState(false);
+  const [imageZoomOrigin, setImageZoomOrigin] = useState({ x: 50, y: 50 });
   const selectedVariant =
     product.variants.find((variant) => variant.id === selectedVariantId) ??
     defaultVariant;
@@ -170,6 +174,14 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
   const isWishlisted = useWishlistStore((state) =>
     state.hasItem(cartItem.productId, cartItem.dbProductId),
   );
+  function handleImageZoomMove(event: MouseEvent<HTMLDivElement>) {
+    const bounds = event.currentTarget.getBoundingClientRect();
+
+    setImageZoomOrigin({
+      x: ((event.clientX - bounds.left) / bounds.width) * 100,
+      y: ((event.clientY - bounds.top) / bounds.height) * 100,
+    });
+  }
 
   return (
     <section className="bg-white pb-14 pt-24 text-[#111] md:pt-20">
@@ -193,16 +205,31 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
 
         <div className="grid gap-9 lg:grid-cols-[1.05fr_0.95fr] lg:gap-7">
           <div className="min-w-0">
-            <div className="relative aspect-[0.83] overflow-hidden bg-[#f2e4d7] sm:aspect-[0.78] lg:aspect-[0.83]">
+            <div
+              className="relative aspect-[0.83] overflow-hidden bg-[#f2e4d7] sm:aspect-[0.78] lg:aspect-[0.83]"
+              onMouseEnter={() => setIsImageZoomed(true)}
+              onMouseLeave={() => {
+                setIsImageZoomed(false);
+                setImageZoomOrigin({ x: 50, y: 50 });
+              }}
+              onMouseMove={handleImageZoomMove}
+            >
               {displayedImage ? (
-                <Image
-                  src={displayedImage}
-                  alt={displayedAlt}
-                  fill
-                  priority
-                  sizes="(min-width: 1024px) 52vw, 100vw"
-                  className="object-cover object-top"
-                />
+                <div className="flex h-full w-full cursor-zoom-in items-start justify-center">
+                  <Image
+                    src={displayedImage}
+                    alt={displayedAlt}
+                    priority
+                    height={700}
+                    width={500}
+                    style={{
+                      transformOrigin: `${imageZoomOrigin.x}% ${imageZoomOrigin.y}%`,
+                    }}
+                    className={`h-auto w-full object-contain object-top transition-transform duration-200 ease-out ${
+                      isImageZoomed ? "scale-[1.9]" : "scale-100"
+                    }`}
+                  />
+                </div>
               ) : (
                 <div className="flex h-full items-center justify-center px-6 text-center text-sm font-medium text-[#3f2617]/70">
                   Product image coming soon
@@ -283,6 +310,22 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
             </div>
 
             <div className=" mt-6 flex gap-4">
+              {selectedVariant?.instagramLink ? (
+                <Button
+                  asChild
+                  variant="outline"
+                  className="rounded-full border-[#d8b278] bg-white text-sm font-medium text-[#3f2617] hover:bg-[#fbf3ea]"
+                >
+                  <Link
+                    href={selectedVariant.instagramLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="View this variant on Instagram"
+                  >
+                    <IconBrandInstagram className="size-4 text-[#c39150]" />
+                  </Link>
+                </Button>
+              ) : null}
               <Button
                 variant="outline"
                 onClick={() => handleToggleWishlist(cartItem)}

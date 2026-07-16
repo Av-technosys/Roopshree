@@ -51,6 +51,9 @@ export default function OrderClient({
   const [searchText, setSearchText] = useState("");
   const debouncedSearch = useDebounce(searchText, 800);
   const selectedOrderStatus = status || undefined;
+  const tableKey = `${currentPage}:${pageSize}:${status}:${order
+    .map((row) => `${row.id}:${row.status}`)
+    .join("|")}`;
 
   useEffect(() => {
     startTransition(() => updateQuery("search", debouncedSearch));
@@ -94,7 +97,12 @@ export default function OrderClient({
                 <Loader2 className="size-6 animate-spin text-primary" />
               </div>
             ) : null}
-            <OrderTable page={currentPage} orders={order} pageSize={pageSize} />
+            <OrderTable
+              key={tableKey}
+              page={currentPage}
+              orders={order}
+              pageSize={pageSize}
+            />
           </div>
           <ProductPagination currentPage={currentPage} totalPages={total} />
         </CardContent>

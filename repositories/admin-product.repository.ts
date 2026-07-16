@@ -131,6 +131,7 @@ function normalizeVariants(variants: any[]) {
       value: {
         productId: '',
         sku: String(variant.sku ?? '').trim(),
+        instagramLink: String(variant.instagramLink ?? '').trim() || null,
         title: String(variant.title ?? '').trim(),
         price: toPaise(variant.price),
         strikeThroughPrice: variant.strikeThroughPrice

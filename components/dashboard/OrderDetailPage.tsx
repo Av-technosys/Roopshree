@@ -1,20 +1,20 @@
-import { notFound } from "next/navigation"
-import Image from "next/image"
+import { notFound } from "next/navigation";
+import Image from "next/image";
 
 import {
   DashboardCard,
   DashboardPageTitle,
-} from "@/components/dashboard/DashboardPrimitives"
-import { OrderCard } from "@/components/dashboard/OrderCard"
-import type { getDashboardOrderDetails } from "@/services/order.service"
+} from "@/components/dashboard/DashboardPrimitives";
+import { OrderCard } from "@/components/dashboard/OrderCard";
+import type { getDashboardOrderDetails } from "@/services/order.service";
 
 export function OrderDetailPage({
   details,
 }: {
-  details: Awaited<ReturnType<typeof getDashboardOrderDetails>>
+  details: Awaited<ReturnType<typeof getDashboardOrderDetails>>;
 }) {
   if (!details) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -69,7 +69,7 @@ export function OrderDetailPage({
       </DashboardCard>
 
       <div className="mt-5">
-        <OrderCard order={details.order} />
+        <OrderCard order={details.order} showViewDetail={false} />
       </div>
 
       <DashboardCard className="mt-5 overflow-hidden">
@@ -117,5 +117,5 @@ export function OrderDetailPage({
         </div>
       </DashboardCard>
     </div>
-  )
+  );
 }

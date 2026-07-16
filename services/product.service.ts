@@ -263,6 +263,7 @@ export async function getProductDetailsBySlug(slug: string) {
       id: variant.id,
       title: variant.title,
       sku: variant.sku,
+      instagramLink: variant.instagramLink,
       price: variant.price / 100,
       strikeThroughPrice: variant.strikeThroughPrice
         ? variant.strikeThroughPrice / 100

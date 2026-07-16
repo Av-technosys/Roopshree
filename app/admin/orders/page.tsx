@@ -11,7 +11,7 @@ interface PageProps {
   }>;
 }
 
-const PAGE_SIZE = pageSize
+const PAGE_SIZE = pageSize;
 
 function toInt(value: string | undefined, fallback: number) {
   const n = Number(value);
@@ -19,31 +19,29 @@ function toInt(value: string | undefined, fallback: number) {
 }
 
 const Page = async ({ searchParams }: PageProps) => {
-  const params =  await searchParams;
+  const params = await searchParams;
 
   const page = toInt(params.page, 1);
   const pageSize = toInt(params.page_size, PAGE_SIZE);
   const search = params.search ?? "";
-const status = params.status ?? "";
+  const status = params.status ?? "";
 
-const result = await fetchOrders({
-  page,
-  pageSize,
-  search,
-  status,
-});
+  const result = await fetchOrders({
+    page,
+    pageSize,
+    search,
+    status,
+  });
 
   return (
-<OrderClient
-  order={result.data}
-  total={result.meta.totalPages}
-  currentPage={result.meta.page}
-  pageSize={result.meta.pageSize}
-  status={status}
-/>
-
+    <OrderClient
+      order={result.data}
+      total={result.meta.totalPages}
+      currentPage={result.meta.page}
+      pageSize={result.meta.pageSize}
+      status={status}
+    />
   );
 };
 
 export default Page;
-

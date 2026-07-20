@@ -155,11 +155,7 @@ async function ShopCatalog({
   );
 }
 
-const page = ({
-  searchParams,
-}: {
-  searchParams?: ShopSearchParams;
-}) => {
+const page = ({ searchParams }: { searchParams?: ShopSearchParams }) => {
   return (
     <main className="flex-1 overflow-x-hidden">
       <HeroSection />
@@ -179,7 +175,7 @@ const page = ({
           <Suspense fallback={<ShopCatalogLoader />}>
             <ShopCatalog searchParams={searchParams} />
           </Suspense>
-          <NewsletterSection />
+          {/* <NewsletterSection /> */}
         </div>
       </section>
     </main>

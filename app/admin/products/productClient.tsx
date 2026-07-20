@@ -44,7 +44,9 @@ export default function ProductClient({
   const updateQuery = useUpdateQuery();
   const [isPending, startTransition] = useTransition();
   const [searchText, setSearchText] = useState("");
-  const [categories, setCategories] = useState<{ value: string; label: string }[]>([]);
+  const [categories, setCategories] = useState<
+    { value: string; label: string }[]
+  >([]);
   const debouncedSearch = useDebounce(searchText, 800);
   const selectedCategory = searchParams.get("category") ?? undefined;
   const selectedStatus = searchParams.get("status") ?? undefined;
@@ -55,7 +57,12 @@ export default function ProductClient({
 
   useEffect(() => {
     getCategories().then((data: CategoryOption[]) => {
-      setCategories(data.map((category) => ({ value: category.slug, label: category.name })));
+      setCategories(
+        data.map((category) => ({
+          value: category.slug,
+          label: category.name,
+        })),
+      );
     });
   }, []);
 
@@ -63,7 +70,9 @@ export default function ProductClient({
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Product Management</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">
+            Product Management
+          </h1>
           <p className="text-sm text-gray-500 mt-1">
             Manage products from the current schema.
           </p>
@@ -93,21 +102,25 @@ export default function ProductClient({
                 label="Category"
                 selectItems={categories}
                 value={selectedCategory}
-                onValueChange={(value) => startTransition(() => updateQuery("category", value))}
+                onValueChange={(value) =>
+                  startTransition(() => updateQuery("category", value))
+                }
               />
               <Select
                 placeholder="Select Status"
                 label="Status"
                 selectItems={statusOptions}
                 value={selectedStatus}
-                onValueChange={(value) => startTransition(() => updateQuery("status", value))}
+                onValueChange={(value) =>
+                  startTransition(() => updateQuery("status", value))
+                }
               />
             </div>
-            
+
             <div className="flex gap-3 shrink-0">
-              <Button onClick={() => router.push("/admin/products/upload-csv")} variant="outline">
+              {/* <Button onClick={() => router.push("/admin/products/upload-csv")} variant="outline">
                 Upload CSV
-              </Button>
+              </Button> */}
               <Button onClick={() => router.push("/admin/products/add")}>
                 <Plus className="w-4.5 h-4.5 mr-1" />
                 Add Product

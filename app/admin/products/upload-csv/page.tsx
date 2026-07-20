@@ -68,9 +68,9 @@ export default function UploadCSVPage() {
           onChange={(event) => setFile(event.target.files?.[0] ?? null)}
         />
         <div className="mt-4 flex gap-4">
-          <Button type="button" onClick={handleUpload} disabled={loading}>
+          {/* <Button type="button" onClick={handleUpload} disabled={loading}>
             {loading ? "Uploading..." : "Upload CSV"}
-          </Button>
+          </Button> */}
           <Button asChild type="button" variant="outline">
             <a href="/api/products/sample-csv">Download Sample CSV</a>
           </Button>
@@ -90,7 +90,10 @@ export default function UploadCSVPage() {
               <h2 className="text-xl font-bold">Failed Rows</h2>
               <div className="mt-4 space-y-3">
                 {result.failedRows.map((item, index) => (
-                  <div key={`${item.sku ?? "row"}-${index}`} className="rounded-lg border p-4">
+                  <div
+                    key={`${item.sku ?? "row"}-${index}`}
+                    className="rounded-lg border p-4"
+                  >
                     <p>SKU: {item.sku ?? "-"}</p>
                     <p>Error: {item.error}</p>
                   </div>

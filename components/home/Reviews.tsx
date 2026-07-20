@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Image from "next/image"
-import { ChevronLeft, ChevronRight, Star } from "lucide-react"
+import * as React from "react";
+import Image from "next/image";
+import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 
 import {
   Carousel,
@@ -11,52 +11,44 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/ui/carousel"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/carousel";
+import { cn } from "@/lib/utils";
 
 const reviews = [
   {
     quote:
-      "Absolutely loved the craftsmanship and detailing of the Bandhej saree. The fabric feels premium and the colors are even more beautiful in real life!",
-    name: "Priya Sharma",
-    location: "Jaipur, Rajasthan",
-    avatar: "/home/new-arrival-model.png",
+      "I had a very good experience with them.💫 The response was great and the product quality is excellent. They have an amazing collection and one must definitely check out their products. The embroidery work is very fine, detailed and beautifully done. They are also very cooperative and responsive, especially when it comes to customization. You can completely trust them and confidently buy their products. Overall a wonderful experience—highly recommended!💫",
+    name: "Pratibha soni",
   },
   {
     quote:
-      "Absolutely loved the craftsmanship and detailing of the Bandhej saree. The fabric feels premium and the colors are even more beautiful in real life!",
-    name: "Priya Sharma",
-    location: "Jaipur, Rajasthan",
-    avatar: "/home/new-arrival-model.png",
+      "Very nice previously I am sacred about quality of product when I received it it got 💯 marks I loved it",
+    name: "Amita Gupta",
   },
   {
     quote:
-      "Absolutely loved the craftsmanship and detailing of the Bandhej saree. The fabric feels premium and the colors are even more beautiful in real life!",
-    name: "Priya Sharma",
-    location: "Jaipur, Rajasthan",
-    avatar: "/home/new-arrival-model.png",
+      "I recently had the pleasure of visiting roop shree, a delightful traditional shop nestled in Sikar (Raj).The shop's commitment to preserving tradition is evident in its carefully curated selection of Peela Chunri, each one reflecting quality craftsmanship and attention to detail. The staff's friendly demeanor and extensive knowledge added to the overall experience, making me feel like a valued customer. It's a true gem in the modern world of retail.",
+    name: "Kavita Agarwal",
   },
   {
     quote:
-      "Absolutely loved the craftsmanship and detailing of the Bandhej saree. The fabric feels premium and the colors are even more beautiful in real life!",
-    name: "Priya Sharma",
-    location: "Jaipur, Rajasthan",
-    avatar: "/home/new-arrival-model.png",
+      "Super happy with the product that I have recieved, the behaviour is so comforting and assisting ...thank you sooo much",
+    name: "Nilam Rani",
   },
-]
+];
 
 const Divider = ({ className }: { className?: string }) => (
   <div
     className={cn(
       "mx-auto flex w-44 items-center justify-center gap-2 text-[#c39150]",
-      className
+      className,
     )}
   >
     <span className="h-px flex-1 bg-linear-to-r from-transparent to-[#c39150]" />
     <span className="size-2 rotate-45 bg-[#C39150]" />
     <span className="h-px flex-1 bg-linear-to-l from-transparent to-[#c39150]" />
   </div>
-)
+);
 
 const ReviewCard = ({ review }: { review: (typeof reviews)[number] }) => {
   return (
@@ -77,58 +69,46 @@ const ReviewCard = ({ review }: { review: (typeof reviews)[number] }) => {
         ))}
       </div>
 
-      <p className="mx-auto mt-4 max-w-[14rem] text-[0.74rem] font-medium leading-[1.22] sm:mt-5 sm:max-w-[16rem] sm:text-[0.88rem] sm:leading-[1.45]">
+      <p className="mx-auto mt-4 max-w-[14rem] line-clamp-4 font-medium leading-[1.22] sm:mt-5 sm:max-w-[16rem] sm:text-[0.88rem] sm:leading-[1.45]">
         &ldquo;{review.quote}&rdquo;
       </p>
 
       <Divider className="mt-auto w-28 sm:mt-6 sm:w-36" />
 
       <div className="mt-3 flex items-center justify-center gap-3 text-left sm:mt-5 sm:justify-start">
-        <div className="relative size-8 overflow-hidden rounded-full bg-white sm:size-10">
-          <Image
-            src={review.avatar}
-            alt={review.name}
-            fill
-            sizes="48px"
-            className="object-cover object-top"
-          />
-        </div>
         <div>
           <h3 className="font-heading text-base font-semibold leading-none sm:text-xl">
             {review.name}
           </h3>
-          <p className="mt-1 text-[0.68rem] leading-none sm:text-sm">
-            {review.location}
-          </p>
         </div>
       </div>
     </article>
-  )
-}
+  );
+};
 
 const Reviews = () => {
-  const [api, setApi] = React.useState<CarouselApi>()
-  const [selectedIndex, setSelectedIndex] = React.useState(0)
-  const [scrollSnaps, setScrollSnaps] = React.useState<number[]>([])
+  const [api, setApi] = React.useState<CarouselApi>();
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [scrollSnaps, setScrollSnaps] = React.useState<number[]>([]);
 
   React.useEffect(() => {
-    if (!api) return
+    if (!api) return;
 
     const update = () => {
-      setSelectedIndex(api.selectedScrollSnap())
-      setScrollSnaps(api.scrollSnapList())
-    }
+      setSelectedIndex(api.selectedScrollSnap());
+      setScrollSnaps(api.scrollSnapList());
+    };
 
-    const frame = requestAnimationFrame(update)
-    api.on("select", update)
-    api.on("reInit", update)
+    const frame = requestAnimationFrame(update);
+    api.on("select", update);
+    api.on("reInit", update);
 
     return () => {
-      cancelAnimationFrame(frame)
-      api.off("select", update)
-      api.off("reInit", update)
-    }
-  }, [api])
+      cancelAnimationFrame(frame);
+      api.off("select", update);
+      api.off("reInit", update);
+    };
+  }, [api]);
 
   return (
     <section className="relative isolate overflow-hidden bg-[#f8ead7] py-8 sm:py-10 md:py-12">
@@ -197,7 +177,7 @@ const Reviews = () => {
               onClick={() => api?.scrollTo(index)}
               className={cn(
                 "h-2 rounded-full bg-[#C39150] transition-all",
-                selectedIndex === index ? "w-7" : "w-2 opacity-80"
+                selectedIndex === index ? "w-7" : "w-2 opacity-80",
               )}
             />
           ))}
@@ -211,7 +191,7 @@ const Reviews = () => {
         </p>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default Reviews
+export default Reviews;

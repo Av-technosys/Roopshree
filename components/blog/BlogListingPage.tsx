@@ -1,8 +1,8 @@
-import Image from "next/image"
-import Link from "next/link"
-import { CalendarDays, Search, UserRound } from "lucide-react"
+import Image from "next/image";
+import Link from "next/link";
+import { CalendarDays, Search, UserRound } from "lucide-react";
 
-import type { BlogCategoryView, BlogView } from "@/services/blog.service"
+import type { BlogCategoryView, BlogView } from "@/services/blog.service";
 
 export function BlogListingPage({
   posts,
@@ -10,10 +10,10 @@ export function BlogListingPage({
   activeCategory,
   search,
 }: {
-  posts: BlogView[]
-  categories: BlogCategoryView[]
-  activeCategory?: string
-  search?: string
+  posts: BlogView[];
+  categories: BlogCategoryView[];
+  activeCategory?: string;
+  search?: string;
 }) {
   return (
     <main className="flex-1 bg-white pt-16">
@@ -55,7 +55,7 @@ export function BlogListingPage({
                 name="search"
                 type="search"
                 defaultValue={search}
-                placeholder="Search blog / journals"
+                placeholder="Search blog"
                 className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[#3F2617]/70"
               />
               <Search className="size-4" />
@@ -76,7 +76,7 @@ export function BlogListingPage({
         )}
       </section>
     </main>
-  )
+  );
 }
 
 function BlogHero() {
@@ -112,7 +112,7 @@ function BlogHero() {
         </div>
       </div>
     </section>
-  )
+  );
 }
 
 export function BlogCard({ post }: { post: BlogView }) {
@@ -152,5 +152,5 @@ export function BlogCard({ post }: { post: BlogView }) {
         </div>
       </Link>
     </article>
-  )
+  );
 }

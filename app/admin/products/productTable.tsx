@@ -147,10 +147,12 @@ export default function ProductTable({ products }: { products: ProductRow[] }) {
                           Duplicate this product?
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          A copy of &quot;{product.name}&quot; will be created
-                          as a <strong>Draft</strong>. You will be redirected to
-                          the new product&apos;s edit page to review and publish
-                          it.
+                          <p className="break-words whitespace-pre-wrap">
+                            A copy of &quot;{product.name}&quot; will be created
+                            as a <strong>Draft</strong>. You will be redirected
+                            to the new product&apos;s edit page to review and
+                            publish it.
+                          </p>
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -184,8 +186,10 @@ export default function ProductTable({ products }: { products: ProductRow[] }) {
                           Delete product permanently?
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          This removes the product and related rows from the
-                          database.
+                          <p className="break-words whitespace-pre-wrap">
+                            This removes the product and related rows <br /> from
+                            the database.
+                          </p>
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>

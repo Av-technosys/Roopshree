@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import { motion } from "framer-motion"
+import Image from "next/image";
+import { motion } from "framer-motion";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 22 },
   visible: { opacity: 1, y: 0 },
-}
+};
 
 const HeroSection = () => {
   return (
@@ -70,13 +70,13 @@ const HeroSection = () => {
           <motion.p
             variants={fadeUp}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="mt-4 max-w-[16rem] text-[0.68rem] leading-[1.45] text-white md:mt-6 md:max-w-md md:text-base md:leading-6 md:text-[#6b6f72]"
+            className="mt-4 max-w-[16rem] text-[0.68rem] leading-[1.45] text-white md:mt-6 md:max-w-md md:text-base md:leading-6 md:text-[#535456]"
           >
             Timeless Bandhej sarees, crafted with intricate tie-dye techniques
             passed down through generations.
           </motion.p>
 
-          <motion.p
+          {/* <motion.p
             variants={fadeUp}
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="mt-3 max-w-[16.5rem] text-[0.68rem] leading-[1.45] text-white md:mt-6 md:max-w-xl md:text-base md:leading-6 md:text-[#6b6f72]"
@@ -85,11 +85,11 @@ const HeroSection = () => {
             artistry, intricate patterns, and premium fabrics with Rajasthan’s
             rich heritage — creating elegant drapes perfect for weddings,
             festivities, and modern traditional styling.
-          </motion.p>
+          </motion.p> */}
         </motion.div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default HeroSection
+export default HeroSection;

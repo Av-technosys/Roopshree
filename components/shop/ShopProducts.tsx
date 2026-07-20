@@ -26,6 +26,7 @@ import { useCartStore } from "@/store/cartStore"
 import { useWishlistStore } from "@/store/wishlistStore"
 
 const pageSize = 12
+const visiblePaginationPages = 4
 
 export type ShopCategory = {
   id?: string
@@ -33,6 +34,19 @@ export type ShopCategory = {
   slug?: string
   href?: string
   image: string
+}
+
+function getVisiblePages(currentPage: number, totalPages: number) {
+  const pageCount = Math.min(visiblePaginationPages, totalPages)
+  const halfWindow = Math.floor(pageCount / 2)
+  let startPage = Math.max(1, currentPage - halfWindow)
+  const endOverflow = startPage + pageCount - 1 - totalPages
+
+  if (endOverflow > 0) {
+    startPage = Math.max(1, startPage - endOverflow)
+  }
+
+  return Array.from({ length: pageCount }, (_, index) => startPage + index)
 }
 
 export default function ShopProducts({
@@ -53,6 +67,9 @@ export default function ShopProducts({
   const [sortBy, setSortBy] = useState(searchParams.get("sort") ?? "featured")
   const totalPages = Math.max(1, Math.ceil(total / pageSize) || 1)
   const pageNumber = Math.min(Math.max(currentPage, 1), totalPages)
+  const visiblePages = getVisiblePages(pageNumber, totalPages)
+  const firstVisiblePage = visiblePages[0] ?? 1
+  const lastVisiblePage = visiblePages[visiblePages.length - 1] ?? totalPages
 
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
@@ -170,7 +187,22 @@ export default function ShopProducts({
         >
           <ChevronLeft className="size-4" />
         </Link>
-        {Array.from({ length: Math.min(4, totalPages) }, (_, index) => index + 1).map((page) => (
+        {firstVisiblePage > 1 ? (
+          <>
+            <Link
+              href={buildHref({ page: 1 })}
+              className="flex size-8 items-center justify-center rounded-[3px] border border-[#d8a15a] bg-white text-[#3F2617] transition hover:border-[#c39150] hover:text-[#c39150]"
+            >
+              1
+            </Link>
+            {firstVisiblePage > 2 ? (
+              <span className="flex size-8 items-center justify-center text-[#3F2617]/55">
+                ...
+              </span>
+            ) : null}
+          </>
+        ) : null}
+        {visiblePages.map((page) => (
           <Link
             key={page}
             href={buildHref({ page })}
@@ -183,11 +215,13 @@ export default function ShopProducts({
             {page}
           </Link>
         ))}
-        {totalPages > 4 ? (
+        {lastVisiblePage < totalPages ? (
           <>
-            <span className="flex size-8 items-center justify-center text-[#3F2617]/55">
-              ...
-            </span>
+            {lastVisiblePage < totalPages - 1 ? (
+              <span className="flex size-8 items-center justify-center text-[#3F2617]/55">
+                ...
+              </span>
+            ) : null}
             <Link
               href={buildHref({ page: totalPages })}
               className={`flex h-8 min-w-8 items-center justify-center rounded-[3px] border px-2 transition ${

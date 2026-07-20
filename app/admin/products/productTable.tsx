@@ -143,11 +143,14 @@ export default function ProductTable({ products }: { products: ProductRow[] }) {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Duplicate this product?</AlertDialogTitle>
+                        <AlertDialogTitle>
+                          Duplicate this product?
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                          A copy of &quot;{product.name}&quot; will be created as a{" "}
-                          <strong>Draft</strong>. You will be redirected to the
-                          new product&apos;s edit page to review and publish it.
+                          A copy of &quot;{product.name}&quot; will be created
+                          as a <strong>Draft</strong>. You will be redirected to
+                          the new product&apos;s edit page to review and publish
+                          it.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -177,19 +180,28 @@ export default function ProductTable({ products }: { products: ProductRow[] }) {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete product permanently?</AlertDialogTitle>
+                        <AlertDialogTitle>
+                          Delete product permanently?
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                          This removes the product and related rows from the database.
+                          This removes the product and related rows from the
+                          database.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel disabled={isPending}>
+                          Cancel
+                        </AlertDialogCancel>
                         <AlertDialogAction
                           disabled={isPending}
                           onClick={() => handleDelete(product.id)}
                           className="bg-red-600 hover:bg-red-700"
                         >
-                          {isPending ? <Loader2 className="animate-spin" /> : "Delete"}
+                          {isPending ? (
+                            <Loader2 className="animate-spin" />
+                          ) : (
+                            "Delete"
+                          )}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>

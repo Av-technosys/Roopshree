@@ -1,24 +1,18 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import Link from "next/link"
-import {
-  Heart,
-  Minus,
-  Plus,
-  Star,
-  Trash2,
-} from "lucide-react"
+import Image from "next/image";
+import Link from "next/link";
+import { Heart, Minus, Plus, Star, Trash2 } from "lucide-react";
 
 import {
   formatPrice,
   productToCartItem,
   type Product,
-} from "@/components/global/const"
-import { useAddToCart } from "@/hooks/useAddToCart"
-import { useWishlist } from "@/hooks/useWishlist"
-import { useCartStore } from "@/store/cartStore"
-import { useWishlistStore } from "@/store/wishlistStore"
+} from "@/components/global/const";
+import { useAddToCart } from "@/hooks/useAddToCart";
+import { useWishlist } from "@/hooks/useWishlist";
+import { useCartStore } from "@/store/cartStore";
+import { useWishlistStore } from "@/store/wishlistStore";
 
 export function ProductCard({ product }: { product: Product }) {
   const {
@@ -26,21 +20,20 @@ export function ProductCard({ product }: { product: Product }) {
     handleDecreaseCartItem,
     handleIncreaseCartItem,
     handleRemoveCartItem,
-  } = useAddToCart()
-  const { handleToggleWishlist } = useWishlist()
-  const storeItem = productToCartItem(product)
-  const cartQuantity = useCartStore(
-    (state) =>
-      state.getItemQuantity(
-        storeItem.productId,
-        storeItem.attributes,
-        storeItem.variantId
-      )
-  )
+  } = useAddToCart();
+  const { handleToggleWishlist } = useWishlist();
+  const storeItem = productToCartItem(product);
+  const cartQuantity = useCartStore((state) =>
+    state.getItemQuantity(
+      storeItem.productId,
+      storeItem.attributes,
+      storeItem.variantId,
+    ),
+  );
   const isWishlisted = useWishlistStore((state) =>
-    state.hasItem(storeItem.productId, storeItem.dbProductId)
-  )
-  const isInCart = cartQuantity > 0
+    state.hasItem(storeItem.productId, storeItem.dbProductId),
+  );
+  const isInCart = cartQuantity > 0;
 
   return (
     <article className="group min-w-0">
@@ -54,8 +47,8 @@ export function ProductCard({ product }: { product: Product }) {
             <Image
               src={product.image}
               alt={product.name}
-              fill
-              sizes="(min-width: 1280px) 220px, (min-width: 768px) 28vw, 48vw"
+              width={600}
+              height={600}
               className={`object-cover transition duration-500 group-hover:scale-[1.04] ${product.imageClass ?? ""}`}
             />
           ) : (
@@ -72,7 +65,10 @@ export function ProductCard({ product }: { product: Product }) {
             isWishlisted ? "md:opacity-100" : ""
           }`}
         >
-          <Heart className="size-4" fill={isWishlisted ? "currentColor" : "none"} />
+          <Heart
+            className="size-4"
+            fill={isWishlisted ? "currentColor" : "none"}
+          />
         </button>
         <div
           className={`absolute inset-x-2 bottom-2 z-10 transition duration-300 md:inset-x-3 md:bottom-3 ${
@@ -117,7 +113,7 @@ export function ProductCard({ product }: { product: Product }) {
         </p>
       </Link>
     </article>
-  )
+  );
 }
 
 function CartQuantityControls({
@@ -127,11 +123,11 @@ function CartQuantityControls({
   onIncrease,
   onRemove,
 }: {
-  quantity: number
-  productName: string
-  onDecrease: () => void
-  onIncrease: () => void
-  onRemove: () => void
+  quantity: number;
+  productName: string;
+  onDecrease: () => void;
+  onIncrease: () => void;
+  onRemove: () => void;
 }) {
   return (
     <div className="grid h-10 grid-cols-[40px_1fr_40px_40px] overflow-hidden rounded-[4px] bg-white text-[#3F2617] shadow-lg shadow-black/10">
@@ -163,5 +159,5 @@ function CartQuantityControls({
         <Trash2 className="size-4" />
       </button>
     </div>
-  )
+  );
 }

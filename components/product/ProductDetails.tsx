@@ -1,6 +1,6 @@
 "use client";
 
-import { type MouseEvent, useMemo, useState } from "react";
+import { type MouseEvent, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -110,6 +110,7 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
   const [selectedMediaId, setSelectedMediaId] = useState<string | null>(null);
   const [isImageZoomed, setIsImageZoomed] = useState(false);
   const [imageZoomOrigin, setImageZoomOrigin] = useState({ x: 50, y: 50 });
+  const galleryScrollerRef = useRef<HTMLDivElement>(null);
   const selectedVariant =
     product.variants.find((variant) => variant.id === selectedVariantId) ??
     defaultVariant;
@@ -182,6 +183,22 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
       y: ((event.clientY - bounds.top) / bounds.height) * 100,
     });
   }
+  function selectGalleryImage(imageId: string) {
+    setSelectedMediaId(imageId);
+  }
+  function scrollGallery(direction: "previous" | "next") {
+    const scroller = galleryScrollerRef.current;
+
+    if (!scroller) return;
+
+    scroller.scrollBy({
+      left:
+        direction === "previous"
+          ? -scroller.clientWidth * 0.85
+          : scroller.clientWidth * 0.85,
+      behavior: "smooth",
+    });
+  }
 
   return (
     <section className="bg-white pb-6 pt-24 text-[#111] md:pt-20">
@@ -206,7 +223,7 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
         <div className="grid gap-9 lg:grid-cols-[1.05fr_0.95fr] lg:gap-7">
           <div className="min-w-0">
             <div
-              className="relative aspect-[0.83] overflow-hidden bg-[#f2e4d7] sm:aspect-[0.78] lg:aspect-[0.83]"
+              className="relative overflow-hidden bg-[#f2e4d7]"
               onMouseEnter={() => setIsImageZoomed(true)}
               onMouseLeave={() => {
                 setIsImageZoomed(false);
@@ -242,18 +259,22 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
                 <button
                   type="button"
                   aria-label="Previous product image"
-                  className="hidden text-[#c39150] md:block"
+                  onClick={() => scrollGallery("previous")}
+                  className="text-[#c39150] transition hover:text-[#3f2617]"
                 >
                   <ChevronLeft className="size-4" />
                 </button>
 
-                <div className="grid flex-1 grid-cols-4 gap-3 sm:gap-5">
-                  {galleryMedia.slice(0, 4).map((image) => (
+                <div
+                  ref={galleryScrollerRef}
+                  className="scrollbar-hidden flex flex-1 snap-x gap-3 overflow-x-auto scroll-smooth sm:gap-5"
+                >
+                  {galleryMedia.map((image) => (
                     <button
                       key={image.id}
                       type="button"
-                      onClick={() => setSelectedMediaId(image.id)}
-                      className={`relative aspect-[0.78] overflow-hidden border transition ${
+                      onClick={() => selectGalleryImage(image.id)}
+                      className={`relative aspect-[0.78] w-[calc((100%-2.25rem)/4)] min-w-[calc((100%-2.25rem)/4)] snap-start overflow-hidden border transition sm:w-[calc((100%-3.75rem)/4)] sm:min-w-[calc((100%-3.75rem)/4)] ${
                         selectedMedia?.id === image.id
                           ? "border-[#c39150]"
                           : "border-transparent"
@@ -274,7 +295,8 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
                 <button
                   type="button"
                   aria-label="Next product image"
-                  className="hidden text-[#c39150] md:block"
+                  onClick={() => scrollGallery("next")}
+                  className="text-[#c39150] transition hover:text-[#3f2617]"
                 >
                   <ChevronRight className="size-4" />
                 </button>
@@ -383,6 +405,10 @@ const ProductDetails = ({ product }: { product: ProductDetailView }) => {
                       onClick={() => {
                         setSelectedVariantId(variant.id);
                         setSelectedMediaId(null);
+                        galleryScrollerRef.current?.scrollTo({
+                          left: 0,
+                          behavior: "smooth",
+                        });
                       }}
                       className={`overflow-hidden rounded-[3px] border bg-white text-left transition ${
                         selectedVariant?.id === variant.id

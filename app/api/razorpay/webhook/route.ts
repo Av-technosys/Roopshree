@@ -42,17 +42,26 @@ function verifyWebhookSignature(rawBody: string, signature: string | null): bool
   }
 }
 
-// Layer 3: Fetches full order details from DB and pushes lead to Zoho Flow
-async function syncOrderToZoho(razorpayOrderId: string): Promise<void> {
+// Layer 3 (backup): Runs only if completeRazorpayPayment (frontend) didn't push to Zoho
+// Returns true if Razorpay should retry (payment not in DB yet), false otherwise
+async function syncOrderToZoho(razorpayOrderId: string): Promise<boolean> {
   const [payment] = await db
-    .select({ orderId: payments.orderId })
+    .select({ orderId: payments.orderId, metadata: payments.metadata })
     .from(payments)
     .where(eq(payments.providerOrderId, razorpayOrderId))
     .limit(1)
 
+  // Payment not in DB yet — return true so we respond 503 and Razorpay retries
   if (!payment) {
-    console.error(`[Zoho Sync] No payment found for Razorpay order: ${razorpayOrderId}`)
-    return
+    console.warn(`[Zoho Sync] Payment not in DB yet, requesting retry: ${razorpayOrderId}`)
+    return true
+  }
+
+  // Frontend already pushed to Zoho — skip to prevent duplicate lead
+  const meta = payment.metadata as Record<string, unknown> | null
+  if (meta?.zoho_synced) {
+    console.log(`[Zoho Sync] Already synced by frontend, skipping: ${razorpayOrderId}`)
+    return false
   }
 
   const [order] = await db
@@ -74,7 +83,7 @@ async function syncOrderToZoho(razorpayOrderId: string): Promise<void> {
 
   if (!order) {
     console.error(`[Zoho Sync] Order not found: ${payment.orderId}`)
-    return
+    return false
   }
 
   const items = await db
@@ -105,7 +114,7 @@ async function syncOrderToZoho(razorpayOrderId: string): Promise<void> {
     }
   }
 
-  const payload = buildZohoPayload({
+  await pushLeadToZohoFlow(buildZohoPayload({
     fullName: userName,
     email: userEmail,
     shippingPhone: order.shippingPhone,
@@ -117,11 +126,10 @@ async function syncOrderToZoho(razorpayOrderId: string): Promise<void> {
     postalCode: order.postalCode,
     orderStatus: order.status,
     items,
-  })
+  }))
 
-  await pushLeadToZohoFlow(payload)
-
-  console.log(`[Zoho Sync] Lead pushed for order: ${order.orderNumber}`)
+  console.log(`[Zoho Sync] Lead pushed (backup path) for order: ${order.orderNumber}`)
+  return false
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -155,9 +163,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ received: true }, { status: 200 })
   }
 
-  // Layer 3: Sync to Zoho — errors are caught so Razorpay doesn't retry
+  // Layer 3: Backup Zoho sync
+  // Returns 503 if payment not in DB yet → Razorpay retries automatically (15min, 30min, 1h...)
   try {
-    await syncOrderToZoho(razorpayOrderId)
+    const shouldRetry = await syncOrderToZoho(razorpayOrderId)
+
+    if (shouldRetry) {
+      return NextResponse.json({ retry: true }, { status: 503 })
+    }
   } catch (err) {
     console.error('[Webhook] Zoho sync failed:', err)
   }

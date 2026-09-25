@@ -59,7 +59,13 @@ export function buildZohoPayload(input: {
 }): ZohoLeadPayload {
   const { first_name, last_name } = splitFullName(input.fullName)
 
-  const address = [input.addressLine1, input.addressLine2].filter(Boolean).join(', ')
+  const address = [
+    input.addressLine1,
+    input.addressLine2,
+    input.city,
+    input.state,
+    input.postalCode,
+  ].filter(Boolean).join(', ')
 
   // All three are comma-separated and index-aligned
   const product_name = input.items.map((i) => i.productName).join(', ')
@@ -76,7 +82,7 @@ export function buildZohoPayload(input: {
     Secondary_Mobile: input.userPhone ?? '',
     address,
     pincode: input.postalCode,
-    place: `${input.city}, ${input.state}`,
+    place: input.city,
     product_name,
     quantity,
     description,

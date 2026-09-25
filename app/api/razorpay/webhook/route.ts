@@ -125,7 +125,7 @@ async function syncOrderToZoho(razorpayOrderId: string): Promise<void> {
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
-  // Raw body must be read as text before JSON.parse to preserve the exact bytes for signature verification
+  // Raw body must be read as text before JSON.parse to preserve bytes for signature verification
   const rawBody = await req.text()
   const signature = req.headers.get('x-razorpay-signature')
 

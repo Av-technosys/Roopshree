@@ -69,10 +69,10 @@ const HeroSection = () => {
           >
             <span className="md:hidden">
               Rooted in the vibrant culture of Rajasthan, Roopshree is a
-              celebration of heritage, handcraft and timeless elegance.
+              celebration of heritage, handcraft and timeless elegance. 
             </span>
             <span className="hidden md:inline">
-              Discover the art of Bandhej, where every knot tells a story of
+               Discover the art of Bandhej, where every knot tells a story of
               heritage and elegance.
             </span>
           </motion.p>

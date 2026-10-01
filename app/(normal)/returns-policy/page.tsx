@@ -135,7 +135,7 @@ export default function ReturnsPolicy() {
               <ul className="list-none space-y-3">
                 <li className="flex items-start gap-2 bg-yellow-50/50 border border-yellow-200/50 rounded p-3">
                   <span className="text-[#C39150] font-semibold">Important:</span>
-                  <span>Return request must be raised within <strong>48 hours</strong> of delivery.</span>
+                  <span>Return requests must be raised within <strong>48 hours</strong> of delivery.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-[#C39150] mt-1.5">•</span>

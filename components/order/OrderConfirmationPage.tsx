@@ -1,8 +1,13 @@
+"use client"
+
 import Image from "next/image"
 import Link from "next/link"
+import { useEffect } from "react"
 import type { ReactNode } from "react"
 import {
+  AlertTriangle,
   Check,
+  Clock,
   Download,
   Heart,
   Mail,
@@ -11,9 +16,13 @@ import {
   Search,
   ShoppingBag,
   User,
+  X,
 } from "lucide-react"
 
+import { useCartStore } from "@/store/cartStore"
+
 type OrderInfo = {
+  id?: string
   orderId: string
   email: string
   orderDate: string
@@ -48,7 +57,21 @@ export function OrderConfirmationPage({
   address: ShippingAddress
   items: OrderItem[]
 }) {
-    
+  const clearCart = useCartStore((state) => state.clearCart)
+  const statusLower = order.paymentStatus.toLowerCase()
+  const isPaid = statusLower === "paid" || statusLower === "confirmed"
+  const isFailed = ["failed", "cancelled", "declined"].includes(statusLower)
+  const isPending = !isPaid && !isFailed
+
+  useEffect(() => {
+    if (isPaid) {
+      clearCart()
+      if (typeof window !== "undefined") {
+        window.sessionStorage.removeItem("roopshree-buy-now")
+        window.sessionStorage.removeItem("roopshree-pending-payment")
+      }
+    }
+  }, [isPaid, clearCart])
 
   return (
     <main className="relative isolate min-h-screen overflow-hidden bg-[#fff6ea] text-[#3F2617]">
@@ -64,25 +87,103 @@ export function OrderConfirmationPage({
       <OrderConfirmationHeader />
 
       <section className="mx-auto flex w-full max-w-[820px] flex-col items-center px-4 pb-12 pt-8 sm:px-6 lg:px-8">
-        <div className="flex size-16 items-center justify-center rounded-full bg-[#59AF52] text-white shadow-sm">
-          <Check className="size-9 stroke-[3]" />
-        </div>
+        {isPaid ? (
+          <div className="flex size-16 items-center justify-center rounded-full bg-[#59AF52] text-white shadow-sm">
+            <Check className="size-9 stroke-[3]" />
+          </div>
+        ) : isFailed ? (
+          <div className="flex size-16 items-center justify-center rounded-full bg-red-600 text-white shadow-sm">
+            <X className="size-9 stroke-[3]" />
+          </div>
+        ) : (
+          <div className="flex size-16 items-center justify-center rounded-full bg-amber-500 text-white shadow-sm">
+            <Clock className="size-9 stroke-[3]" />
+          </div>
+        )}
 
         <h1 className="mt-5 font-heading text-4xl font-semibold leading-none text-[#3F2617]">
-          Thank You!
+          {isPaid
+            ? "Thank You!"
+            : isFailed
+            ? "Payment Failed"
+            : "Payment Incomplete"}
         </h1>
         <p className="mt-3 text-center text-sm font-medium text-[#3F2617]/75">
-          Your order has been placed successfully.
+          {isPaid
+            ? "Your order has been placed successfully."
+            : isFailed
+            ? "Your transaction was cancelled or declined by the bank. No money was deducted."
+            : "Your payment is currently pending confirmation from your bank."}
         </p>
+
+        {isFailed ? (
+          <div className="mt-4 flex gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.sessionStorage.removeItem("roopshree-pending-payment")
+                }
+                window.location.href = "/checkout"
+              }}
+              className="bg-[#C39150] px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-[#3F2617]"
+            >
+              Retry Payment
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.sessionStorage.removeItem("roopshree-pending-payment")
+                }
+                window.location.href = "/cart"
+              }}
+              className="border border-[#C39150] px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-[#3F2617] transition hover:bg-[#fff8ef]"
+            >
+              View Cart
+            </button>
+          </div>
+        ) : isPending ? (
+          <div className="mt-4 flex gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.sessionStorage.removeItem("roopshree-pending-payment")
+                }
+                window.location.href = "/checkout"
+              }}
+              className="bg-[#C39150] px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-[#3F2617]"
+            >
+              Complete Payment Now
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.sessionStorage.removeItem("roopshree-pending-payment")
+                }
+                window.location.href = "/cart"
+              }}
+              className="border border-[#C39150] px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-[#3F2617] transition hover:bg-[#fff8ef]"
+            >
+              Return to Cart
+            </button>
+          </div>
+        ) : null}
 
         <div className="mt-5 border border-[#C39150]/55 bg-[#fff8ef]/75 px-8 py-3 text-center text-base font-semibold text-[#C39150]">
           Order ID: {order.orderId}
         </div>
 
-        <p className="mt-5 flex items-center justify-center gap-2 text-center text-xs font-medium text-[#3F2617]/75">
-          <Mail className="size-4 text-[#C39150]" />
-          We&apos;ve sent a confirmation email to {order.email}
-        </p>
+        {order.email ? (
+          <p className="mt-5 flex items-center justify-center gap-2 text-center text-xs font-medium text-[#3F2617]/75">
+            <Mail className="size-4 text-[#C39150]" />
+            {isPaid
+              ? `We've sent a confirmation email to ${order.email}`
+              : `Order details registered with ${order.email}`}
+          </p>
+        ) : null}
 
         <div className="mt-8 grid w-full gap-5 md:grid-cols-2">
           <InfoCard
@@ -94,12 +195,29 @@ export function OrderConfirmationPage({
             <InfoRow
               label="Payment Status"
               value={
-                <span className="rounded bg-[#DFF3D8] px-3 py-1 text-[11px] font-semibold text-[#459B3F]">
-                  {order.paymentStatus}
+                <span
+                  className={`rounded px-3 py-1 text-[11px] font-semibold ${
+                    isPaid
+                      ? "bg-[#DFF3D8] text-[#459B3F]"
+                      : isFailed
+                      ? "bg-red-100 text-red-600"
+                      : "bg-amber-100 text-amber-700"
+                  }`}
+                >
+                  {isPaid ? order.paymentStatus : isFailed ? "Failed" : "Pending"}
                 </span>
               }
             />
-            <InfoRow label="Estimated Delivery" value={order.estimatedDelivery} />
+            <InfoRow
+              label="Estimated Delivery"
+              value={
+                isPaid
+                  ? order.estimatedDelivery
+                  : isFailed
+                  ? "Cancelled"
+                  : "Pending Payment"
+              }
+            />
           </InfoCard>
 
           <InfoCard icon={<MapPin className="size-5" />} title="Shipping Address">

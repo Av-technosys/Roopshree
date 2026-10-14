@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
 import { CheckoutReviewModal } from "@/components/checkout/CheckoutReviewModal"
 import { CheckoutSummary } from "@/components/checkout/CheckoutSummary"
@@ -68,6 +68,7 @@ function isShippingComplete(shipping: CheckoutShippingDetails) {
 }
 
 export function CheckoutFlow({ addresses }: { addresses: AddressView[] }) {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const source = searchParams.get("source") === "buy-now" ? "buy-now" : "cart"
 
@@ -90,6 +91,20 @@ export function CheckoutFlow({ addresses }: { addresses: AddressView[] }) {
 
   const isManualAddress = selectedAddressId === manualAddressId
   const canReviewOrder = items.length > 0 && isShippingComplete(shipping)
+
+  // Clear any stale pending payment state when user is actively checking out
+  useEffect(() => {
+    // Only cleanup expired pending payment session
+    try {
+      const stored = window.sessionStorage.getItem("roopshree-pending-payment")
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (Date.now() - (parsed.timestamp || 0) > 30 * 60 * 1000) {
+          window.sessionStorage.removeItem("roopshree-pending-payment")
+        }
+      }
+    } catch {}
+  }, [])
 
   useEffect(() => {
     if (source !== "buy-now") return

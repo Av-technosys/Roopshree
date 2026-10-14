@@ -6,7 +6,7 @@ import type { AddressView } from "@/services/address.service"
 export function CheckoutPage({ addresses }: { addresses: AddressView[] }) {
   return (
     <main className="min-h-screen overflow-x-hidden pt-16">
-      <section className="relative isolate min-h-screen overflow-x-hidden">
+      <section className="relative min-h-screen overflow-x-hidden">
         <Image
           src="/404.png"
           alt=""

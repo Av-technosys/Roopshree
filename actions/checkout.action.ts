@@ -2,7 +2,7 @@
 
 import crypto from "node:crypto"
 
-import { and, count, eq, sql } from "drizzle-orm"
+import { and, count, desc, eq, or } from "drizzle-orm"
 
 import {
   cartItems,
@@ -17,10 +17,11 @@ import {
   products,
   productVariants,
 } from "@/db/schema/products"
-import { addresses } from "@/db/schema/users"
+import { addresses, users } from "@/db/schema/users"
 import { db } from "@/lib/db"
 import { getCurrentDbUserId } from "@/lib/current-db-user"
 import { getCurrentUser } from "@/lib/auth"
+import { generateMerchantTxnNo, initiateIciciSale } from "@/lib/icici"
 import {
   notifyFirstOrderEmail,
   notifyOrderConfirmationEmail,
@@ -689,14 +690,17 @@ export async function completeRazorpayPayment(input: {
       })
 
       if (checkout.source === "cart") {
-        await tx.execute(
-          sql`
-            DELETE FROM ${cartItems}
-            USING ${carts}
-            WHERE ${cartItems.cartId} = ${carts.id}
-            AND ${carts.userId} = ${userId}
-          `,
-        )
+        const [userCart] = await tx
+          .select({ id: carts.id })
+          .from(carts)
+          .where(eq(carts.userId, userId))
+          .limit(1)
+
+        if (userCart) {
+          await tx
+            .delete(cartItems)
+            .where(eq(cartItems.cartId, userCart.id))
+        }
       }
 
       return {
@@ -754,3 +758,731 @@ export async function completeRazorpayPayment(input: {
     return { success: false, message: "Unable to complete payment" }
   }
 }
+
+export async function createCartPaymentOrderIcici(input: {
+  shipping: ShippingDetails
+}) {
+  const userId = await getCurrentDbUserId()
+
+  if (!userId) {
+    return { success: false, userIsNotLoggedIn: true, message: "Login required" }
+  }
+
+  const shippingResult = await resolveShippingDetails(userId, input.shipping)
+
+  if (!shippingResult.ok) {
+    return { success: false, message: shippingResult.message }
+  }
+
+  try {
+    const items = await getCartCheckoutItems(userId)
+
+    if (items.length === 0) {
+      return { success: false, message: "Cart is empty" }
+    }
+
+    const totals = getTotals(items)
+    const merchantTxnNo = generateMerchantTxnNo()
+    const sessionUser = await getCurrentUser()
+
+    const iciciSale = await initiateIciciSale({
+      amountInPaise: totals.total,
+      merchantTxnNo,
+      customerName:
+        shippingResult.shipping.fullName || sessionUser?.name || "Customer",
+      customerEmail: sessionUser?.email || "customer@roopshree.com",
+      customerPhone: shippingResult.shipping.phone,
+    })
+
+    if (!iciciSale.success || !iciciSale.redirectUrl) {
+      return {
+        success: false,
+        message: iciciSale.message || "Failed to initialize ICICI payment gateway",
+      }
+    }
+
+    let orderShipping = { ...shippingResult.shipping }
+
+    if (shippingResult.shipping.addressId) {
+      const [address] = await db
+        .select()
+        .from(addresses)
+        .where(
+          and(
+            eq(addresses.id, shippingResult.shipping.addressId),
+            eq(addresses.userId, userId),
+          ),
+        )
+        .limit(1)
+
+      if (address) {
+        orderShipping = mapAddressToShipping(address)
+      }
+    }
+
+    let createdOrderId: string | null = null
+
+    await db.transaction(async (tx) => {
+      const [order] = await tx
+        .insert(orders)
+        .values({
+          orderNumber: getOrderNumber(),
+          userId,
+          addressId: orderShipping.addressId ?? null,
+          status: "pending",
+          shippingPhone: orderShipping.phone,
+          addressLine1: orderShipping.addressLine1,
+          addressLine2: orderShipping.addressLine2 || null,
+          city: orderShipping.city,
+          state: orderShipping.state,
+          postalCode: orderShipping.postalCode,
+          country: orderShipping.country || "India",
+          totalAmount: totals.total,
+        })
+        .returning({ id: orders.id })
+
+      createdOrderId = order.id
+
+      await tx.insert(orderItems).values(
+        items.map((item) => ({
+          orderId: order.id,
+          variantId: item.variantId,
+          quantity: item.quantity,
+          productPrice: item.productPrice,
+          productName: item.productName,
+          productSlug: item.productSlug,
+          productSku: item.productSku,
+          productImage: item.productImage,
+          variantTitle: item.variantTitle,
+        })),
+      )
+
+      await tx.insert(payments).values({
+        orderId: order.id,
+        provider: "icici",
+        status: "pending",
+        providerOrderId: merchantTxnNo,
+        amountInPaise: totals.total,
+        metadata: {
+          source: "cart",
+          items,
+          merchantTxnNo,
+        },
+      })
+    })
+
+    return {
+      success: true,
+      redirectUrl: iciciSale.redirectUrl,
+      merchantTxnNo,
+      orderId: createdOrderId,
+    }
+  } catch (error) {
+    console.error("Create ICICI cart payment order failed:", error)
+    return { success: false, message: "Unable to start ICICI payment" }
+  }
+}
+
+export async function createBuyNowPaymentOrderIcici(input: {
+  shipping: ShippingDetails
+  productId?: string
+  variantId?: string | null
+  quantity?: number
+}) {
+  const userId = await getCurrentDbUserId()
+
+  if (!userId) {
+    return { success: false, userIsNotLoggedIn: true, message: "Login required" }
+  }
+
+  if (!input.productId) {
+    return { success: false, message: "Product id is required" }
+  }
+
+  const shippingResult = await resolveShippingDetails(userId, input.shipping)
+
+  if (!shippingResult.ok) {
+    return { success: false, message: shippingResult.message }
+  }
+
+  try {
+    const item = await getBuyNowCheckoutItem({
+      productId: input.productId,
+      variantId: input.variantId,
+      quantity: input.quantity,
+    })
+
+    if (!item) {
+      return { success: false, message: "Product not found" }
+    }
+
+    const items = [item]
+    const totals = getTotals(items)
+    const merchantTxnNo = generateMerchantTxnNo()
+    const sessionUser = await getCurrentUser()
+
+    const iciciSale = await initiateIciciSale({
+      amountInPaise: totals.total,
+      merchantTxnNo,
+      customerName:
+        shippingResult.shipping.fullName || sessionUser?.name || "Customer",
+      customerEmail: sessionUser?.email || "customer@roopshree.com",
+      customerPhone: shippingResult.shipping.phone,
+    })
+
+    if (!iciciSale.success || !iciciSale.redirectUrl) {
+      return {
+        success: false,
+        message: iciciSale.message || "Failed to initialize ICICI payment gateway",
+      }
+    }
+
+    let orderShipping = { ...shippingResult.shipping }
+
+    if (shippingResult.shipping.addressId) {
+      const [address] = await db
+        .select()
+        .from(addresses)
+        .where(
+          and(
+            eq(addresses.id, shippingResult.shipping.addressId),
+            eq(addresses.userId, userId),
+          ),
+        )
+        .limit(1)
+
+      if (address) {
+        orderShipping = mapAddressToShipping(address)
+      }
+    }
+
+    let createdOrderId: string | null = null
+
+    await db.transaction(async (tx) => {
+      const [order] = await tx
+        .insert(orders)
+        .values({
+          orderNumber: getOrderNumber(),
+          userId,
+          addressId: orderShipping.addressId ?? null,
+          status: "pending",
+          shippingPhone: orderShipping.phone,
+          addressLine1: orderShipping.addressLine1,
+          addressLine2: orderShipping.addressLine2 || null,
+          city: orderShipping.city,
+          state: orderShipping.state,
+          postalCode: orderShipping.postalCode,
+          country: orderShipping.country || "India",
+          totalAmount: totals.total,
+        })
+        .returning({ id: orders.id })
+
+      createdOrderId = order.id
+
+      await tx.insert(orderItems).values(
+        items.map((i) => ({
+          orderId: order.id,
+          variantId: i.variantId,
+          quantity: i.quantity,
+          productPrice: i.productPrice,
+          productName: i.productName,
+          productSlug: i.productSlug,
+          productSku: i.productSku,
+          productImage: i.productImage,
+          variantTitle: i.variantTitle,
+        })),
+      )
+
+      await tx.insert(payments).values({
+        orderId: order.id,
+        provider: "icici",
+        status: "pending",
+        providerOrderId: merchantTxnNo,
+        amountInPaise: totals.total,
+        metadata: {
+          source: "buy-now",
+          items,
+          merchantTxnNo,
+        },
+      })
+    })
+
+    return {
+      success: true,
+      redirectUrl: iciciSale.redirectUrl,
+      merchantTxnNo,
+      orderId: createdOrderId,
+    }
+  } catch (error) {
+    console.error("Create ICICI buy-now payment order failed:", error)
+    return { success: false, message: "Unable to start ICICI payment" }
+  }
+}
+
+export async function finalizeIciciPaymentOrder({
+  merchantTxnNo,
+  bankRefNo,
+  status,
+  rawResponse,
+  paidAmountInPaise,
+}: {
+  merchantTxnNo: string
+  bankRefNo?: string
+  status: "paid" | "failed"
+  rawResponse?: Record<string, unknown>
+  paidAmountInPaise?: number
+}) {
+  try {
+    const [existingPayment] = await db
+      .select({
+        id: payments.id,
+        orderId: payments.orderId,
+        status: payments.status,
+        metadata: payments.metadata,
+        amountInPaise: payments.amountInPaise,
+      })
+      .from(payments)
+      .where(eq(payments.providerOrderId, merchantTxnNo))
+      .limit(1)
+
+    if (!existingPayment) {
+      return { success: false, message: "Payment transaction not found" }
+    }
+
+    if (existingPayment.status === "paid") {
+      return { success: true, orderId: existingPayment.orderId }
+    }
+
+    if (status === "failed") {
+      await db.transaction(async (tx) => {
+        await tx
+          .update(payments)
+          .set({
+            status: "failed",
+            metadata: {
+              ...(typeof existingPayment.metadata === "object"
+                ? (existingPayment.metadata as Record<string, unknown>)
+                : {}),
+              failureResponse: rawResponse,
+            },
+            updatedAt: new Date(),
+          })
+          .where(eq(payments.id, existingPayment.id))
+
+        await tx
+          .update(orders)
+          .set({
+            status: "cancelled",
+            updatedAt: new Date(),
+          })
+          .where(eq(orders.id, existingPayment.orderId))
+      })
+
+      return {
+        success: false,
+        orderId: existingPayment.orderId,
+        message: "Payment failed or was cancelled",
+      }
+    }
+
+    // Amount Verification: Verify paid amount matches the order payment record
+    if (paidAmountInPaise !== undefined && paidAmountInPaise !== null) {
+      if (paidAmountInPaise !== existingPayment.amountInPaise) {
+        console.error(
+          `[ICICI Payment Security Alert] Amount mismatch! Expected: ${existingPayment.amountInPaise} paise, but received: ${paidAmountInPaise} paise. MerchantTxnNo: ${merchantTxnNo}`,
+        )
+        await db.transaction(async (tx) => {
+          await tx
+            .update(payments)
+            .set({
+              status: "failed",
+              metadata: {
+                ...(typeof existingPayment.metadata === "object"
+                  ? (existingPayment.metadata as Record<string, unknown>)
+                  : {}),
+                failureReason: "AMOUNT_MISMATCH",
+                expectedAmountInPaise: existingPayment.amountInPaise,
+                receivedAmountInPaise: paidAmountInPaise,
+                failureResponse: rawResponse,
+              },
+              updatedAt: new Date(),
+            })
+            .where(eq(payments.id, existingPayment.id))
+
+          await tx
+            .update(orders)
+            .set({
+              status: "cancelled",
+              updatedAt: new Date(),
+            })
+            .where(eq(orders.id, existingPayment.orderId))
+        })
+
+        return {
+          success: false,
+          orderId: existingPayment.orderId,
+          message: "Payment amount mismatch detected. Order cancelled.",
+        }
+      }
+    }
+
+    // Success path
+    const orderDetails = await db.transaction(async (tx) => {
+      await tx
+        .update(payments)
+        .set({
+          status: "paid",
+          providerPaymentId: bankRefNo || merchantTxnNo,
+          metadata: {
+            ...(typeof existingPayment.metadata === "object"
+              ? (existingPayment.metadata as Record<string, unknown>)
+              : {}),
+            successResponse: rawResponse,
+          },
+          updatedAt: new Date(),
+        })
+        .where(eq(payments.id, existingPayment.id))
+
+      const [order] = await tx
+        .update(orders)
+        .set({
+          status: "paid",
+          updatedAt: new Date(),
+        })
+        .where(eq(orders.id, existingPayment.orderId))
+        .returning({
+          id: orders.id,
+          orderNumber: orders.orderNumber,
+          userId: orders.userId,
+          createdAt: orders.createdAt,
+          totalAmount: orders.totalAmount,
+        })
+
+      const items = await tx
+        .select({
+          productName: orderItems.productName,
+        })
+        .from(orderItems)
+        .where(eq(orderItems.orderId, existingPayment.orderId))
+
+      const metadataObj =
+        typeof existingPayment.metadata === "object"
+          ? (existingPayment.metadata as Record<string, unknown>)
+          : null
+      const isCartSource = metadataObj?.source === "cart"
+
+      if (isCartSource && order.userId) {
+        const [userCart] = await tx
+          .select({ id: carts.id })
+          .from(carts)
+          .where(eq(carts.userId, order.userId))
+          .limit(1)
+
+        if (userCart) {
+          await tx
+            .delete(cartItems)
+            .where(eq(cartItems.cartId, userCart.id))
+        }
+      }
+
+      return {
+        order,
+        items,
+      }
+    })
+
+    let customerEmail: string | undefined
+    let customerName = "Customer"
+
+    if (orderDetails.order.userId) {
+      try {
+        const [customer] = await db
+          .select({
+            email: users.email,
+            name: users.name,
+          })
+          .from(users)
+          .where(eq(users.id, orderDetails.order.userId))
+          .limit(1)
+
+        if (customer?.email) {
+          customerEmail = customer.email
+          customerName = customer.name || "Customer"
+        }
+      } catch (e) {
+        console.error("Error fetching customer for order confirmation:", e)
+      }
+    }
+
+    if (!customerEmail) {
+      try {
+        const sessionUser = await getCurrentUser()
+        if (sessionUser?.email) {
+          customerEmail = sessionUser.email
+          customerName = sessionUser.name || sessionUser.email.split("@")[0] || "Customer"
+        }
+      } catch {}
+    }
+
+    if (!customerEmail && rawResponse) {
+      customerEmail = (rawResponse.customerEmailID || rawResponse.email || rawResponse.customerEmail) as string | undefined
+    }
+
+    if (customerEmail) {
+      try {
+        await notifyOrderConfirmationEmail({
+          email: customerEmail,
+          customerName,
+          orderId: orderDetails.order.orderNumber,
+          orderDate: formatDate(orderDetails.order.createdAt),
+          productNames: orderDetails.items
+            .map((item) => item.productName)
+            .filter(Boolean)
+            .join(", "),
+          orderTotal: formatCurrency(orderDetails.order.totalAmount),
+        })
+        console.log(`[Order Confirmation] Email successfully dispatched to ${customerEmail}`)
+
+        if (orderDetails.order.userId) {
+          const [orderCount] = await db
+            .select({ value: count() })
+            .from(orders)
+            .where(eq(orders.userId, orderDetails.order.userId))
+
+          if ((orderCount?.value ?? 0) === 1) {
+            await notifyFirstOrderEmail({
+              email: customerEmail,
+              customerName,
+            })
+          }
+        }
+      } catch (emailErr) {
+        console.error("Unable to send ICICI confirmation email:", emailErr)
+      }
+    }
+
+    return {
+      success: true,
+      orderId: orderDetails.order.id,
+    }
+  } catch (error) {
+    console.error("finalizeIciciPaymentOrder error:", error)
+    return {
+      success: false,
+      message: "Unable to finalize ICICI payment order",
+    }
+  }
+}
+
+export async function cancelPendingOrderAction({
+  orderId,
+  merchantTxnNo,
+}: {
+  orderId?: string
+  merchantTxnNo?: string
+}) {
+  try {
+    const userId = await getCurrentDbUserId()
+
+    let targetOrderId = orderId
+
+    if (!targetOrderId && merchantTxnNo) {
+      const [paymentRecord] = await db
+        .select({ orderId: payments.orderId })
+        .from(payments)
+        .where(
+          or(
+            eq(payments.providerOrderId, merchantTxnNo),
+            eq(payments.providerPaymentId, merchantTxnNo),
+          ),
+        )
+        .limit(1)
+
+      if (paymentRecord?.orderId) {
+        targetOrderId = paymentRecord.orderId
+      }
+    }
+
+    if (!targetOrderId) {
+      return { success: false, message: "Order not found" }
+    }
+
+    const isOrderNumber = targetOrderId.startsWith("RS-")
+    const orderCondition = isOrderNumber
+      ? eq(orders.orderNumber, targetOrderId)
+      : eq(orders.id, targetOrderId)
+
+    const whereConditions = [orderCondition]
+    if (userId) {
+      whereConditions.push(eq(orders.userId, userId))
+    }
+
+    const [existingOrder] = await db
+      .select({ id: orders.id, status: orders.status })
+      .from(orders)
+      .where(and(...whereConditions))
+      .limit(1)
+
+    if (!existingOrder) {
+      return { success: false, message: "Order not found" }
+    }
+
+    if (existingOrder.status === "pending") {
+      await db.transaction(async (tx) => {
+        await tx
+          .update(orders)
+          .set({ status: "cancelled", updatedAt: new Date() })
+          .where(eq(orders.id, existingOrder.id))
+
+        await tx
+          .update(payments)
+          .set({ status: "failed", updatedAt: new Date() })
+          .where(eq(payments.orderId, existingOrder.id))
+      })
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error("cancelPendingOrderAction error:", error)
+    return { success: false, message: "Unable to cancel pending order" }
+  }
+}
+
+export async function getPendingOrderSummaryAction(orderId?: string) {
+  try {
+    const userId = await getCurrentDbUserId()
+
+    // 1. If an explicit orderId is provided (e.g. from client session):
+    if (orderId) {
+      const isOrderNumber = orderId.startsWith("RS-")
+      const orderMatchCondition = isOrderNumber
+        ? eq(orders.orderNumber, orderId)
+        : eq(orders.id, orderId)
+
+      const [order] = await db
+        .select({
+          id: orders.id,
+          orderNumber: orders.orderNumber,
+          totalAmount: orders.totalAmount,
+          createdAt: orders.createdAt,
+          status: orders.status,
+          userId: orders.userId,
+        })
+        .from(orders)
+        .where(orderMatchCondition)
+        .limit(1)
+
+      if (!order) return { hasPending: false }
+
+      // If user is logged in, verify order ownership if userId exists on order
+      if (userId && order.userId && order.userId !== userId) {
+        return { hasPending: false }
+      }
+
+      // If the order status is NOT "pending" (i.e. cancelled or paid), banner must NOT show!
+      if (order.status !== "pending") {
+        return { hasPending: false }
+      }
+
+      // If order is older than 30 minutes, it's considered expired
+      const ageMs = Date.now() - new Date(order.createdAt).getTime()
+      if (ageMs > 30 * 60 * 1000) {
+        return { hasPending: false }
+      }
+
+      return {
+        hasPending: true,
+        order: {
+          id: order.id,
+          orderNumber: order.orderNumber,
+          totalAmount: order.totalAmount,
+        },
+      }
+    }
+
+    // 2. Otherwise, check the user's MOST RECENT order
+    if (!userId) return { hasPending: false }
+
+    const [latestOrder] = await db
+      .select({
+        id: orders.id,
+        orderNumber: orders.orderNumber,
+        totalAmount: orders.totalAmount,
+        createdAt: orders.createdAt,
+        status: orders.status,
+      })
+      .from(orders)
+      .where(eq(orders.userId, userId))
+      .orderBy(desc(orders.createdAt))
+      .limit(1)
+
+    if (!latestOrder) {
+      return { hasPending: false }
+    }
+
+    // Crucial: Only show if the latest order is strictly "pending"!
+    // If the latest order is cancelled, failed, or paid, no pending banner should show.
+    if (latestOrder.status !== "pending") {
+      return { hasPending: false }
+    }
+
+    // Must be within last 30 minutes
+    const ageMs = Date.now() - new Date(latestOrder.createdAt).getTime()
+    if (ageMs > 30 * 60 * 1000) {
+      return { hasPending: false }
+    }
+
+    return {
+      hasPending: true,
+      order: {
+        id: latestOrder.id,
+        orderNumber: latestOrder.orderNumber,
+        totalAmount: latestOrder.totalAmount,
+      },
+    }
+  } catch (error) {
+    console.error("getPendingOrderSummaryAction error:", error)
+    return { hasPending: false }
+  }
+}
+
+export async function getOrderStatusForVerificationAction(orderId: string) {
+  try {
+    const [orderRecord] = await db
+      .select({
+        id: orders.id,
+        orderNumber: orders.orderNumber,
+        status: orders.status,
+      })
+      .from(orders)
+      .where(eq(orders.id, orderId))
+      .limit(1)
+
+    if (!orderRecord) {
+      return { success: false, message: "Order not found" }
+    }
+
+    const [paymentRecord] = await db
+      .select({
+        status: payments.status,
+        providerPaymentId: payments.providerPaymentId,
+      })
+      .from(payments)
+      .where(eq(payments.orderId, orderRecord.id))
+      .limit(1)
+
+    return {
+      success: true,
+      orderStatus: orderRecord.status,
+      paymentStatus: paymentRecord?.status || "pending",
+      orderNumber: orderRecord.orderNumber,
+    }
+  } catch (error) {
+    console.error("getOrderStatusForVerificationAction error:", error)
+    return { success: false, message: "Error fetching order status" }
+  }
+}
+
+
+
+

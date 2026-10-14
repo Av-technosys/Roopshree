@@ -1,6 +1,7 @@
 import {
   countDashboardOrders,
   findDashboardOrderDetailRow,
+  findOrderDetailRowById,
   findOrderById,
   listDashboardOrderRows,
   updateOrderStatusRecord,
@@ -130,7 +131,12 @@ export async function getDashboardOrderDetails(orderId: string) {
     payment: {
       provider: row.payment?.provider ?? 'razorpay',
       method: row.payment?.method ?? null,
-      status: row.payment ? getStatusLabel(row.payment.status) : 'Pending',
+      status:
+        row.order.status === 'cancelled'
+          ? 'Failed'
+          : row.payment
+          ? getStatusLabel(row.payment.status)
+          : 'Failed',
       providerPaymentId: row.payment?.providerPaymentId ?? null,
     },
     address: {
@@ -165,33 +171,82 @@ export async function getOrderConfirmationDetails(orderId: string) {
     getCurrentUser(),
   ])
 
-  if (!details) {
+  if (details) {
+    return {
+      order: {
+        id: details.order.id,
+        orderId: details.order.orderNumber,
+        email: sessionUser?.email ?? '',
+        orderDate: formatDate(details.order.createdAt),
+        paymentMethod:
+          details.payment.method?.toUpperCase() ??
+          details.payment.provider.toUpperCase(),
+        paymentStatus:
+          details.order.rawStatus === 'cancelled'
+            ? 'Failed'
+            : details.payment.status,
+        estimatedDelivery: '3 - 5 Days',
+        totalPaid: formatCurrency(details.order.totalAmount),
+      },
+      address: {
+        name: sessionUser?.name || sessionUser?.email?.split('@')[0] || 'Customer',
+        line1: details.address.line,
+        phone: details.address.phone,
+      },
+      items: details.items.map((item) => ({
+        product: item.product,
+        variant: item.variant || 'Default',
+        quantity: item.quantity,
+        total: item.total,
+        image: item.image,
+      })),
+    }
+  }
+
+  // Fallback: directly find order by id or orderNumber
+  const directRow = await findOrderDetailRowById(orderId)
+  if (!directRow) {
     return null
   }
 
   return {
     order: {
-      orderId: details.order.orderNumber,
+      orderId: directRow.order.orderNumber,
       email: sessionUser?.email ?? '',
-      orderDate: formatDate(details.order.createdAt),
+      orderDate: formatDate(directRow.order.createdAt),
       paymentMethod:
-        details.payment.method?.toUpperCase() ??
-        details.payment.provider.toUpperCase(),
-      paymentStatus: details.payment.status,
+        directRow.payment?.method?.toUpperCase() ??
+        directRow.payment?.provider?.toUpperCase() ??
+        'ONLINE',
+      paymentStatus:
+        directRow.order.status === 'cancelled' || directRow.payment?.status === 'failed'
+          ? 'Failed'
+          : directRow.payment
+          ? getStatusLabel(directRow.payment.status)
+          : 'Pending',
       estimatedDelivery: '3 - 5 Days',
-      totalPaid: formatCurrency(details.order.totalAmount),
+      totalPaid: formatCurrency(directRow.order.totalAmount),
     },
     address: {
       name: sessionUser?.name || sessionUser?.email?.split('@')[0] || 'Customer',
-      line1: details.address.line,
-      phone: details.address.phone,
+      line1: [
+        directRow.order.addressLine1,
+        directRow.order.addressLine2,
+        directRow.order.city,
+        directRow.order.state,
+        directRow.order.postalCode,
+        directRow.order.country,
+      ]
+        .filter(Boolean)
+        .join(', '),
+      phone: directRow.order.shippingPhone,
     },
-    items: details.items.map((item) => ({
-      product: item.product,
-      variant: item.variant || 'Default',
+    items: directRow.items.map((item) => ({
+      product: item.productName,
+      variant: item.variantTitle ?? 'Default',
       quantity: item.quantity,
-      total: item.total,
-      image: item.image,
+      total: formatCurrency(item.productPrice * item.quantity),
+      image: item.productImage ? getS3ObjectPreviewUrl(item.productImage) : '/home/new-arrival-model.png',
     })),
   }
 }

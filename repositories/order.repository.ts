@@ -90,3 +90,33 @@ export async function findDashboardOrderDetailRow(userId: string, orderId: strin
     payment: payment ?? null,
   }
 }
+
+export async function findOrderDetailRowById(orderId: string) {
+  const [order] = await db
+    .select()
+    .from(orders)
+    .where(or(eq(orders.id, orderId), eq(orders.orderNumber, orderId)))
+    .limit(1)
+
+  if (!order) {
+    return null
+  }
+
+  const items = await db
+    .select()
+    .from(orderItems)
+    .where(eq(orderItems.orderId, order.id))
+
+  const [payment] = await db
+    .select()
+    .from(payments)
+    .where(eq(payments.orderId, order.id))
+    .limit(1)
+
+  return {
+    order,
+    items,
+    payment: payment ?? null,
+  }
+}
+
